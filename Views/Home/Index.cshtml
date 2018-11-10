@@ -1,19 +1,6 @@
-﻿@using Fort.Models
-@using Fort.Helpers
-@model Fort.Services.MapService
+﻿@using Fort.Helpers
 @{
     ViewData["Title"] = "Home Page";
 }
 
-<svg height="@Position.RealHeight" width="@Position.RealWidth">
-    @foreach (Path path in Model.Paths)
-    {
-        <line x1="@Position.ToRealWidth(path.Source.X)" y1="@Position.ToRealHeight(path.Source.Y)" x2="@Position.ToRealWidth(path.Source.X + (path.Target.X - path.Source.X) / 2)" y2="@Position.ToRealHeight(path.Source.Y + (path.Target.Y - path.Source.Y) / 2)" style="stroke:@path.Source.Owner.Color;stroke-width:2" />   
-        <line x1="@Position.ToRealWidth(path.Source.X + (path.Target.X - path.Source.X) / 2)" y1="@Position.ToRealHeight(path.Source.Y + (path.Target.Y - path.Source.Y) / 2)" x2="@Position.ToRealWidth(path.Target.X)" y2="@Position.ToRealHeight(path.Target.Y)"  style="stroke:@path.Target.Owner.Color;stroke-width:2" />   
-    }
-
-    @foreach (Fortress fortress in Model.Fortresses.Values)
-    {
-        <circle cx="@Position.ToRealWidth(fortress.X)" cy="@Position.ToRealHeight(fortress.Y)" r="@(System.Math.Log10(fortress.Population)*10)" fill="@fortress.Owner.Color" />
-    }
-</svg>
+@Html.Raw(Map.Print())

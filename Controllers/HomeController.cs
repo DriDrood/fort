@@ -16,7 +16,27 @@ namespace Fort.Controllers
         public IActionResult Index()
         {
             return View(_mapService);
-            
+        }
+
+        public IActionResult Turn()
+        {
+            var round = _mapService.Turn();
+            if (round != null)
+                foreach (var turn in round)
+                    turn.Play();
+
+            return Ok(new
+            {
+                Round = round,
+                Map = Helpers.Map.Print()
+            });
+        }
+
+        public IActionResult Reset()
+        {
+            _mapService.Load();
+
+            return RedirectToAction("Index");
         }
     }
 }

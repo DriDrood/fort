@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Fort.Models;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
@@ -15,50 +16,73 @@ namespace Fort.Services
         }
 
         private string _map =
-@"
-{
-    ""Forts"": {
-      ""one"": {
-        ""x"": 50,
-        ""y"": 50
-      },
-      ""two"": {
-        ""x"": 100,
-        ""y"": 100
-      },
-      ""five"": {
-        ""x"": 150,
-        ""y"": 80
-      },
-      ""far"": {
-        ""x"": 823,
-        ""y"": 683
-      }
-    },
-    ""Paths"": {
-        ""1"": {
-            ""Source"":""one"",
-            ""Target"":""two""
-        },
-        ""2"": {
-            ""Source"":""one"",
-            ""Target"":""five""
-        },
-        ""3"": {
-            ""Source"":""five"",
-            ""Target"":""two""
-        },
-        ""4"": {
-            ""Source"":""five"",
-            ""Target"":""far""
+        @"
+        {
+            ""Forts"": {
+            ""one"": {
+                ""x"": 50,
+                ""y"": 50
+            },
+            ""two"": {
+                ""x"": 100,
+                ""y"": 100
+            },
+            ""five"": {
+                ""x"": 150,
+                ""y"": 80
+            },
+            ""far"": {
+                ""x"": 823,
+                ""y"": 683
+            }
+            },
+            ""Paths"": {
+                ""1"": {
+                    ""Source"":""one"",
+                    ""Target"":""two""
+                },
+                ""2"": {
+                    ""Source"":""one"",
+                    ""Target"":""five""
+                },
+                ""3"": {
+                    ""Source"":""five"",
+                    ""Target"":""two""
+                },
+                ""4"": {
+                    ""Source"":""five"",
+                    ""Target"":""far""
+                }
+            },
+            ""Turns"": [
+                [
+                    {
+                        ""From"": ""one"",
+                        ""To"": ""two"",
+                        ""Amount"": 3
+                    },
+                    {
+                        ""From"": ""five"",
+                        ""To"": ""two"",
+                        ""Amount"": 1
+                    }
+                ],
+                [
+                    {
+                        ""From"": ""two"",
+                        ""To"": ""one"",
+                        ""Amount"": 1
+                    }
+                ],
+            ]
         }
-    }
-}
-";
+        ";
+        private List<Turn> _turns;
 
         public Dictionary<string, Fortress> Fortresses { get; private set; }
-
         public List<Path> Paths { get; private set; }
+
+        public int LastTurnOrder { get; private set; } = 0;
 
         public void Load()
         {
@@ -91,6 +115,42 @@ namespace Fort.Services
                     Target = Fortresses[path.Value["Target"].Value<string>()]
                 });
             }
+
+            _turns = new List<Turn>();
+            int index = 1;
+            int roundIndex = 1;
+            foreach (JToken round in items["Turns"])
+            {
+                foreach (JObject turn in round)
+                {
+                    _turns.Add(new Turn{
+                        Id = index,
+                        Order = roundIndex,
+                        Amount = turn["Amount"].Value<int>(),
+                        From = Fortresses[turn["From"].Value<string>()],
+                        To = Fortresses[turn["To"].Value<string>()]
+                    });
+
+                    index++;
+                }
+
+                roundIndex++;
+            }
+        }
+
+        public IEnumerable<Turn> Turn()
+        {
+            if (!_turns.Any(t => t.Order > LastTurnOrder))
+                return null;
+
+            IEnumerable<Turn> thisTurns = new Turn[] { };
+            while (!thisTurns.Any())
+            {
+                LastTurnOrder++;
+                thisTurns = _turns.Where(t => t.Order == LastTurnOrder);
+            }
+
+            return thisTurns;
         }
     }
 }

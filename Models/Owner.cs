@@ -4,5 +4,6 @@ namespace Fort.Models
     {
         public string Name { get; set; } = "Neutral";
         public string Color { get; set; } = "Grey";
+        public string Team { get; set; } = "best";
     }
 }
