@@ -2,3 +2,15 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 // Write your JavaScript code.
+
+$(document).ready(function () {
+    $('#turn').on('click', function () {
+        var url = window.location.protocol + "//" + window.location.hostname;
+        if (window.location.port != 80)
+            url += ":" + window.location.port;
+
+        $.get(url + "/turn", function (data) {
+            $('#map').html(data.map);
+        });
+    });
+});

@@ -3,4 +3,8 @@
     ViewData["Title"] = "Home Page";
 }
 
-@Html.Raw(Map.Print())
+<div id="map">
+    @Html.Raw(Map.Print())
+</div>
+
+<button id="turn">Turn</button>

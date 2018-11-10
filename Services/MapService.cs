@@ -59,19 +59,19 @@ namespace Fort.Services
                     {
                         ""From"": ""one"",
                         ""To"": ""two"",
-                        ""Amount"": 3
+                        ""Amount"": 30
                     },
                     {
                         ""From"": ""five"",
                         ""To"": ""two"",
-                        ""Amount"": 1
+                        ""Amount"": 100
                     }
                 ],
                 [
                     {
                         ""From"": ""two"",
                         ""To"": ""one"",
-                        ""Amount"": 1
+                        ""Amount"": 20
                     }
                 ],
             ]
@@ -82,10 +82,11 @@ namespace Fort.Services
         public Dictionary<string, Fortress> Fortresses { get; private set; }
         public List<Path> Paths { get; private set; }
 
-        public int LastTurnOrder { get; private set; } = 0;
+        public int LastTurnOrder { get; private set; }
 
         public void Load()
         {
+            LastTurnOrder = 0;
             JToken items = JToken.Parse(_map);
             Random rand = new Random();
 
@@ -97,7 +98,7 @@ namespace Fort.Services
                     Name = fort.Name,
                     X = fort.Value["x"].Value<int>(),
                     Y = fort.Value["y"].Value<int>(),
-                    Population = rand.Next() % 100,
+                    Population = 100 + rand.Next() % 20,
                     Owner = new Owner
                     {
                         Color = $"rgb({rand.Next() % 256}, {rand.Next() % 256}, {rand.Next() % 256})"
