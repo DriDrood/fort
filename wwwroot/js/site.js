@@ -20,4 +20,38 @@ $(document).ready(function () {
             });
         });
     });
+    
+    $('body').on('click', function (e) {
+        switch ($(e.target).prop('tagName')) {
+            case 'svg':
+                var x = e.originalEvent.clientX;
+                var y = e.originalEvent.clientY;
+
+                // console.log($(this).position().left);
+
+                $(e.target).append('<circle cx="' + x + '" cy="' + y + '" r="10" />');
+                refresh();
+                break;
+            case 'circle':
+                $(e.target).remove();
+                refresh();
+                break;
+        }
+    });
+
+    $('#send').on('click', function (e) {
+        var coords = [];
+        $('circle').each(function (index, el) {
+            var element = $(el);
+
+            coords.push({ x: element.attr('cx'), y: element.attr('cy') })
+        });
+
+        console.log(coords);
+        $.ajax({ type: 'POST', url: '/CreateMap', data: JSON.stringify(coords), contentType: 'application/json'});
+    });
 });
+   
+function refresh() {
+    $('#mapCreator').html($('#mapCreator').html());
+}

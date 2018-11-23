@@ -42,5 +42,16 @@ namespace Fort.Controllers
 
             return RedirectToAction("Index");
         }
+
+        public IActionResult CreateMap()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult CreateMap([FromBody]JToken coords)
+        {
+            return null;
+        }
     }
 }

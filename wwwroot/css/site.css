@@ -24,3 +24,12 @@ for details on configuring this project to bundle and minify static web assets. 
 
     border-radius: 10px;
 }
+
+#mapCreator {
+    width: 1280px;
+    height: 720px;
+
+    border: 2px solid #000;
+    background-image: url('/images/top-black-and-white-map-of-the-world-1.png');
+    background-size: 100% 100%;
+}
