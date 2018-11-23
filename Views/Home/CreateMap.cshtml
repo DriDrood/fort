@@ -1,9 +1,15 @@
 ﻿@using Fort.Helpers
+@using System.Collections.Generic
+@model List<Fort.Database.Entities.Fortress>
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <svg id="mapCreator">
+    @foreach (var fort in Model)
+    {
+        <circle cx="@fort.X" cy="@fort.Y" r="10" />
+    }
 </svg>
 
 <button id="send">Send</button>

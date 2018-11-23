@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Fort.Database;
 using Fort.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,15 +20,21 @@ namespace Fort
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+            ConnectionString = configuration.GetConnectionString("DefaultConnection");
         }
 
         public IConfiguration Configuration { get; }
 
         private static IServiceProvider _services;
+        public static string ConnectionString { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<FortDbContext>(options =>
+                options.UseMySql(ConnectionString, b => b.MigrationsAssembly("Fort"))
+            );
+
             services.Configure<CookiePolicyOptions>(options =>
             {
                 // This lambda determines whether user consent for non-essential cookies is needed for a given request.
@@ -64,7 +72,7 @@ namespace Fort
                 routes.MapRoute(
                     name: "default",
                     template: "{action=Index}/{id?}",
-                    defaults: new { controller = "Home" } );
+                    defaults: new { controller = "Home" });
             });
 
             app.ApplicationServices.GetService<MapService>().Load();

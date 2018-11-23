@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Fort.Models;
 using Fort.Services;
 using Newtonsoft.Json.Linq;
+using Fort.Database;
 
 namespace Fort.Controllers
 {
@@ -45,13 +46,32 @@ namespace Fort.Controllers
 
         public IActionResult CreateMap()
         {
-            return View();
+            using (FortDbContext context = new FortDbContext())
+            {
+                return View(context.Fortresses.ToList());
+            }
         }
 
         [HttpPost]
-        public IActionResult CreateMap([FromBody]JToken coords)
+        public string CreateMap([FromBody]JArray coords)
         {
-            return null;
+            using (FortDbContext context = new FortDbContext())
+            {
+                context.Fortresses.RemoveRange(context.Fortresses);
+
+                foreach (JToken coord in coords)
+                {
+                    context.Fortresses.Add(new Database.Entities.Fortress
+                    {
+                        X = coord["x"].Value<int>(),
+                        Y = coord["y"].Value<int>()
+                    });
+                }
+
+                context.SaveChanges();
+            }
+
+            return "ok";
         }
     }
 }
