@@ -36,5 +36,10 @@ namespace Fort.Helpers
 
             return result;
         }
+
+        public static string Army(Turn turn)
+        {
+            return $"<div id=\"army{turn.Id}\" class=\"army\" style=\"background-color:{turn.From.Owner.Color};top:{Position.ToRealHeight(turn.From.Y)-10}px;left:{Position.ToRealWidth(turn.From.X)-10}px;\"></div>";
+        }
     }
 }

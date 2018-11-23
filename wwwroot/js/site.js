@@ -10,7 +10,14 @@ $(document).ready(function () {
             url += ":" + window.location.port;
 
         $.get(url + "/turn", function (data) {
-            $('#map').html(data.map);
+            $.each(data.round, function (index, turn) {
+                console.log(turn.element);
+                $('body').append(turn.element);
+                $('#army' + turn.id).animate({ left: turn.finalx, top: turn.finaly }, 1000, function () {
+                    $('#map').html(data.map);
+                    $('.army').remove();
+                });
+            });
         });
     });
 });

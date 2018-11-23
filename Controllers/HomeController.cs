@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Fort.Models;
 using Fort.Services;
+using Newtonsoft.Json.Linq;
 
 namespace Fort.Controllers
 {
@@ -20,14 +21,17 @@ namespace Fort.Controllers
 
         public IActionResult Turn()
         {
-            var round = _mapService.Turn();
-            if (round != null)
-                foreach (var turn in round)
-                    turn.Play();
+            var round = _mapService.Turn() ?? new Turn[] { };
+
+            foreach (var turn in round)
+                turn.Play();
+
+            foreach (Fortress fortress in _mapService.Fortresses.Values)
+                fortress.Population += _mapService.PopulationGrow;
 
             return Ok(new
             {
-                Round = round,
+                Round = round?.Select(t => new { id = t.Id, element = Helpers.Map.Army(t), finalx = Helpers.Position.ToRealWidth(t.To.X) - 10, finaly = Helpers.Position.ToRealHeight(t.To.Y) - 10 }),
                 Map = Helpers.Map.Print()
             });
         }

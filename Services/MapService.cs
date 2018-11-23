@@ -13,7 +13,11 @@ namespace Fort.Services
         {
             Helpers.Position.RealHeight = double.Parse(configuration["realResolution:height"]);
             Helpers.Position.RealWidth = double.Parse(configuration["realResolution:width"]);
+
+            PopulationGrow = int.Parse(configuration["populationGrow"]);
         }
+
+        public int PopulationGrow { get; private set; }
 
         private string _map =
         @"
@@ -21,15 +25,15 @@ namespace Fort.Services
             ""Forts"": {
             ""one"": {
                 ""x"": 50,
-                ""y"": 50
+                ""y"": 50,
             },
             ""two"": {
-                ""x"": 100,
-                ""y"": 100
+                ""x"": 300,
+                ""y"": 250
             },
             ""five"": {
                 ""x"": 150,
-                ""y"": 80
+                ""y"": 600
             },
             ""far"": {
                 ""x"": 823,
@@ -64,7 +68,7 @@ namespace Fort.Services
                     {
                         ""From"": ""five"",
                         ""To"": ""two"",
-                        ""Amount"": 100
+                        ""Amount"": 80
                     }
                 ],
                 [
@@ -98,7 +102,7 @@ namespace Fort.Services
                     Name = fort.Name,
                     X = fort.Value["x"].Value<int>(),
                     Y = fort.Value["y"].Value<int>(),
-                    Population = 100 + rand.Next() % 20,
+                    Population = 20 + rand.Next() % 100,
                     Owner = new Owner
                     {
                         Color = $"rgb({rand.Next() % 256}, {rand.Next() % 256}, {rand.Next() % 256})"
@@ -124,7 +128,8 @@ namespace Fort.Services
             {
                 foreach (JObject turn in round)
                 {
-                    _turns.Add(new Turn{
+                    _turns.Add(new Turn
+                    {
                         Id = index,
                         Order = roundIndex,
                         Amount = turn["Amount"].Value<int>(),
