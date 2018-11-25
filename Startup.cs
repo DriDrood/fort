@@ -45,6 +45,7 @@ namespace Fort
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            services.AddScoped<FortDbContext>();
             // services.AddSingleton<MapService>();
         }
 

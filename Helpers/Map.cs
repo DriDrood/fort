@@ -1,6 +1,6 @@
 using System.Text;
-using Fort.Models;
-using Fort.Services;
+using Fort.Database;
+using Fort.Database.Entities;
 
 namespace Fort.Helpers
 {
@@ -9,19 +9,19 @@ namespace Fort.Helpers
         public static string Print()
         {
             StringBuilder svgMap = new StringBuilder();
-            MapService mapService = Startup.Get<MapService>();
+            FortDbContext context = Startup.Get<FortDbContext>();
 
             svgMap.AppendLine($"<svg id=\"map\" height=\"{Position.RealHeight}\" width=\"{Position.RealWidth}\">");
-            foreach (Path path in mapService.Paths)
+            foreach (Path path in context.Paths)
             {
                 var middle = getMiddlePoint(path);
-                svgMap.AppendLine($"<line x1=\"{Position.ToRealWidth(path.Source.X)}\" y1=\"{Position.ToRealHeight(path.Source.Y)}\" x2=\"{Position.ToRealWidth(middle.x)}\" y2=\"{Position.ToRealHeight(middle.y)}\" style=\"stroke:{path.Source.Owner.Color};stroke-width:5\" />");
-                svgMap.AppendLine($"<line x1=\"{Position.ToRealWidth(middle.x)}\" y1=\"{Position.ToRealHeight(middle.y)}\" x2=\"{Position.ToRealWidth(path.Target.X)}\" y2=\"{Position.ToRealHeight(path.Target.Y)}\"  style=\"stroke:{path.Target.Owner.Color};stroke-width:5\" />");
+                svgMap.AppendLine($"<line x1=\"{Position.ToRealWidth(path.Source.X)}\" y1=\"{Position.ToRealHeight(path.Source.Y)}\" x2=\"{Position.ToRealWidth(middle.x)}\" y2=\"{Position.ToRealHeight(middle.y)}\" style=\"stroke:black;stroke-width:5\" />");
+                svgMap.AppendLine($"<line x1=\"{Position.ToRealWidth(middle.x)}\" y1=\"{Position.ToRealHeight(middle.y)}\" x2=\"{Position.ToRealWidth(path.Target.X)}\" y2=\"{Position.ToRealHeight(path.Target.Y)}\"  style=\"stroke:black;stroke-width:5\" />");
             }
 
-            foreach (Fortress fortress in mapService.Fortresses.Values)
+            foreach (City city in context.Cities)
             {
-                svgMap.AppendLine($"<circle cx=\"{Position.ToRealWidth(fortress.X)}\" cy=\"{Position.ToRealHeight(fortress.Y)}\" r=\"{System.Math.Log10(fortress.Population)*20}\" fill=\"{fortress.Owner.Color}\" />");
+                svgMap.AppendLine($"<circle cx=\"{Position.ToRealWidth(city.X)}\" cy=\"{Position.ToRealHeight(city.Y)}\" r=\"{System.Math.Log10(city.Army) * 20}\" fill=\"black\" />");
             }
             svgMap.AppendLine("</svg>");
 
@@ -39,7 +39,7 @@ namespace Fort.Helpers
 
         public static string Army(Turn turn)
         {
-            return $"<div id=\"army{turn.Id}\" class=\"army\" style=\"background-color:{turn.From.Owner.Color};top:{Position.ToRealHeight(turn.From.Y)-10}px;left:{Position.ToRealWidth(turn.From.X)-10}px;\"></div>";
+            return $"<div id=\"army{turn.Id}\" class=\"army\" style=\"background-color:black;top:{Position.ToRealHeight(turn.SourceCity.Y) - 10}px;left:{Position.ToRealWidth(turn.SourceCity.X) - 10}px;\"></div>";
         }
     }
 }
