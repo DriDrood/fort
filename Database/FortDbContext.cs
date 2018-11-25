@@ -9,11 +9,30 @@ namespace Fort.Database
         public FortDbContext(DbContextOptions<FortDbContext> options) : base(options) { }
         public FortDbContext() : this(new DbContextOptions<FortDbContext>()) { }
 
-        public virtual DbSet<Fortress> Fortresses { get; set; }
+        public virtual DbSet<City> Cities { get; set; }
+        public virtual DbSet<Path> Paths { get; set; }
+        public virtual DbSet<Round> Rounds { get; set; }
+        public virtual DbSet<Team> Teams { get; set; }
+        public virtual DbSet<Turn> Turns { get; set; }
+        public virtual DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<City>()
+                .HasMany(c => c.SourceToPaths)
+                .WithOne(p => p.Source);
+            builder.Entity<City>()
+                .HasMany(c => c.TargetToPaths)
+                .WithOne(p => p.Target);
+                
+            builder.Entity<City>()
+                .HasMany(c => c.SourceToTurns)
+                .WithOne(p => p.SourceCity);
+            builder.Entity<City>()
+                .HasMany(c => c.TargetToTurns)
+                .WithOne(p => p.TargetCity);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

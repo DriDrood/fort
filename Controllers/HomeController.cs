@@ -20,35 +20,35 @@ namespace Fort.Controllers
             return View(_mapService);
         }
 
-        public IActionResult Turn()
-        {
-            var round = _mapService.Turn() ?? new Turn[] { };
+        // public IActionResult Turn()
+        // {
+        //     var round = _mapService.Turn() ?? new Turn[] { };
 
-            foreach (var turn in round)
-                turn.Play();
+        //     foreach (var turn in round)
+        //         turn.Play();
 
-            foreach (Fortress fortress in _mapService.Fortresses.Values)
-                fortress.Population += _mapService.PopulationGrow;
+        //     foreach (Fortress fortress in _mapService.Fortresses.Values)
+        //         fortress.Population += _mapService.PopulationGrow;
 
-            return Ok(new
-            {
-                Round = round?.Select(t => new { id = t.Id, element = Helpers.Map.Army(t), finalx = Helpers.Position.ToRealWidth(t.To.X) - 10, finaly = Helpers.Position.ToRealHeight(t.To.Y) - 10 }),
-                Map = Helpers.Map.Print()
-            });
-        }
+        //     return Ok(new
+        //     {
+        //         Round = round?.Select(t => new { id = t.Id, element = Helpers.Map.Army(t), finalx = Helpers.Position.ToRealWidth(t.To.X) - 10, finaly = Helpers.Position.ToRealHeight(t.To.Y) - 10 }),
+        //         Map = Helpers.Map.Print()
+        //     });
+        // }
 
-        public IActionResult Reset()
-        {
-            _mapService.Load();
+        // public IActionResult Reset()
+        // {
+        //     _mapService.Load();
 
-            return RedirectToAction("Index");
-        }
+        //     return RedirectToAction("Index");
+        // }
 
         public IActionResult CreateMap()
         {
             using (FortDbContext context = new FortDbContext())
             {
-                return View(context.Fortresses.ToList());
+                return View(context.Cities.ToList());
             }
         }
 
@@ -57,11 +57,11 @@ namespace Fort.Controllers
         {
             using (FortDbContext context = new FortDbContext())
             {
-                context.Fortresses.RemoveRange(context.Fortresses);
+                context.Cities.RemoveRange(context.Cities);
 
                 foreach (JToken coord in coords)
                 {
-                    context.Fortresses.Add(new Database.Entities.Fortress
+                    context.Cities.Add(new Database.Entities.City
                     {
                         X = coord["x"].Value<int>(),
                         Y = coord["y"].Value<int>()

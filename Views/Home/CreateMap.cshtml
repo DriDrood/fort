@@ -1,14 +1,14 @@
 ﻿@using Fort.Helpers
 @using System.Collections.Generic
-@model List<Fort.Database.Entities.Fortress>
+@model List<Fort.Database.Entities.City>
 @{
     ViewData["Title"] = "Home Page";
 }
 
 <svg id="mapCreator">
-    @foreach (var fort in Model)
+    @foreach (var city in Model)
     {
-        <circle cx="@fort.X" cy="@fort.Y" r="10" />
+        <circle cx="@city.X" cy="@city.Y" r="10" />
     }
 </svg>
 

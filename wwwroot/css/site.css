@@ -33,3 +33,13 @@ for details on configuring this project to bundle and minify static web assets. 
     background-image: url('/images/top-black-and-white-map-of-the-world-1.png');
     background-size: 100% 100%;
 }
+
+.ally {
+    border-color: #0a8524;
+}
+.me {
+    border-color: #2689c2;
+}
+.enemy {
+    border-color: #83001c;
+}
