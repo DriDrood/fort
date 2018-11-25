@@ -9,7 +9,7 @@ namespace Fort.Helpers
         public static string Print()
         {
             StringBuilder svgMap = new StringBuilder();
-            FortDbContext context = Startup.Get<FortDbContext>();
+            FortDbContext context = Program.GetService<FortDbContext>();
 
             svgMap.AppendLine($"<svg id=\"map\" height=\"{Position.RealHeight}\" width=\"{Position.RealWidth}\">");
             foreach (Path path in context.Paths)

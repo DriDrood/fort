@@ -4,8 +4,12 @@ for details on configuring this project to bundle and minify static web assets. 
     padding: 0;
     margin: 0;
 }
+html {
+    height: 100%;
+    width: 100%;
+}
 
-#turn {
+/* #turn {
     position: absolute;
     top: 50px;
     right: 100px;
@@ -23,7 +27,41 @@ for details on configuring this project to bundle and minify static web assets. 
     z-index: 10;
 
     border-radius: 10px;
+} */
+
+body.login {
+    display: flex;
+    height: 100%;
+    width: 100%;
+
+    justify-content: center;
+    align-items: center;
+
+    background-image: url('/images/login-back.png');
+    background-size: cover;
 }
+body.login form {
+    display: inline-block;
+
+    margin: auto;
+    padding: 20px;
+
+    border: 2px solid #000;
+    border-radius: 10px;
+
+    background: #fff;
+}
+body.login form input, body.login form button, body.login form .error {
+    display: block;
+    width: 200px;
+
+    margin: 5px;
+}
+body.login form .error {
+    color: #f00;
+    text-align: center;
+}
+
 
 #mapCreator {
     width: 1280px;
@@ -34,6 +72,7 @@ for details on configuring this project to bundle and minify static web assets. 
     background-size: 100% 100%;
 }
 
+/* 
 .ally {
     border-color: #0a8524;
 }
@@ -42,4 +81,4 @@ for details on configuring this project to bundle and minify static web assets. 
 }
 .enemy {
     border-color: #83001c;
-}
+} */

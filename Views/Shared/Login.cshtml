@@ -1,0 +1,14 @@
+@model string
+@{
+    ViewData["Title"] = "Přihlášení";
+    ViewData["page"] = "login";
+}
+
+<form method="POST">
+    <input type="text" name="code" />
+    <button>Přihlásit</button>
+    @if (ViewData["errorMessage"] != null)
+    {
+        <div class="error">@ViewData["errorMessage"]</div>
+    }
+</form>

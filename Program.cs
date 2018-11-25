@@ -8,6 +8,7 @@ using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Fort
 {
@@ -15,8 +16,12 @@ namespace Fort
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            Host = CreateWebHostBuilder(args).Build();
+            Host.Run();
         }
+
+        public static IWebHost Host { get; private set; }
+        public static TService GetService<TService>() => Host.Services.GetService<TService>();
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)

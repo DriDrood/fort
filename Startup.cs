@@ -24,8 +24,6 @@ namespace Fort
         }
 
         public IConfiguration Configuration { get; }
-
-        private static IServiceProvider _services;
         public static string ConnectionString { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -44,16 +42,13 @@ namespace Fort
 
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
-            services.AddScoped<FortDbContext>();
+            
             // services.AddSingleton<MapService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            _services = app.ApplicationServices;
-
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -69,18 +64,26 @@ namespace Fort
             {
                 routes.MapRoute(
                     name: "MapCreator",
-                    template: "MapCreator/{action=Index}",
+                    template: "Admin/MapCreator/{action=Index}",
                     defaults: new { controller = "MapCreator" });
+                    
+                routes.MapRoute(
+                    name: "Admin",
+                    template: "Admin/{code=}/{action=Login}",
+                    defaults: new { controller = "PlayAdmin" });
+                    
+                routes.MapRoute(
+                    name: "Team",
+                    template: "Team/{code=}/{action=Login}/",
+                    defaults: new { controller = "PlayTeam" });
 
                 routes.MapRoute(
-                    name: "default",
-                    template: "{action=Index}/{id?}",
-                    defaults: new { controller = "Home" });
+                    name: "User",
+                    template: "{code=}/{action=Login}",
+                    defaults: new { controller = "PlayUser" });
             });
 
             // app.ApplicationServices.GetService<MapService>().Load();
         }
-
-        public static TService Get<TService>() => _services.GetService<TService>();
     }
 }
