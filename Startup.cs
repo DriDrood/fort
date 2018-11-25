@@ -45,7 +45,7 @@ namespace Fort
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddSingleton<MapService>();
+            // services.AddSingleton<MapService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,19 +63,21 @@ namespace Fort
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
             app.UseStaticFiles();
-            app.UseCookiePolicy();
-
             app.UseMvc(routes =>
             {
+                routes.MapRoute(
+                    name: "MapCreator",
+                    template: "MapCreator/{action=Index}",
+                    defaults: new { controller = "MapCreator" });
+
                 routes.MapRoute(
                     name: "default",
                     template: "{action=Index}/{id?}",
                     defaults: new { controller = "Home" });
             });
 
-            app.ApplicationServices.GetService<MapService>().Load();
+            // app.ApplicationServices.GetService<MapService>().Load();
         }
 
         public static TService Get<TService>() => _services.GetService<TService>();

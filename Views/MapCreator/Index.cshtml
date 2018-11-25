@@ -2,7 +2,8 @@
 @using System.Collections.Generic
 @model List<Fort.Database.Entities.City>
 @{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Map Creator";
+    ViewData["page"] = "mapCreator";
 }
 
 <svg id="mapCreator">
@@ -11,5 +12,3 @@
         <circle cx="@city.X" cy="@city.Y" r="10" />
     }
 </svg>
-
-<button id="send">Send</button>

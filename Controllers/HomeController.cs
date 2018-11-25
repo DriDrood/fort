@@ -43,35 +43,5 @@ namespace Fort.Controllers
 
         //     return RedirectToAction("Index");
         // }
-
-        public IActionResult CreateMap()
-        {
-            using (FortDbContext context = new FortDbContext())
-            {
-                return View(context.Cities.ToList());
-            }
-        }
-
-        [HttpPost]
-        public string CreateMap([FromBody]JArray coords)
-        {
-            using (FortDbContext context = new FortDbContext())
-            {
-                context.Cities.RemoveRange(context.Cities);
-
-                foreach (JToken coord in coords)
-                {
-                    context.Cities.Add(new Database.Entities.City
-                    {
-                        X = coord["x"].Value<int>(),
-                        Y = coord["y"].Value<int>()
-                    });
-                }
-
-                context.SaveChanges();
-            }
-
-            return "ok";
-        }
     }
 }
