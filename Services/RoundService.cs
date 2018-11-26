@@ -17,12 +17,12 @@ namespace Fort.Services
 
         private CommService _commService => Program.GetService<CommService>();
         private Timer _timer;
+        private Task _playTask;
 
         public Round CurrentRound { get; private set; }
 
-        public void Turn(Turn turn)
+        public void Turn(User user, Turn turn)
         {
-            User user = Program.GetService<CurrentPlayerService>().User;
             if (CurrentRound.EndsAt != null)
                 throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "Round already ended");
 
@@ -38,27 +38,24 @@ namespace Fort.Services
         }
 
         #region Admin
-        public void Pause()
+        public void Pause(User user)
         {
-            User user = Program.GetService<CurrentPlayerService>().User;
             if (!user.IsAdmin)
                 throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "User is not admin");
 
             _timer.Pause();
         }
 
-        public void Resume()
+        public void Resume(User user)
         {
-            User user = Program.GetService<CurrentPlayerService>().User;
             if (!user.IsAdmin)
                 throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "User is not admin");
 
             _timer.Resume();
         }
 
-        public void EndRound()
+        public void EndRound(User user)
         {
-            User user = Program.GetService<CurrentPlayerService>().User;
             if (!user.IsAdmin)
                 throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "User is not admin");
 
@@ -71,26 +68,25 @@ namespace Fort.Services
             throw new NotImplementedException();
         }
 
-        public async Task Play()
+        public void Play(User user)
         {
-            User user = Program.GetService<CurrentPlayerService>().User;
-            if (CurrentRound.EndsAt != null)
-                throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "Round already ended");
-
-            using (FortDbContext context = new FortDbContext())
+            _playTask = Task.Run(async () =>
             {
-                while (context.Teams.Count(t => t.Members.Any(m => m.Cities.Any())) > 1)
+                using (FortDbContext context = new FortDbContext())
                 {
-                    StartRound(context);
-                    await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultRoundDurationSec));
+                    while (context.Teams.Count(t => t.Members.Any(m => m.Cities.Any())) > 1)
+                    {
+                        StartRound(context);
+                        await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultRoundDurationSec));
 
-                    EndRound(context);
-                    await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultBeforeVisualizationSec));
+                        EndRound(context);
+                        await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultBeforeVisualizationSec));
 
-                    Visualize(context);
-                    await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
+                        Visualize(context);
+                        await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
+                    }
                 }
-            }
+            });
         }
         private void StartRound(FortDbContext context)
         {

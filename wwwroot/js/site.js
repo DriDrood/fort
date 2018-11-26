@@ -37,6 +37,23 @@ $(document).ready(function () {
             console.log(data);
         }
     }
+    
+    $('#play').on('click', function () {
+        var data = { method: "play" }
+        ws.send(JSON.stringify(data));
+    });
+    $('#pause').on('click', function () {
+        var data = { method: "pause" }
+        ws.send(JSON.stringify(data));
+    });
+    $('#resume').on('click', function () {
+        var data = { method: "resume" }
+        ws.send(JSON.stringify(data));
+    });
+    $('#end').on('click', function () {
+        var data = { method: "end" }
+        ws.send(JSON.stringify(data));
+    });
 });
 
 function refresh() {

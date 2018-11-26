@@ -5,6 +5,9 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Fort.Database;
+using Fort.Database.Entities;
+using Fort.Utils.Logger;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -17,8 +20,9 @@ namespace Fort.Services
             _playerConnections = new Dictionary<string, WebSocket>();
         }
 
-        private Dictionary<string, WebSocket> _playerConnections;
         private int _bufferSize = 4096;
+        private RoundService _roundService => Program.GetService<RoundService>();
+        private Dictionary<string, WebSocket> _playerConnections;
 
         public async Task CreateNewConnection(string playerId, WebSocket webSocket)
         {
@@ -38,7 +42,9 @@ namespace Fort.Services
                 }
                 while (!result.EndOfMessage);
 
-                await recieveMessage(playerId, JToken.Parse(message.ToString()));
+                // ignore closing
+                if (!result.CloseStatus.HasValue)
+                    await recieveMessage(playerId, message.ToString());
             }
             while (!result.CloseStatus.HasValue);
 
@@ -46,9 +52,52 @@ namespace Fort.Services
             _playerConnections.Remove(playerId);
         }
 
-        private async Task recieveMessage(string playerId, JToken message)
+        private async Task recieveMessage(string playerId, string message)
         {
-#warning TODO
+            try
+            {
+                JToken data = JToken.Parse(message);
+
+                using (FortDbContext context = new FortDbContext())
+                {
+                    User user = await Task.Run(() => context.Users.Find(playerId));
+
+                    switch (data["method"].Value<string>().ToLower())
+                    {
+                        case "turn":
+                            Turn playerTurn = data["turn"].ToObject<Turn>();
+                            _roundService.Turn(user, playerTurn);
+                            break;
+
+                        case "play":
+                            _roundService.Play(user);
+                            break;
+
+                        case "pause":
+                            _roundService.Pause(user);
+                            break;
+
+                        case "resume":
+                            _roundService.Resume(user);
+                            break;
+
+                        case "end":
+                            _roundService.EndRound(user);
+                            break;
+
+                        default:
+                            throw new FortException(ELogLevel.Warning, playerId, "unknown method");
+                    }
+                }
+            }
+            catch (FortException ex)
+            {
+                Logger.Log(ex.LogLevel, ex.Player, ex.Message, ex.StackTrace);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(ELogLevel.UnknownException, playerId, ex.Message, ex.StackTrace);
+            }
         }
 
         public async Task SendToAll(string method, object data)

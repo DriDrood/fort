@@ -40,6 +40,7 @@ namespace Fort
             services.AddScoped<MapAdminService>();
             services.AddScoped<CurrentPlayerService>();
             services.AddSingleton<RealPositionService>();
+            services.AddSingleton<RoundService>();
             services.AddSingleton<CommService>();
         }
 
@@ -55,12 +56,12 @@ namespace Fort
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
-            
+
             app.UseStaticFiles();
             app.UseWebSockets();
-            app.UseMiddleware<WSMiddleware>();
             app.UseMiddleware<CurrentPlayerMiddleware>();
             app.UseMiddleware<LoggerMiddleware>();
+            app.UseMiddleware<WSMiddleware>();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
