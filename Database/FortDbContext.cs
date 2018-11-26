@@ -16,6 +16,8 @@ namespace Fort.Database
         public virtual DbSet<Turn> Turns { get; set; }
         public virtual DbSet<User> Users { get; set; }
 
+        public virtual DbSet<Log> Logs { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

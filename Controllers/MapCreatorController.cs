@@ -1,7 +1,7 @@
-using System;
 using System.Linq;
 using Fort.Database;
 using Fort.Database.Entities;
+using Fort.Utils.Logger;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 
@@ -47,7 +47,7 @@ namespace Fort.Controllers
 
             using (FortDbContext context = new FortDbContext())
             {
-                var city = context.Cities.SingleOrDefault(c => c.X == x && c.Y == y) ?? throw new Exception("City not found");
+                var city = context.Cities.SingleOrDefault(c => c.X == x && c.Y == y) ?? throw new FortException(ELogLevel.Warning, "Admin", "City not found");
                 context.Cities.Remove(city);
                 context.SaveChanges();
             }

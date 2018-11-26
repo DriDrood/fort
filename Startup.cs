@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Fort.Database;
 using Fort.Services;
+using Fort.Utils.Logger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -53,6 +54,7 @@ namespace Fort
             }
             
             app.UseStaticFiles();
+            app.UseMiddleware<LoggerMiddleware>();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

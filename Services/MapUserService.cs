@@ -42,7 +42,7 @@ namespace Fort.Services
             if (city.Owner.TeamId == _currentPlayerService.User.TeamId)
                 return city.Owner.ImageUrl;
 
-            // TODO: near cities
+            #warning TODO: near cities
 
             return null;
         }
