@@ -6,6 +6,7 @@ using Fort.Database;
 using Fort.Services;
 using Fort.Utils;
 using Fort.Utils.Logger;
+using Fort.Utils.WS;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -39,6 +40,7 @@ namespace Fort
             services.AddScoped<MapAdminService>();
             services.AddScoped<CurrentPlayerService>();
             services.AddSingleton<RealPositionService>();
+            services.AddSingleton<CommService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,6 +57,8 @@ namespace Fort
             }
             
             app.UseStaticFiles();
+            app.UseWebSockets();
+            app.UseMiddleware<WSMiddleware>();
             app.UseMiddleware<CurrentPlayerMiddleware>();
             app.UseMiddleware<LoggerMiddleware>();
             app.UseMvc(routes =>

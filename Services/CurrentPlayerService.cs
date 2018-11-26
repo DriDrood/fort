@@ -9,13 +9,7 @@ namespace Fort.Services
 
         public override string ToString()
         {
-            if (User != null)
-                return $"U:{User.Id}";
-
-            if (Team != null)
-                return $"T:{Team.Id}";
-
-            return "";
+            return User?.Id ?? Team?.Id ?? "";
         }
     }
 }

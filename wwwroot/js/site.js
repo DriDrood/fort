@@ -4,23 +4,7 @@
 // Write your JavaScript code.
 
 $(document).ready(function () {
-    $('#turn').on('click', function () {
-        var url = window.location.protocol + "//" + window.location.hostname;
-        if (window.location.port != 80)
-            url += ":" + window.location.port;
-
-        $.get(url + "/turn", function (data) {
-            $.each(data.round, function (index, turn) {
-                console.log(turn.element);
-                $('body').append(turn.element);
-                $('#army' + turn.id).animate({ left: turn.finalx, top: turn.finaly }, 1000, function () {
-                    $('#map').html(data.map);
-                    $('.army').remove();
-                });
-            });
-        });
-    });
-
+    var ws;
     $('body.mapCreator').on('click', function (e) {
         switch ($(e.target).prop('tagName')) {
             case 'svg':
@@ -44,6 +28,15 @@ $(document).ready(function () {
                 break;
         }
     });
+
+    if ($('body.map').length > 0) {
+        var url = 'ws://' + location.hostname + (location.port != '' ? (':' + location.port) : '') + location.pathname;
+        console.log('connecting to ' + url);
+        ws = new WebSocket(url);
+        ws.onmessage = function (data) {
+            console.log(data);
+        }
+    }
 });
 
 function refresh() {
