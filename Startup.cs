@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Fort.Database;
 using Fort.Services;
+using Fort.Utils;
 using Fort.Utils.Logger;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -54,12 +55,13 @@ namespace Fort
             }
             
             app.UseStaticFiles();
+            app.UseMiddleware<CurrentPlayerMiddleware>();
             app.UseMiddleware<LoggerMiddleware>();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "MapCreator",
-                    template: "Admin/MapCreator/{action=Index}",
+                    template: "Admin/MapCreator/{code}/{action=Index}",
                     defaults: new { controller = "MapCreator" });
 
                 routes.MapRoute(
