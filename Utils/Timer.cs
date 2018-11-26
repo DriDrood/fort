@@ -6,16 +6,10 @@ namespace Fort.Utils
 {
     public class Timer
     {
-        public Timer(TimeSpan duration)
-        {
-            _duration = duration;
-            IsPaused = true;
-            IsEnded = false;
-        }
-
-        public TimeSpan? Remains => IsPaused || IsEnded ? _duration : _duration - (DateTime.UtcNow - _startAt);
+        public TimeSpan? Remains => IsPaused || IsEnded || NotStarted ? _duration : _duration - (DateTime.UtcNow - _startAt);
         public bool IsPaused { get; private set; }
         public bool IsEnded { get; private set; }
+        public bool NotStarted { get; set; }
 
         private TimeSpan _duration;
         private DateTime _startAt;
@@ -23,9 +17,18 @@ namespace Fort.Utils
         private CancellationTokenSource _cancelToken;
         private TaskCompletionSource<bool> _awaitingPause;
 
+        public Task NewStart(TimeSpan duration)
+        {
+            SetTime(duration);
+            return Start();
+        }
+
         public Task Start()
         {
-            IsPaused = false;
+            if (!NotStarted)
+                return null;
+
+            NotStarted = false;
 
             _startAt = DateTime.UtcNow;
             _cancelToken = new CancellationTokenSource();
@@ -36,7 +39,7 @@ namespace Fort.Utils
 
         public void Pause()
         {
-            if (IsPaused)
+            if (IsPaused || NotStarted)
                 return;
 
             IsPaused = true;
@@ -50,7 +53,7 @@ namespace Fort.Utils
 
         public void Resume()
         {
-            if (!IsPaused)
+            if (!IsPaused || NotStarted)
                 return;
 
             IsPaused = false;
@@ -74,6 +77,14 @@ namespace Fort.Utils
             _cancelToken = null;
             _awaitingPause?.SetResult(false);
             _awaitingPause = null;
+        }
+
+        public void SetTime(TimeSpan duration)
+        {
+            _duration = duration;
+            IsPaused = false;
+            IsEnded = false;
+            NotStarted = true;
         }
 
         private async Task sleep()

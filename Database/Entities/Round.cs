@@ -17,7 +17,7 @@ namespace Fort.Database.Entities
         public string Note { get; set; }
 
         public DateTime StartsAt { get; set; }
-        public DateTime EndsAt { get; set; }
+        public DateTime? EndsAt { get; set; }
 
         public virtual ICollection<Turn> Turns { get; set; }
     }
