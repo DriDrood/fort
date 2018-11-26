@@ -1,3 +1,4 @@
+using Fort.Database;
 using Fort.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -5,8 +6,9 @@ namespace Fort.Controllers
 {
     public abstract class PlayBaseController : Controller
     {
-        protected abstract MapBaseService _mapService { get; }
-        protected abstract bool _existThisCode(string code);
+        protected abstract MapBaseService MapService { get; }
+        protected abstract bool ExistThisCode(string code);
+        protected abstract void Set(string code);
 
         public IActionResult Login()
         {
@@ -15,7 +17,7 @@ namespace Fort.Controllers
         [HttpPost]
         public IActionResult Login(string code)
         {
-            if (_existThisCode(code))
+            if (ExistThisCode(code))
                 return RedirectToAction("Map", new { code = code });
 
             ViewData["errorMessage"] = "Neplatný kód!";
@@ -24,7 +26,8 @@ namespace Fort.Controllers
 
         public IActionResult Map(string code)
         {
-            return View(_mapService);
+            Set(code);
+            return View(MapService);
         }
     }
 }

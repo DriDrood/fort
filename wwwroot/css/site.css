@@ -62,6 +62,10 @@ body.login form .error {
     text-align: center;
 }
 
+#map {
+    background-image: url('/images/top-black-and-white-map-of-the-world-1.png');
+    background-size: 100% 100%;
+}
 
 #mapCreator {
     width: 1280px;
@@ -71,14 +75,3 @@ body.login form .error {
     background-image: url('/images/top-black-and-white-map-of-the-world-1.png');
     background-size: 100% 100%;
 }
-
-/* 
-.ally {
-    border-color: #0a8524;
-}
-.me {
-    border-color: #2689c2;
-}
-.enemy {
-    border-color: #83001c;
-} */

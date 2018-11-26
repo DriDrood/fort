@@ -30,7 +30,7 @@ $(document).ready(function () {
                 $(e.target).append('<circle cx="' + x + '" cy="' + y + '" r="10" />');
                 refresh();
 
-                $.ajax({ type: 'POST', url: '/MapCreator/AddPoint', data: JSON.stringify({ x: x, y: y }), contentType: 'application/json' });
+                $.ajax({ type: 'POST', url: '/Admin/MapCreator/AddPoint', data: JSON.stringify({ x: x, y: y }), contentType: 'application/json' });
                 break;
             case 'circle':
                 var circle = $(e.target);
@@ -40,7 +40,7 @@ $(document).ready(function () {
                 circle.remove();
                 refresh();
 
-                $.ajax({ type: 'POST', url: '/MapCreator/DeletePoint', data: JSON.stringify({ x: x, y: y }), contentType: 'application/json' });
+                $.ajax({ type: 'POST', url: '/Admin/MapCreator/DeletePoint', data: JSON.stringify({ x: x, y: y }), contentType: 'application/json' });
                 break;
         }
     });

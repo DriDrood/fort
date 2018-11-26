@@ -29,7 +29,8 @@ namespace Fort.Controllers
                 var city = new City
                 {
                     X = x,
-                    Y = y
+                    Y = y,
+                    Army = 5
                 };
                 context.Cities.Add(city);
                 context.SaveChanges();

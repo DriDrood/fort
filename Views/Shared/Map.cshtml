@@ -1,0 +1,9 @@
+@model Fort.Services.MapBaseService
+@{
+    ViewData["Title"] = "Mapa";
+    ViewData["page"] = "map";
+}
+
+<div id="content">
+    @Html.Raw(Model.Print())
+</div>

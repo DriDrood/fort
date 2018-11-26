@@ -19,6 +19,7 @@ namespace Fort.Database.Entities
         public string UserName { get; set; }
         [StringLength(100)]
         public string ImageUrl { get; set; }
+        public bool IsAdmin { get; set; }
 
         [StringLength(5)]
         public string TeamId { get; set; }

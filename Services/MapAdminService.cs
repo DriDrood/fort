@@ -1,0 +1,27 @@
+using Fort.Database;
+using Fort.Database.Entities;
+
+namespace Fort.Services
+{
+    public class MapAdminService : MapBaseService
+    {
+        public MapAdminService(FortDbContext context, RealPositionService positionService, CurrentPlayerService currentPlayerService) : base(context, positionService, currentPlayerService)
+        {
+        }
+
+        protected override int? GetCityArmy(City city)
+        {
+            return city.Army;
+        }
+
+        protected override string GetCityColor(City city)
+        {
+            return Program.Config.ColorsForAdmin[city.Owner.Team.Id];
+        }
+
+        protected override string GetCityImage(City city)
+        {
+            return city.Owner.ImageUrl;
+        }
+    }
+}

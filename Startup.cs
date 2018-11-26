@@ -19,31 +19,24 @@ namespace Fort
     {
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
             ConnectionString = configuration.GetConnectionString("DefaultConnection");
+            configuration.GetSection("Fort").Bind(Program.Config);
         }
 
-        public IConfiguration Configuration { get; }
         public static string ConnectionString { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<FortDbContext>(options =>
-                options.UseMySql(ConnectionString, b => b.MigrationsAssembly("Fort"))
-            );
-
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
-
+            services.AddDbContext<FortDbContext>(options => options.UseMySql(ConnectionString, b => b.MigrationsAssembly("Fort")));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-            
-            // services.AddSingleton<MapService>();
+
+            services.AddScoped<MapUserService>();
+            services.AddScoped<MapTeamService>();
+            services.AddScoped<MapAdminService>();
+            services.AddScoped<CurrentPlayerService>();
+            services.AddSingleton<RealPositionService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,7 +51,7 @@ namespace Fort
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
             }
-
+            
             app.UseStaticFiles();
             app.UseMvc(routes =>
             {
@@ -66,12 +59,12 @@ namespace Fort
                     name: "MapCreator",
                     template: "Admin/MapCreator/{action=Index}",
                     defaults: new { controller = "MapCreator" });
-                    
+
                 routes.MapRoute(
                     name: "Admin",
                     template: "Admin/{code=}/{action=Login}",
                     defaults: new { controller = "PlayAdmin" });
-                    
+
                 routes.MapRoute(
                     name: "Team",
                     template: "Team/{code=}/{action=Login}/",
@@ -82,8 +75,6 @@ namespace Fort
                     template: "{code=}/{action=Login}",
                     defaults: new { controller = "PlayUser" });
             });
-
-            // app.ApplicationServices.GetService<MapService>().Load();
         }
     }
 }

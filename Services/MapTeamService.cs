@@ -3,15 +3,15 @@ using Fort.Database.Entities;
 
 namespace Fort.Services
 {
-    public class MapUserService : MapBaseService
+    public class MapTeamService : MapBaseService
     {
-        public MapUserService(FortDbContext context, RealPositionService positionService, CurrentPlayerService currentPlayerService) : base(context, positionService, currentPlayerService)
+        public MapTeamService(FortDbContext context, RealPositionService positionService, CurrentPlayerService currentPlayerService) : base(context, positionService, currentPlayerService)
         {
         }
 
         protected override int? GetCityArmy(City city)
         {
-            if (city.Owner?.TeamId == _currentPlayerService.User.TeamId)
+            if (city.Owner?.TeamId == _currentPlayerService.Team.Id)
                 return city.Army;
 
             return null;
@@ -23,12 +23,8 @@ namespace Fort.Services
             if (city.Owner?.Team?.Id == null)
                 return "gray";
 
-            // me
-            if (city.OwnerId == _currentPlayerService.User.Id)
-                return "#2689c2";
-
             // ally
-            if (city.Owner.TeamId == _currentPlayerService.User.TeamId)
+            if (city.Owner.TeamId == _currentPlayerService.Team.Id)
                 return "#0a8524";
 
             // enemy
@@ -39,7 +35,7 @@ namespace Fort.Services
         protected override string GetCityImage(City city)
         {
             // ally
-            if (city.Owner.TeamId == _currentPlayerService.User.TeamId)
+            if (city.Owner.TeamId == _currentPlayerService.Team.Id)
                 return city.Owner.ImageUrl;
 
             // TODO: near cities

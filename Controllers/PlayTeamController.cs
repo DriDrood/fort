@@ -1,25 +1,24 @@
 using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
 using Fort.Database;
 using Fort.Services;
 
 namespace Fort.Controllers
 {
-    public class PlayUserController : PlayBaseController
+    public class PlayTeamController : PlayBaseController
     {
-        public PlayUserController(FortDbContext context, MapUserService mapUserService, CurrentPlayerService currentPlayerService)
+        public PlayTeamController(FortDbContext context, MapTeamService mapTeamService, CurrentPlayerService currentPlayerService)
         {
             _context = context;
-            _map = mapUserService;
+            _map = mapTeamService;
             _currentPlayerService = currentPlayerService;
         }
 
         private FortDbContext _context;
-        private MapUserService _map;
+        private MapTeamService _map;
         private CurrentPlayerService _currentPlayerService;
 
         protected override MapBaseService MapService => _map;
-        protected override bool ExistThisCode(string code) => _context.Users.Any(u => u.Id == code);
+        protected override bool ExistThisCode(string code) => _context.Teams.Any(u => u.Id == code);
         protected override void Set(string code)
         {
             _currentPlayerService.Team = _context.Teams.Find(code);
