@@ -62,14 +62,19 @@ namespace Fort.Services
             _timer.End();
         }
 
-        public void RestartAll()
+        public void RestartAll(User user)
         {
+            if (!user.IsAdmin)
+                throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "User is not admin");
 #warning TODO
             throw new NotImplementedException();
         }
 
         public void Play(User user)
         {
+            if (!user.IsAdmin)
+                throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "User is not admin");
+
             _playTask = Task.Run(async () =>
             {
                 using (FortDbContext context = new FortDbContext())
@@ -98,7 +103,7 @@ namespace Fort.Services
             context.Add(CurrentRound);
             context.SaveChanges();
 
-            var startMessageTask = _commService.SendToAll("StartRound", CurrentRound);
+            var startMessageTask = _commService.SendToAll("StartRound", Program.Config.DefaultRoundDurationSec);
         }
         private void EndRound(FortDbContext context)
         {

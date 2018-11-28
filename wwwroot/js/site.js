@@ -33,11 +33,20 @@ $(document).ready(function () {
         var url = 'ws://' + location.hostname + (location.port != '' ? (':' + location.port) : '') + location.pathname;
         console.log('connecting to ' + url);
         ws = new WebSocket(url);
-        ws.onmessage = function (data) {
-            console.log(data);
+        ws.onmessage = function (message) {
+            console.log(message);
+            var data = JSON.parse(message.data);
+            switch(data["method"])
+            {
+                case "StartRound":
+                    var minutes = Math.floor(data["params"] / 60);
+                    var seconds = data["params"] % 60;
+                    $('#time').html(minutes + ':' + seconds);
+                    break;
+            }
         }
     }
-    
+
     $('#play').on('click', function () {
         var data = { method: "play" }
         ws.send(JSON.stringify(data));

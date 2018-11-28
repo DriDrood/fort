@@ -118,7 +118,8 @@ namespace Fort.Services
 
         private async Task send(WebSocket webSocket, string method, object data)
         {
-            byte[] messageBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(data));
+            object message = new { method = method, @params = data };
+            byte[] messageBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
 
             while (messageBytes.Length > 0)
             {
