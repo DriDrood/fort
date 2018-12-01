@@ -36,6 +36,7 @@ namespace Fort.Controllers
             if (player != null)
                 return RedirectToAction("Map", new { code = code });
 
+            Logger.Log(ELogLevel.Warning, code, "Neplatný kód!");
             ViewData["errorMessage"] = "Neplatný kód!";
             return View();
         }

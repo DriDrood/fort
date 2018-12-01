@@ -24,6 +24,7 @@ namespace Fort
         {
             ConnectionString = configuration.GetConnectionString("DefaultConnection");
             configuration.GetSection("Fort").Bind(Program.Config);
+            Logger.Configure(configuration.GetSection("Logger"));
         }
 
         public static string ConnectionString { get; set; }
