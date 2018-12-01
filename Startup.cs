@@ -66,23 +66,13 @@ namespace Fort
             {
                 routes.MapRoute(
                     name: "MapCreator",
-                    template: "Admin/MapCreator/{code}/{action=Index}",
+                    template: "{code}/MapCreator/{action=Index}",
                     defaults: new { controller = "MapCreator" });
 
                 routes.MapRoute(
-                    name: "Admin",
-                    template: "Admin/{code=}/{action=Login}",
-                    defaults: new { controller = "PlayAdmin" });
-
-                routes.MapRoute(
-                    name: "Team",
-                    template: "Team/{code=}/{action=Login}/",
-                    defaults: new { controller = "PlayTeam" });
-
-                routes.MapRoute(
-                    name: "User",
+                    name: "Play",
                     template: "{code=}/{action=Login}",
-                    defaults: new { controller = "PlayUser" });
+                    defaults: new { controller = "Play" });
             });
         }
     }

@@ -86,13 +86,13 @@ namespace Fort.Services
                             break;
 
                         default:
-                            throw new FortException(ELogLevel.Warning, playerId, "unknown method");
+                            throw new FortException(ELogLevel.Warning, "Neznámá funkce");
                     }
                 }
             }
             catch (FortException ex)
             {
-                Logger.Log(ex.LogLevel, ex.Player, ex.Message, ex.StackTrace);
+                Logger.Log(ex.LogLevel, playerId, ex.Message, ex.StackTrace);
             }
             catch (Exception ex)
             {

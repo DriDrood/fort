@@ -16,7 +16,7 @@ namespace Fort.Services
 
         protected override string GetCityColor(City city)
         {
-            return Program.Config.ColorsForAdmin[city.Owner.Team.Id];
+            return Program.Config.ColorsForAdmin[city.Owner?.Team.Id ?? "neutral"];
         }
 
         protected override string GetCityImage(City city)

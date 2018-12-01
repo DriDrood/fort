@@ -25,11 +25,11 @@ namespace Fort.Utils.Logger
             }
             catch (FortException ex)
             {
-                Logger.Log(ex.LogLevel, ex.Player, ex.Message, ex.StackTrace);
+                Logger.Log(ex.LogLevel, currentPlayer.Player.Id, ex.Message, ex.StackTrace);
             }
             catch (Exception ex)
             {
-                Logger.Log(ELogLevel.UnknownException, currentPlayer.ToString(), ex.Message, ex.StackTrace);
+                Logger.Log(ELogLevel.UnknownException, currentPlayer.Player.Id, ex.Message, ex.StackTrace);
             }
         }
     }

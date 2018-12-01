@@ -3,16 +3,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Fort.Database.Entities
 {
-    public class User
+    public class User : Player
     {
         public User()
         {
             Cities = new HashSet<City>();
             Turns = new HashSet<Turn>();
         }
-
-        [StringLength(5)]
-        public string Id { get; set; }
 
         [Required]
         [StringLength(50)]

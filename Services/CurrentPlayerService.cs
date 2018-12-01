@@ -4,12 +4,14 @@ namespace Fort.Services
 {
     public class CurrentPlayerService
     {
-        public User User { get; set; }
-        public Team Team { get; set; }
+        public Player Player { get; set; }
+
+        public User User => (User)Player;
+        public Team Team => (Team)Player;
 
         public override string ToString()
         {
-            return User?.Id ?? Team?.Id ?? "";
+            return Player?.Id ?? "";
         }
     }
 }

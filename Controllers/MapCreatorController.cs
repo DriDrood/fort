@@ -47,7 +47,7 @@ namespace Fort.Controllers
 
             using (FortDbContext context = new FortDbContext())
             {
-                var city = context.Cities.SingleOrDefault(c => c.X == x && c.Y == y) ?? throw new FortException(ELogLevel.Warning, "Admin", "City not found");
+                var city = context.Cities.SingleOrDefault(c => c.X == x && c.Y == y) ?? throw new FortException(ELogLevel.Warning, "Město nenalezeno");
                 context.Cities.Remove(city);
                 context.SaveChanges();
             }

@@ -24,7 +24,7 @@ namespace Fort.Services
         public void Turn(User user, Turn turn)
         {
             if (CurrentRound.EndsAt != null)
-                throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "Round already ended");
+                throw new FortException(ELogLevel.Warning, "Kolo již skončilo");
 
             using (FortDbContext context = new FortDbContext())
             {
@@ -41,7 +41,7 @@ namespace Fort.Services
         public void Pause(User user)
         {
             if (!user.IsAdmin)
-                throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "User is not admin");
+                throw new FortException(ELogLevel.Warning, "Nejste správce");
 
             _timer.Pause();
         }
@@ -49,7 +49,7 @@ namespace Fort.Services
         public void Resume(User user)
         {
             if (!user.IsAdmin)
-                throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "User is not admin");
+                throw new FortException(ELogLevel.Warning, "Nejste správce");
 
             _timer.Resume();
         }
@@ -57,7 +57,7 @@ namespace Fort.Services
         public void EndRound(User user)
         {
             if (!user.IsAdmin)
-                throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "User is not admin");
+                throw new FortException(ELogLevel.Warning, "Nejste správce");
 
             _timer.End();
         }
@@ -65,7 +65,7 @@ namespace Fort.Services
         public void RestartAll(User user)
         {
             if (!user.IsAdmin)
-                throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "User is not admin");
+                throw new FortException(ELogLevel.Warning, "Nejste správce");
 #warning TODO
             throw new NotImplementedException();
         }
@@ -73,7 +73,7 @@ namespace Fort.Services
         public void Play(User user)
         {
             if (!user.IsAdmin)
-                throw new FortException(ELogLevel.Warning, $"U:{user.Id}", "User is not admin");
+                throw new FortException(ELogLevel.Warning, "Nejste správce");
 
             _playTask = Task.Run(async () =>
             {

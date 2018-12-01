@@ -23,7 +23,7 @@ namespace Fort
         
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseKestrel(opt => opt.Listen(IPAddress.Any, 80))
+                .UseKestrel(opt => opt.Listen(IPAddress.Any, 8000))
                 .UseStartup<Startup>();
 
         public static FortConfig Config { get; set; } = new FortConfig();
