@@ -87,6 +87,7 @@ function onMessage(message) {
             break;
         case "EndRound":
             stopCountDown();
+            countDown(data["params"]["duration"]);
             $('#actions .round').html('Ukončené Kolo ' + data["params"]["roundNumber"]);
             break;
     }

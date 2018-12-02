@@ -87,7 +87,7 @@ namespace Fort.Services
                             break;
 
                         case "end":
-                            await _actionService.EndRound(user);
+                            _actionService.End(user);
                             break;
 
                         default:

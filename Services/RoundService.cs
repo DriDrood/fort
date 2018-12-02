@@ -76,15 +76,19 @@ namespace Fort.Services
             {
                 while (_context.Teams.Count(t => t.Members.Any(m => m.Cities.Any())) > 1)
                 {
+                    _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultRoundDurationSec));
                     Start();
-                    await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultRoundDurationSec));
-                    await End();
+                    await _timer.Start();
 
-                    await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultBeforeVisualizationSec));
+                    _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultBeforeVisualizationSec));
+                    await End();
+                    await _timer.Start();
+
                     await Finalize();
 
-                    Init(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
-                    await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
+                    _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
+                    Init(_timer.Remains.Value);
+                    await _timer.Start();
                 }
             });
         }
@@ -122,20 +126,24 @@ namespace Fort.Services
             CurrentRound.StartsAt = DateTime.UtcNow;
             _context.SaveChanges();
 
-            _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultRoundDurationSec));
-            var startMessageTask = _commService.SendToAll("StartRound", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.Id });
+            var startMessageTask = _commService.SendToAll("StartRound", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
         }
 
         public async Task Pause()
         {
             _timer.Pause();
-            await _commService.SendToAll("Pause", new { roundNumber = CurrentRound.Id });
+            await _commService.SendToAll("Pause", new { roundNumber = CurrentRound.RoundNumber });
         }
 
         public async Task Resume()
         {
             _timer.Resume();
-            await _commService.SendToAll("Resume", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.Id });
+            await _commService.SendToAll("Resume", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
+        }
+
+        public void ForceEnd()
+        {
+            _timer.End();
         }
 
         public async Task End()
@@ -143,8 +151,7 @@ namespace Fort.Services
             CurrentRound.EndsAt = DateTime.UtcNow;
             _context.SaveChanges();
 
-            _timer.End();
-            await _commService.SendToAll("EndRound", new { duration = (int)_timer.Remains.Value.TotalSeconds });
+            await _commService.SendToAll("EndRound", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
         }
 
         public async Task Finalize()

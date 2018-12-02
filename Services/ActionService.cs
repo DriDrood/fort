@@ -49,12 +49,12 @@ namespace Fort.Services
             await _roundService.Resume();
         }
 
-        public async Task EndRound(User user)
+        public void End(User user)
         {
             if (!user.IsAdmin)
                 throw new FortException(ELogLevel.Warning, "Nejste správce");
 
-            await _roundService.End();
+            _roundService.ForceEnd();
         }
 
         public async Task RestartAll(User user)
