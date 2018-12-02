@@ -69,9 +69,7 @@ $(document).ready(function () {
             var data = JSON.parse(message.data);
             switch (data["method"]) {
                 case "StartRound":
-                    var minutes = Math.floor(data["params"] / 60);
-                    var seconds = data["params"] % 60;
-                    $('#time').html(minutes + ':' + seconds);
+                    countDown(data["params"]);
                     break;
             }
         }
@@ -122,4 +120,20 @@ $(document).ready(function () {
 
 function refresh() {
     $('#mapCreator').html($('#mapCreator').html());
+}
+
+function countDown(total_seconds) {
+    setInterval(function () {
+        var hours = Math.floor(total_seconds / (60 * 60));
+        var minutes = Math.floor(total_seconds / 60);
+        var seconds = total_seconds % 60;
+        $('#time').html(hours + ':' + pad100(minutes) + ':' + pad100(seconds));
+        total_seconds--;
+    }, 1000);
+}
+function pad100(value) {
+    if (value < 10)
+        return '0' + value;
+
+    return value;
 }
