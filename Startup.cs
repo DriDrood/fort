@@ -39,7 +39,6 @@ namespace Fort
             services.AddScoped<MapTeamService>();
             services.AddScoped<MapAdminService>();
             services.AddScoped<CurrentPlayerService>();
-            services.AddSingleton<RealPositionService>();
             services.AddSingleton<RoundService>();
             services.AddSingleton<CommService>();
         }

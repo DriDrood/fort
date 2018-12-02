@@ -5,7 +5,7 @@ namespace Fort.Services
 {
     public class MapAdminService : MapBaseService
     {
-        public MapAdminService(FortDbContext context, RealPositionService positionService, CurrentPlayerService currentPlayerService) : base(context, positionService, currentPlayerService)
+        public MapAdminService(FortDbContext context, CurrentPlayerService currentPlayerService) : base(context, currentPlayerService)
         {
         }
 
