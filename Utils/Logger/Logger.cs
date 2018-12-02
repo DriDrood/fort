@@ -17,7 +17,7 @@ namespace Fort.Utils.Logger
         {
             StringBuilder fullText = new StringBuilder();
             fullText.AppendLine($"{DateTime.UtcNow} :: {logLevel.ToString().PadRight(17)} :: {player.PadRight(6)} :: {message}");
-            foreach (string line in stackTrace?.Split('\n') ?? new string[] { })
+            foreach (string line in stackTrace?.Split(Environment.NewLine) ?? new string[] { })
                 fullText.AppendLine($"    {line}");
 
             // log to console
@@ -37,7 +37,8 @@ namespace Fort.Utils.Logger
                     case ELogLevel.JS:
                         Console.ForegroundColor = ConsoleColor.Cyan;
                         break;
-                    case ELogLevel.Message:
+                    case ELogLevel.MessageSend:
+                    case ELogLevel.MessageReceive:
                         Console.ForegroundColor = ConsoleColor.Gray;
                         break;
                 }

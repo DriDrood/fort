@@ -6,6 +6,7 @@ namespace Fort.Utils.Logger
         Warning,
         Connection,
         JS,
-        Message        
+        MessageSend,
+        MessageReceive
     }
 }

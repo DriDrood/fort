@@ -28,6 +28,8 @@ namespace Fort.Services
         {
             _playerConnections.Add(playerId, webSocket);
 
+            Logger.Log(ELogLevel.Connection, playerId, "User connected");
+
             // wait for messages
             var buffer = new byte[_bufferSize];
             WebSocketReceiveResult result;
@@ -37,7 +39,7 @@ namespace Fort.Services
                 do
                 {
                     result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                    string messagePart = Encoding.UTF8.GetString(buffer);
+                    string messagePart = Encoding.UTF8.GetString(buffer.Take(result.Count).ToArray());
                     message.Append(messagePart);
                 }
                 while (!result.EndOfMessage);
@@ -50,10 +52,13 @@ namespace Fort.Services
 
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
             _playerConnections.Remove(playerId);
+
+            Logger.Log(ELogLevel.Connection, playerId, "User disconnected");
         }
 
         private async Task recieveMessage(string playerId, string message)
         {
+            Logger.Log(ELogLevel.MessageReceive, playerId, message);
             try
             {
                 JToken data = JToken.Parse(message);
@@ -105,7 +110,7 @@ namespace Fort.Services
             List<Task> tasks = new List<Task>();
             foreach (var pair in _playerConnections)
             {
-                tasks.Add(send(pair.Value, method, data));
+                tasks.Add(send(pair.Value, method, data, pair.Key));
             }
 
             await Task.Run(() => Task.WaitAll(tasks.ToArray()));
@@ -113,14 +118,20 @@ namespace Fort.Services
 
         public async Task SendToOne(string playerId, string method, object data)
         {
-            await send(_playerConnections[playerId], method, data);
+            await send(_playerConnections[playerId], method, data, playerId);
         }
 
-        private async Task send(WebSocket webSocket, string method, object data)
+        private async Task send(WebSocket webSocket, string method, object data, string playerId)
         {
+            // create message
             object message = new { method = method, @params = data };
-            byte[] messageBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(message));
+            string messageString = JsonConvert.SerializeObject(message);
+            byte[] messageBytes = Encoding.UTF8.GetBytes(messageString);
 
+            // log
+            Logger.Log(ELogLevel.MessageSend, playerId, messageString);
+
+            // split & send
             while (messageBytes.Length > 0)
             {
                 byte[] buffer = messageBytes.Take(_bufferSize).ToArray();
