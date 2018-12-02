@@ -24,7 +24,6 @@ namespace Fort
         {
             ConnectionString = configuration.GetConnectionString("DefaultConnection");
             configuration.GetSection("Fort").Bind(Program.Config);
-            Logger.Configure(configuration.GetSection("Logger"));
         }
 
         public static string ConnectionString { get; set; }
@@ -46,7 +45,7 @@ namespace Fort
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IConfiguration configuration)
         {
             if (env.IsDevelopment())
             {
@@ -75,6 +74,9 @@ namespace Fort
                     template: "{code=}/{action=Login}",
                     defaults: new { controller = "Play" });
             });
+
+            Logger.Configure(configuration.GetSection("Logger"));
+            app.ApplicationServices.GetService<RoundService>().Setup(configuration.GetSection("StartingPositions"));
         }
     }
 }

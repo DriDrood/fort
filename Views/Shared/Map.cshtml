@@ -4,9 +4,7 @@
     ViewData["page"] = "map";
 }
 
-<div id="content">
-    @Html.Raw(Model.Print())
-</div>
+@Html.Raw(Model.Print())
 
 @if ((ViewData["player"] as Fort.Services.CurrentPlayerService)?.User?.IsAdmin == true)
 {

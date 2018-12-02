@@ -26,7 +26,7 @@ namespace Fort.Services
         {
             StringBuilder svgMap = new StringBuilder();
 
-            svgMap.AppendLine($"<svg id=\"map\" height=\"{_positionService.RealHeight}\" width=\"{_positionService.RealWidth}\">");
+            svgMap.AppendLine($"<svg id=\"map\" viewBox=\"0 0 1600 794\">");
             foreach (Path path in _context.Paths
                 .Include(p => p.Source).ThenInclude(c => c.Owner).ThenInclude(u => u.Team)
                 .Include(p => p.Target).ThenInclude(c => c.Owner).ThenInclude(u => u.Team))
@@ -38,7 +38,7 @@ namespace Fort.Services
 
             foreach (City city in _context.Cities)
             {
-                svgMap.AppendLine($"<circle cx=\"{_positionService.ToRealWidth(city.X)}\" cy=\"{_positionService.ToRealHeight(city.Y)}\" r=\"{System.Math.Log10(city.Army) * 20}\" fill=\"{GetCityColor(city)}\" />");
+                svgMap.AppendLine($"<circle cx=\"{_positionService.ToRealWidth(city.X)}\" cy=\"{_positionService.ToRealHeight(city.Y)}\" r=\"{System.Math.Log10(city.Army) * 10}\" fill=\"{GetCityColor(city)}\" />");
             }
             svgMap.AppendLine("</svg>");
 

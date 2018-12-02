@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Fort.Database;
 using Fort.Database.Entities;
 using Fort.Utils;
 using Fort.Utils.Logger;
+using Microsoft.Extensions.Configuration;
 
 namespace Fort.Services
 {
@@ -20,6 +22,44 @@ namespace Fort.Services
         private Task _playTask;
 
         public Round CurrentRound { get; private set; }
+
+        public void Setup(IConfigurationSection config)
+        {
+            // load from config
+            Dictionary<string, string> startingPosition = new Dictionary<string, string>();
+            config.Bind(startingPosition);
+
+            // save to DB
+            using (FortDbContext context = new FortDbContext())
+            {
+                foreach (City city in context.Cities)
+                {
+                    // city has owner
+                    if (startingPosition.ContainsKey(city.Id.ToString()))
+                    {
+                        city.Army = Program.Config.DefaultPopulationStart;
+                        city.OwnerId = startingPosition[city.Id.ToString()];
+                    }
+                    // city is neutral
+                    else
+                    {
+                        city.Army = GetNeutralArmySize();
+                        city.OwnerId = null;
+                    }
+                }
+
+                context.SaveChanges();
+            }
+        }
+        private int GetNeutralArmySize()
+        {
+            Random rand = new Random();
+            int min = Program.Config.NeutralCitiesPopulation["Min"];
+            int max = Program.Config.NeutralCitiesPopulation["Max"];
+
+            return
+                min + (rand.Next() % (max - min));
+        }
 
         public void Turn(User user, Turn turn)
         {
