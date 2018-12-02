@@ -70,8 +70,13 @@ namespace Fort
 
                 routes.MapRoute(
                     name: "Play",
-                    template: "{code=}/{action=Login}",
+                    template: "{code}/{action=Map}",
                     defaults: new { controller = "Play" });
+
+                routes.MapRoute(
+                    name: "Login",
+                    template: "",
+                    defaults: new { controller = "Play", action = "Login" });
             });
 
             Logger.Configure(configuration.GetSection("Logger"));
