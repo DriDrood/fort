@@ -6,11 +6,13 @@
 
 @Html.Raw(Model.Print())
 
-@if ((ViewData["player"] as Fort.Services.CurrentPlayerService)?.User?.IsAdmin == true)
-{
-    <button id="play">play</button>
-    <button id="pause">pause</button>
-    <button id="resume">resume</button>
-    <button id="end">end</button>
-}
-<span id="time">0:00:00</span>
+<div id="actions">
+    @if ((ViewData["player"] as Fort.Services.CurrentPlayerService)?.User?.IsAdmin == true)
+    {
+        <i class="fa fa-play" id="play" title="Začít hru"></i>
+        <i class="fa fa-pause" id="pause" title="Pozastavit"></i>
+        <i class="fa fa-step-forward" id="resume" title="Znovu spustit"></i>
+        <i class="fa fa-stop" id="end" title="Ukončit kolo"></i>
+    }
+    <span id="time">0:00:00</span>
+</div>
