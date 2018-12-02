@@ -6,10 +6,11 @@ namespace Fort.Utils
 {
     public class Timer
     {
-        public TimeSpan? Remains => IsPaused || IsEnded || NotStarted ? _duration : _duration - (DateTime.UtcNow - _startAt);
-        public bool IsPaused { get; private set; }
-        public bool IsEnded { get; private set; }
-        public bool NotStarted { get; set; }
+        public TimeSpan? Remains => State == Status.Running
+            ? _duration - (DateTime.UtcNow - _startAt)
+            : _duration;
+
+        public Status State { get; private set; }
 
         private TimeSpan _duration;
         private DateTime _startAt;
@@ -25,10 +26,10 @@ namespace Fort.Utils
 
         public Task Start()
         {
-            if (!NotStarted)
+            if (State == Status.Paused || State == Status.Running)
                 return null;
 
-            NotStarted = false;
+            State = Status.Running;
 
             _startAt = DateTime.UtcNow;
             _cancelToken = new CancellationTokenSource();
@@ -39,10 +40,10 @@ namespace Fort.Utils
 
         public void Pause()
         {
-            if (IsPaused || NotStarted)
+            if (State != Status.Running)
                 return;
 
-            IsPaused = true;
+            State = Status.Paused;
             _duration = _duration - (DateTime.UtcNow - _startAt);
 
             _awaitingPause = new TaskCompletionSource<bool>();
@@ -53,10 +54,10 @@ namespace Fort.Utils
 
         public void Resume()
         {
-            if (!IsPaused || NotStarted)
+            if (State != Status.Paused)
                 return;
 
-            IsPaused = false;
+            State = Status.Running;
             _startAt = DateTime.UtcNow;
             _cancelToken = new CancellationTokenSource();
             _sleeping = Task.Run(() => _cancelToken.Token.WaitHandle.WaitOne(_duration), _cancelToken.Token);
@@ -67,11 +68,10 @@ namespace Fort.Utils
 
         public void End()
         {
-            if (!IsPaused)
+            if (State == Status.Running)
                 _duration = _duration - (DateTime.UtcNow - _startAt);
 
-            IsPaused = false;
-            IsEnded = true;
+            State = Status.Finished;
 
             _cancelToken?.Cancel();
             _cancelToken = null;
@@ -82,29 +82,35 @@ namespace Fort.Utils
         public void SetTime(TimeSpan duration)
         {
             _duration = duration;
-            IsPaused = false;
-            IsEnded = false;
-            NotStarted = true;
+            State = Status.Begin;
         }
 
         private async Task sleep()
         {
-            while (!IsEnded)
+            while (State != Status.Finished)
             {
                 // wait
                 await _sleeping;
 
                 // paused
-                if (IsPaused)
+                if (State == Status.Paused)
                     await _awaitingPause.Task;
 
                 // time finished
-                else if (!IsEnded)
+                else if (State == Status.Running)
                 {
-                    IsEnded = true;
+                    State = Status.Finished;
                     _duration = TimeSpan.Zero;
                 }
             }
+        }
+
+        public enum Status
+        {
+            Begin,
+            Running,
+            Paused,
+            Finished
         }
     }
 }

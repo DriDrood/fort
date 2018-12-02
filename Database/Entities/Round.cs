@@ -13,10 +13,11 @@ namespace Fort.Database.Entities
 
         public int Id { get; set; }
 
+        public int RoundNumber { get; set; }
         [StringLength(1000)]
         public string Note { get; set; }
 
-        public DateTime StartsAt { get; set; }
+        public DateTime? StartsAt { get; set; }
         public DateTime? EndsAt { get; set; }
 
         public virtual ICollection<Turn> Turns { get; set; }

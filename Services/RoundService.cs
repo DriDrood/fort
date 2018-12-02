@@ -10,46 +10,53 @@ using Microsoft.Extensions.Configuration;
 
 namespace Fort.Services
 {
-    public class RoundService
+    public class RoundService : IDisposable
     {
         public RoundService()
         {
-            _timer = new Timer();
+            _context = new FortDbContext();
         }
 
+        private FortDbContext _context;
         private CommService _commService => Program.GetService<CommService>();
         private Timer _timer;
         private Task _playTask;
 
-        public Round CurrentRound { get; private set; }
+        private Dictionary<string, string> _startingPositions;
 
+        public Round CurrentRound { get; private set; }
+        public Timer.Status State => _timer.State;
+        public TimeSpan? Remaining => _timer.Remains;
+
+        #region  Setup
         public void Setup(IConfigurationSection config)
         {
             // load from config
-            Dictionary<string, string> startingPosition = new Dictionary<string, string>();
-            config.Bind(startingPosition);
+            _startingPositions = new Dictionary<string, string>();
+            config.Bind(_startingPositions);
 
             // save to DB
-            using (FortDbContext context = new FortDbContext())
+            LoadStart();
+        }
+        private void LoadStart()
+        {
+            foreach (City city in _context.Cities)
             {
-                foreach (City city in context.Cities)
+                // city has owner
+                if (_startingPositions.ContainsKey(city.Id.ToString()))
                 {
-                    // city has owner
-                    if (startingPosition.ContainsKey(city.Id.ToString()))
-                    {
-                        city.Army = Program.Config.DefaultPopulationStart;
-                        city.OwnerId = startingPosition[city.Id.ToString()];
-                    }
-                    // city is neutral
-                    else
-                    {
-                        city.Army = GetNeutralArmySize();
-                        city.OwnerId = null;
-                    }
+                    city.Army = Program.Config.DefaultPopulationStart;
+                    city.OwnerId = _startingPositions[city.Id.ToString()];
                 }
-
-                context.SaveChanges();
+                // city is neutral
+                else
+                {
+                    city.Army = GetNeutralArmySize();
+                    city.OwnerId = null;
+                }
             }
+
+            _context.SaveChanges();
         }
         private int GetNeutralArmySize()
         {
@@ -60,104 +67,96 @@ namespace Fort.Services
             return
                 min + (rand.Next() % (max - min));
         }
+        #endregion
 
-        public void Turn(User user, Turn turn)
+        #region Lifecycle
+        public void StartGame()
         {
-            if (CurrentRound.EndsAt != null)
-                throw new FortException(ELogLevel.Warning, "Kolo již skončilo");
-
-            using (FortDbContext context = new FortDbContext())
-            {
-                turn.User = user;
-                turn.Round = CurrentRound;
-                turn.CreatedAt = DateTime.UtcNow;
-
-                context.Turns.Add(turn);
-                context.SaveChanges();
-            }
-        }
-
-        #region Admin
-        public void Pause(User user)
-        {
-            if (!user.IsAdmin)
-                throw new FortException(ELogLevel.Warning, "Nejste správce");
-
-            _timer.Pause();
-        }
-
-        public void Resume(User user)
-        {
-            if (!user.IsAdmin)
-                throw new FortException(ELogLevel.Warning, "Nejste správce");
-
-            _timer.Resume();
-        }
-
-        public void EndRound(User user)
-        {
-            if (!user.IsAdmin)
-                throw new FortException(ELogLevel.Warning, "Nejste správce");
-
-            _timer.End();
-        }
-
-        public void RestartAll(User user)
-        {
-            if (!user.IsAdmin)
-                throw new FortException(ELogLevel.Warning, "Nejste správce");
-#warning TODO
-            throw new NotImplementedException();
-        }
-
-        public void Play(User user)
-        {
-            if (!user.IsAdmin)
-                throw new FortException(ELogLevel.Warning, "Nejste správce");
-
             _playTask = Task.Run(async () =>
             {
-                using (FortDbContext context = new FortDbContext())
+                while (_context.Teams.Count(t => t.Members.Any(m => m.Cities.Any())) > 1)
                 {
-                    while (context.Teams.Count(t => t.Members.Any(m => m.Cities.Any())) > 1)
-                    {
-                        StartRound(context);
-                        await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultRoundDurationSec));
+                    Start();
+                    await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultRoundDurationSec));
+                    await End();
 
-                        EndRound(context);
-                        await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultBeforeVisualizationSec));
+                    await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultBeforeVisualizationSec));
+                    await Finalize();
 
-                        Visualize(context);
-                        await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
-                    }
+                    Init(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
+                    await _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
                 }
             });
         }
-        private void StartRound(FortDbContext context)
+        public void EndGame()
         {
+#warning TODO: show result
+        }
+        public async Task ResetGame()
+        {
+            CurrentRound = null;
+            _timer = new Timer();
+            await _commService.SendToAll("Reset", new { });
+
+            LoadStart();
+            Init();
+        }
+
+        public void Init(TimeSpan? duration = null)
+        {
+            _timer = new Timer();
+
+            int currentRoundNumber = CurrentRound?.RoundNumber + 1 ?? 1;
             CurrentRound = new Round
             {
-                StartsAt = DateTime.UtcNow,
+                RoundNumber = currentRoundNumber,
                 EndsAt = null
             };
-            context.Add(CurrentRound);
-            context.SaveChanges();
 
-            var startMessageTask = _commService.SendToAll("StartRound", Program.Config.DefaultRoundDurationSec);
+            _context.Rounds.Add(CurrentRound);
+            _context.SaveChanges();
         }
-        private void EndRound(FortDbContext context)
+
+        public void Start()
+        {
+            CurrentRound.StartsAt = DateTime.UtcNow;
+            _context.SaveChanges();
+
+            _timer.NewStart(TimeSpan.FromSeconds(Program.Config.DefaultRoundDurationSec));
+            var startMessageTask = _commService.SendToAll("StartRound", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.Id });
+        }
+
+        public async Task Pause()
+        {
+            _timer.Pause();
+            await _commService.SendToAll("Pause", new { roundNumber = CurrentRound.Id });
+        }
+
+        public async Task Resume()
+        {
+            _timer.Resume();
+            await _commService.SendToAll("Resume", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.Id });
+        }
+
+        public async Task End()
         {
             CurrentRound.EndsAt = DateTime.UtcNow;
-            context.SaveChanges();
+            _context.SaveChanges();
 
-            var startMessageTask = _commService.SendToAll("EndRound", CurrentRound);
-
-#warning TODO: turns
+            _timer.End();
+            await _commService.SendToAll("EndRound", new { duration = (int)_timer.Remains.Value.TotalSeconds });
         }
-        private void Visualize(FortDbContext context)
+
+        public async Task Finalize()
         {
-#warning TODO: Foreach display Start, Move, End
+            await Task.Run(() => { });
+#warning TODO: compute rounds, show to user
         }
         #endregion
+
+        public void Dispose()
+        {
+            _context.Dispose();
+        }
     }
 }

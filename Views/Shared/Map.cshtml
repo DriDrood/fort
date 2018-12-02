@@ -14,5 +14,7 @@
         <i class="fa fa-step-forward" id="resume" title="Znovu spustit"></i>
         <i class="fa fa-stop" id="end" title="Ukončit kolo"></i>
     }
-    <span id="time">0:00:00</span>
+    <span class="round">@Model.GetStatus()</span>
+    <span class="time">@Model.GetRemaining()</span>
+    <span class="connection"><i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i></span>
 </div>

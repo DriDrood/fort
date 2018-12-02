@@ -21,7 +21,7 @@ namespace Fort.Services
         }
 
         private int _bufferSize = 4096;
-        private RoundService _roundService => Program.GetService<RoundService>();
+        private ActionService _actionService => Program.GetService<ActionService>();
         private Dictionary<string, WebSocket> _playerConnections;
 
         public async Task CreateNewConnection(string playerId, WebSocket webSocket)
@@ -71,23 +71,23 @@ namespace Fort.Services
                     {
                         case "turn":
                             Turn playerTurn = data["turn"].ToObject<Turn>();
-                            _roundService.Turn(user, playerTurn);
+                            _actionService.Turn(user, playerTurn);
                             break;
 
                         case "play":
-                            _roundService.Play(user);
+                            _actionService.Play(user);
                             break;
 
                         case "pause":
-                            _roundService.Pause(user);
+                            await _actionService.Pause(user);
                             break;
 
                         case "resume":
-                            _roundService.Resume(user);
+                            await _actionService.Resume(user);
                             break;
 
                         case "end":
-                            _roundService.EndRound(user);
+                            await _actionService.EndRound(user);
                             break;
 
                         default:

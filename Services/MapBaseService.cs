@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using Fort.Database;
 using Fort.Database.Entities;
@@ -41,6 +42,40 @@ namespace Fort.Services
             svgMap.AppendLine("</svg>");
 
             return svgMap.ToString();
+        }
+
+        public string GetStatus()
+        {
+            string result = "";
+            switch (Program.GetService<RoundService>().State)
+            {
+                case Fort.Utils.Timer.Status.Begin:
+                    result = "Začíná";
+                    break;
+                case Fort.Utils.Timer.Status.Running:
+                    result = "Běží";
+                    break;
+                case Fort.Utils.Timer.Status.Paused:
+                    result = "Pozastavené";
+                    break;
+                case Fort.Utils.Timer.Status.Finished:
+                    result = "Ukončené";
+                    break;
+
+                default:
+                    throw new InvalidOperationException("Neznámý stav kola");
+            }
+
+#warning TODO: 
+            return $"{result} kolo {Program.GetService<RoundService>().CurrentRound?.Id ?? 1}";
+        }
+        public string GetRemaining()
+        {
+            var rem = Program.GetService<RoundService>().Remaining;
+            if (rem == null)
+                return "0:00:00";
+
+            return $"{rem.Value.Hours}:{rem.Value.Minutes.ToString().PadLeft(2, '0')}:{rem.Value.Seconds.ToString().PadLeft(2, '0')}";
         }
 
         public string Army(Turn turn)

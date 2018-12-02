@@ -40,6 +40,7 @@ namespace Fort
             services.AddScoped<MapAdminService>();
             services.AddScoped<CurrentPlayerService>();
             services.AddSingleton<RoundService>();
+            services.AddSingleton<ActionService>();
             services.AddSingleton<CommService>();
         }
 
@@ -81,6 +82,7 @@ namespace Fort
 
             Logger.Configure(configuration.GetSection("Logger"));
             app.ApplicationServices.GetService<RoundService>().Setup(configuration.GetSection("StartingPositions"));
+            app.ApplicationServices.GetService<RoundService>().Init();
         }
     }
 }

@@ -82,11 +82,11 @@ body.login form .error {
 #actions i {
     margin: 5px;
 }
+#actions .time {
+    margin-left: 10px;
+}
 #play {
     color: #0f0;
-}
-#time {
-    margin-left: 10px;
 }
 
 #mapCreator {
