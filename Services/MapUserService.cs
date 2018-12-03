@@ -36,15 +36,15 @@ namespace Fort.Services
                 return "#83001c";
         }
 
-        protected override string GetCityImage(City city)
+        protected override bool ShowCityAvatar(City city)
         {
             // ally
-            if (city.Owner.TeamId == _currentPlayerService.User.TeamId)
-                return city.Owner.ImageUrl;
+            if (city.Owner?.TeamId == _currentPlayerService.User.TeamId)
+                return true;
 
-            #warning TODO: near cities
+#warning TODO: near cities
 
-            return null;
+            return false;
         }
     }
 }

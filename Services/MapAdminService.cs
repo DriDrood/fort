@@ -19,9 +19,12 @@ namespace Fort.Services
             return Program.Config.ColorsForAdmin[city.Owner?.Team.Id ?? "neutral"];
         }
 
-        protected override string GetCityImage(City city)
+        protected override bool ShowCityAvatar(City city)
         {
-            return city.Owner.ImageUrl;
+            if (city.Owner != null)
+                return true;
+
+            return false;
         }
     }
 }

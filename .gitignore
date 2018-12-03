@@ -197,3 +197,5 @@ FakesAssemblies/
 
 # IDEA IDEs
 .idea/
+
+wwwroot/images/Users/*

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fort.Database.Entities
 {
@@ -30,5 +31,8 @@ namespace Fort.Database.Entities
         public virtual ICollection<Path> TargetToPaths { get; set; }
         public virtual ICollection<Turn> SourceToTurns { get; set; }
         public virtual ICollection<Turn> TargetToTurns { get; set; }
+
+        [NotMapped]
+        public int Radius => (int)(System.Math.Log10(Army) * 10);
     }
 }

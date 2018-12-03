@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Fort.Database;
 using Fort.Database.Entities;
@@ -12,11 +14,24 @@ namespace Fort.Services
         {
             _context = context;
             _currentPlayerService = currentPlayerService;
+            _userImages = new HashSet<(User user, int round)>();
         }
 
         protected abstract string GetCityColor(City city);
-        protected abstract string GetCityImage(City city);
         protected abstract int? GetCityArmy(City city);
+        protected abstract bool ShowCityAvatar(City city);
+        protected virtual string GetCityFill(City city)
+        {
+            if (ShowCityAvatar(city))
+            {
+                _userImages.Add((city.Owner, city.Radius));
+                return $"url(#U_{city.Owner.Id}_{city.Radius})";
+            }
+
+            return GetCityColor(city);
+        }
+
+        protected HashSet<(User user, int round)> _userImages;
 
         protected FortDbContext _context;
         protected CurrentPlayerService _currentPlayerService;
@@ -26,6 +41,8 @@ namespace Fort.Services
             StringBuilder svgMap = new StringBuilder();
 
             svgMap.AppendLine($"<svg id=\"map\" viewBox=\"0 0 1600 794\">");
+
+            // paths
             foreach (Path path in _context.Paths
                 .Include(p => p.Source).ThenInclude(c => c.Owner).ThenInclude(u => u.Team)
                 .Include(p => p.Target).ThenInclude(c => c.Owner).ThenInclude(u => u.Team))
@@ -35,10 +52,22 @@ namespace Fort.Services
                 svgMap.AppendLine($"<line x1=\"{middle.x}\" y1=\"{middle.y}\" x2=\"{path.Target.X}\" y2=\"{path.Target.Y}\"  style=\"stroke:{GetCityColor(path.Target)};stroke-width:5\" />");
             }
 
+            // cities
             foreach (City city in _context.Cities)
             {
-                svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"{System.Math.Log10(city.Army) * 10}\" fill=\"{GetCityColor(city)}\" />");
+                svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"{city.Radius}\" fill=\"{GetCityFill(city)}\" style=\"stroke:{GetCityColor(city)};stroke-width:2\" />");
             }
+            // users image
+            svgMap.AppendLine($"<defs>");
+            foreach ((User user, int round) in _userImages)
+            {
+                svgMap.AppendLine($"<pattern id=\"U_{user.Id}_{round}\" width=\"1\" height=\"1\">");
+                svgMap.AppendLine($"<image xlink:href=\"/images/Users/{user.ImageUrl}\" x=\"0\" y=\"0\" width=\"{round * 2}\" height=\"{round * 2}\" />");
+                svgMap.AppendLine($"</pattern>");
+            }
+            svgMap.AppendLine($"</defs>");
+
+            // end
             svgMap.AppendLine("</svg>");
 
             return svgMap.ToString();
