@@ -66,7 +66,6 @@ namespace Fort.Services
                     throw new InvalidOperationException("Neznámý stav kola");
             }
 
-#warning TODO: 
             return $"{result} Kolo {Program.GetService<RoundService>().CurrentRound.RoundNumber}";
         }
         public string GetRemaining()
