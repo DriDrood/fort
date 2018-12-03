@@ -78,17 +78,23 @@ function onMessage(message) {
     switch (data["method"]) {
         case "StartRound":
         case "Resume":
+            stopCountDown();
             countDown(data["params"]["duration"]);
-            $('#actions .round').html('Běží kolo ' + data["params"]["roundNumber"]);
+            $('#actions .round').html('<i class="fa fa-play" title="Kolo běží"></i> kolo ' + data["params"]["roundNumber"]);
             break;
         case "Pause":
             stopCountDown();
-            $('#actions .round').html('Pozastavené Kolo ' + data["params"]["roundNumber"]);
+            $('#actions .round').html('<i class="fa fa-pause" title="Kolo je pozastavené"></i> Kolo ' + data["params"]["roundNumber"]);
             break;
         case "EndRound":
             stopCountDown();
             countDown(data["params"]["duration"]);
-            $('#actions .round').html('Ukončené Kolo ' + data["params"]["roundNumber"]);
+            $('#actions .round').html('<i class="fa fa-flag-checkered" title="Kolo skončilo"></i> Kolo ' + data["params"]["roundNumber"]);
+            break;
+        case "InitRound":
+            stopCountDown();
+            countDown(data["params"]["duration"]);
+            $('#actions .round').html('<i class="fa fa-circle-o-notch" title="Začíná kolo"></i> Kolo ' + data["params"]["roundNumber"]);
             break;
     }
 }
@@ -113,7 +119,7 @@ function countDown(total_seconds) {
     function pad100(value) {
         if (value < 10)
             return '0' + value;
-    
+
         return value;
     }
 }

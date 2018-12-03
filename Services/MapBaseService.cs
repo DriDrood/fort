@@ -50,16 +50,16 @@ namespace Fort.Services
             switch (Program.GetService<RoundService>().State)
             {
                 case Fort.Utils.Timer.Status.Begin:
-                    result = "Začíná";
+                    result = "<i class=\"fa fa-circle-o-notch\" title=\"Začíná kolo\"></i>";
                     break;
                 case Fort.Utils.Timer.Status.Running:
-                    result = "Běží";
+                    result = "<i class=\"fa fa-play\" title=\"Kolo běží\"></i>";
                     break;
                 case Fort.Utils.Timer.Status.Paused:
-                    result = "Pozastavené";
+                    result = "<i class=\"fa fa-pause\" title=\"Kolo je pozastavené\"></i>";
                     break;
                 case Fort.Utils.Timer.Status.Finished:
-                    result = "Ukončené";
+                    result = "<i class=\"fa fa-flag-checkered\" title=\"Kolo skončilo\"></i>";
                     break;
 
                 default:
@@ -67,7 +67,7 @@ namespace Fort.Services
             }
 
 #warning TODO: 
-            return $"{result} kolo {Program.GetService<RoundService>().CurrentRound?.Id ?? 1}";
+            return $"{result} Kolo {Program.GetService<RoundService>().CurrentRound.RoundNumber}";
         }
         public string GetRemaining()
         {

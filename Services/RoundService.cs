@@ -15,6 +15,7 @@ namespace Fort.Services
         public RoundService()
         {
             _context = new FortDbContext();
+            _timer = new Timer();
         }
 
         private FortDbContext _context;
@@ -87,7 +88,7 @@ namespace Fort.Services
                     await Finalize();
 
                     _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
-                    Init(_timer.Remains.Value);
+                    await Init(_timer.Remains.Value);
                     await _timer.Start();
                 }
             });
@@ -103,13 +104,11 @@ namespace Fort.Services
             await _commService.SendToAll("Reset", new { });
 
             LoadStart();
-            Init();
+            await Init();
         }
 
-        public void Init(TimeSpan? duration = null)
+        public async Task Init(TimeSpan? duration = null)
         {
-            _timer = new Timer();
-
             int currentRoundNumber = CurrentRound?.RoundNumber + 1 ?? 1;
             CurrentRound = new Round
             {
@@ -119,6 +118,8 @@ namespace Fort.Services
 
             _context.Rounds.Add(CurrentRound);
             _context.SaveChanges();
+
+            await _commService.SendToAll("InitRound", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
         }
 
         public void Start()
