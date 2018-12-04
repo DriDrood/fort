@@ -55,7 +55,7 @@ namespace Fort.Services
             // cities
             foreach (City city in _context.Cities)
             {
-                svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"{city.Radius}\" fill=\"{GetCityFill(city)}\" style=\"stroke:{GetCityColor(city)};stroke-width:2\" />");
+                svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"{city.Radius}\" data-city-id=\"{city.Id}\" data-army=\"{city.Army}\" fill=\"{GetCityFill(city)}\" style=\"stroke:{GetCityColor(city)};stroke-width:2\" />");
             }
             // users image
             svgMap.AppendLine($"<defs>");

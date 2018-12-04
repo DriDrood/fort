@@ -6,6 +6,20 @@
 
 @Html.Raw(Model.Print())
 
+<div class="shadow">
+    <div id="sendArmy" class="modal">
+        <div class="modal_header">
+
+        </div>
+        <div class="modal_content">
+            <div id="armySlider" class="slider" data-target="armySize"><div class="slider_point"></div></div>
+            <input id="armySize" type="number" min="0" max="0" value="0" data-source="armySlider" />
+            <button value="sendArmy">Ok</button>
+            <button value="cancel">Zrušit</button>
+        </div>
+    </div>
+</div>
+
 <div id="actions">
     @if ((ViewData["player"] as Fort.Services.CurrentPlayerService)?.User?.IsAdmin == true)
     {

@@ -70,7 +70,7 @@ namespace Fort.Services
                     switch (data["method"].Value<string>().ToLower())
                     {
                         case "turn":
-                            Turn playerTurn = data["turn"].ToObject<Turn>();
+                            Turn playerTurn = data["params"].ToObject<Turn>();
                             _actionService.Turn(user, playerTurn);
                             break;
 

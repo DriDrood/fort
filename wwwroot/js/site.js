@@ -5,38 +5,59 @@
 
 $(document).ready(function () {
     var sourceCity = null;
+    var targetCity = null;
     if ($('body.map').length > 0) {
         createWS();
     }
 
-    $('body.map').on('click', function (e) {
+    $('body.map').on('mousedown', function (e) {
         var clicked = $(e.target);
 
         // click on circle
         if (clicked.prop('tagName') == 'circle') {
             // source
             if (sourceCity == null) {
-                sourceCity = { x: clicked.attr('cx'), y: clicked.attr('cy') };
+                sourceCity = { id: clicked.attr('data-city-id'), army: clicked.attr('data-army') };
             }
 
             // target
             else {
-                ws.send(JSON.stringify({
-                    method: "turn",
-                    params: {
-                        source: {
-                            x: sourceCity.x,
-                            y: sourceCity.y
-                        },
-                        target: {
-                            x: clicked.attr('cx'),
-                            y: clicked.attr('cy')
-                        }
-                    }
-                }));
-                sourceCity = null;
+                targetCity = { id: clicked.attr('data-city-id'), army: clicked.attr('data-army') };
+                var modal = $('#sendArmy');
+                modal.parent().css('display', 'flex');
+
+                // set max army
+                modal.find('#armySize')
+                    .attr('max', sourceCity['army'])
+                    .val(0);
+                // move point
+                modal.find('.slider_point').css('left', '');
             }
         }
+        // send army
+        else if (clicked.val() == 'sendArmy')
+        {
+            ws.send(JSON.stringify({
+                method: "turn",
+                params: {
+                    SourceCityId: sourceCity.id,
+                    TargetCityId: targetCity.id,
+                    amount: $('#armySize').val()
+                }
+            }));
+            
+            $('.shadow').css('display', 'none');
+            sourceCity = null;
+            targetCity = null;
+        }
+        // hide modal
+        else if (clicked.hasClass('shadow') || clicked.val() == 'cancel')
+        {
+            $('.shadow').css('display', 'none');
+            sourceCity = null;
+            targetCity = null;
+        }
+        // actions
         else if (clicked.attr('id') == 'play') {
             ws.send(JSON.stringify({ method: "play" }));
         }
@@ -49,6 +70,7 @@ $(document).ready(function () {
         else if (clicked.attr('id') == 'end') {
             ws.send(JSON.stringify({ method: "end" }));
         }
+        // reconect
         else if (clicked.hasClass('fa-chain-broken')) {
             clicked.parent().html('<i class="fa fa-spinner fa-spin fa-fw"></i>')
             createWS();

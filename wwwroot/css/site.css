@@ -29,6 +29,12 @@ html, body {
     border-radius: 10px;
 } */
 
+#map {
+    background-image: url('/images/top-black-and-white-map-of-the-world-1.png');
+    background-size: 100% 100%;
+}
+
+/* Login */
 body.login {
     display: flex;
 
@@ -60,11 +66,7 @@ body.login form .error {
     text-align: center;
 }
 
-#map {
-    background-image: url('/images/top-black-and-white-map-of-the-world-1.png');
-    background-size: 100% 100%;
-}
-
+/* actions */
 #actions {
     position: absolute;
     top: 0;
@@ -89,6 +91,35 @@ body.login form .error {
     color: #0f0;
 }
 
+/* modal */
+.shadow {
+    position: fixed;
+    display: none; /* flex */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgba(0, 0, 0, 0.6);
+}
+.modal {
+    width: 200px;
+
+    background-color: green;
+}
+.modal .modal_header {
+    height: 20px;
+
+    background-color: aquamarine;
+}
+.modal .modal_content {
+    padding: 20px;
+}
+
+/* Map creator */
 #mapCreator {
     border: 2px solid #000;
     background-image: url('/images/top-black-and-white-map-of-the-world-1.png');
