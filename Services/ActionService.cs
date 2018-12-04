@@ -17,8 +17,8 @@ namespace Fort.Services
 
             using (FortDbContext context = new FortDbContext())
             {
-                turn.User = user;
-                turn.Round = _roundService.CurrentRound;
+                turn.UserId = user.Id;
+                turn.RoundId = _roundService.CurrentRound.Id;
                 turn.CreatedAt = DateTime.UtcNow;
 
                 context.Turns.Add(turn);
