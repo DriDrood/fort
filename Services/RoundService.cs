@@ -179,7 +179,7 @@ namespace Fort.Services
             JArray jTurns = new JArray();
             foreach (Turn turn in turns)
             {
-                Turn second = turns.First(t => t.SourceCityId == turn.TargetCityId && t.TargetCityId == turn.SourceCityId);
+                Turn second = turns.FirstOrDefault(t => t.SourceCityId == turn.TargetCityId && t.TargetCityId == turn.SourceCityId);
                 // army destroyed
                 if (second != null && turn.Amount < second.Amount)
                 {
@@ -196,15 +196,15 @@ namespace Fort.Services
                 }
                 // no turn on same path || bigger army
                 else
-                    jTurns.Add(new JObject(new
+                    jTurns.Add(new JObject
                     {
-                        sourceX = turn.SourceCity.X,
-                        sourceY = turn.SourceCity.Y,
-                        targetX = turn.TargetCity.X,
-                        targetY = turn.TargetCity.Y,
-                        amount = turn.Amount,
-                        isHalfWay = true
-                    }));
+                        { "sourceX", turn.SourceCity.X },
+                        { "sourceY", turn.SourceCity.Y },
+                        { "targetX", turn.TargetCity.X },
+                        { "targetY", turn.TargetCity.Y },
+                        { "amount", turn.Amount },
+                        { "isHalfWay", false }
+                    });
             }
             await _commService.SendToAll("turns", jTurns);
 
@@ -212,20 +212,25 @@ namespace Fort.Services
             foreach (Turn turn in turns)
             {
                 // ally
-                if (turn.TargetCity.Owner.TeamId == turn.SourceCity.Owner.TeamId)
+                if (turn.TargetCity.Owner?.TeamId == turn.SourceCity.Owner.TeamId)
                     turn.TargetCity.Army += turn.Amount;
                 // enenmy
                 else
                     turn.TargetCity.Army -= turn.Amount;
             }
             _context.SaveChanges();
-            // change owner
+            /// city
             foreach (City city in _context.Cities)
             {
+                // change owner
                 if (city.Army == 0)
                     city.OwnerId = null;
                 else if (city.Army < 0)
                     city.Owner = turns.First(t => t.TargetCityId == city.Id && t.SourceCity.Owner.TeamId != city.Owner.TeamId).SourceCity.Owner;
+
+                // grow
+                if (city.OwnerId != null)
+                    city.Army += city.Grow ?? Program.Config.DefaultPopulationGrow;
             }
             // print
             await _commService.SendToEach("map_walkIn", (playerId) =>
