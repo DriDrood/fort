@@ -78,7 +78,7 @@ namespace Fort.Services
 
                         case "play":
                             _actionService.Play(user);
-                            await SendToOne(playerId, "notification", new { type = "success", message = "Hra začíná" });
+                            await SendToAll("notification", new { type = "success", message = "Hra začíná" });
                             break;
 
                         case "pause":
