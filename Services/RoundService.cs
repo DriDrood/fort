@@ -7,6 +7,7 @@ using Fort.Database.Entities;
 using Fort.Utils;
 using Fort.Utils.Logger;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json.Linq;
 
 namespace Fort.Services
 {
@@ -83,9 +84,12 @@ namespace Fort.Services
 
                     _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultBeforeVisualizationSec));
                     await End();
-                    await _timer.Start();
+                    var tt = _timer.Start();
 
                     await Finalize();
+                    await tt;
+
+                    await ShowFinalize();
 
                     _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
                     await Init(_timer.Remains.Value);
@@ -157,8 +161,82 @@ namespace Fort.Services
 
         public async Task Finalize()
         {
-            await Task.Run(() => { });
-#warning TODO: compute rounds, show to user
+            var turns = _context.Turns.Where(t => t.RoundId == CurrentRound.Id).OrderBy(t => t.CreatedAt).ToList();
+
+            /// walk out
+            foreach (Turn turn in turns)
+            {
+                turn.SourceCity.Army -= turn.Amount;
+            }
+            // print
+            await _commService.SendToEach("map_walkOut", (playerId) =>
+            {
+                Player player = (Player)_context.Users.Find(playerId) ?? _context.Teams.Find(playerId);
+                return MapBaseService.GetMapServiceForPlayer(_context, player).Print();
+            });
+
+            /// fights in the middle
+            JArray jTurns = new JArray();
+            foreach (Turn turn in turns)
+            {
+                Turn second = turns.First(t => t.SourceCityId == turn.TargetCityId && t.TargetCityId == turn.SourceCityId);
+                // army destroyed
+                if (second != null && turn.Amount < second.Amount)
+                {
+                    var middle = MapBaseService.GetMiddlePoint(turn.SourceCity.X, turn.SourceCity.Y, turn.TargetCity.X, turn.TargetCity.Y);
+                    jTurns.Add(new JObject(new
+                    {
+                        sourceX = turn.SourceCity.X,
+                        sourceY = turn.SourceCity.Y,
+                        targetX = middle.x,
+                        targetY = middle.y,
+                        amount = turn.Amount,
+                        isHalfWay = true
+                    }));
+                }
+                // no turn on same path || bigger army
+                else
+                    jTurns.Add(new JObject(new
+                    {
+                        sourceX = turn.SourceCity.X,
+                        sourceY = turn.SourceCity.Y,
+                        targetX = turn.TargetCity.X,
+                        targetY = turn.TargetCity.Y,
+                        amount = turn.Amount,
+                        isHalfWay = true
+                    }));
+            }
+            await _commService.SendToAll("turns", jTurns);
+
+            /// walk in
+            foreach (Turn turn in turns)
+            {
+                // ally
+                if (turn.TargetCity.Owner.TeamId == turn.SourceCity.Owner.TeamId)
+                    turn.TargetCity.Army += turn.Amount;
+                // enenmy
+                else
+                    turn.TargetCity.Army -= turn.Amount;
+            }
+            _context.SaveChanges();
+            // change owner
+            foreach (City city in _context.Cities)
+            {
+                if (city.Army == 0)
+                    city.OwnerId = null;
+                else if (city.Army < 0)
+                    city.Owner = turns.First(t => t.TargetCityId == city.Id && t.SourceCity.Owner.TeamId != city.Owner.TeamId).SourceCity.Owner;
+            }
+            // print
+            await _commService.SendToEach("map_walkIn", (playerId) =>
+            {
+                Player player = (Player)_context.Users.Find(playerId) ?? _context.Teams.Find(playerId);
+                return MapBaseService.GetMapServiceForPlayer(_context, player).Print();
+            });
+        }
+        public async Task ShowFinalize()
+        {
+            await _commService.SendToAll("map_show", new { });
         }
         #endregion
 

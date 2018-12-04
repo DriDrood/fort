@@ -53,3 +53,7 @@ $(document).ready(function () {
         }
     });
 });
+
+function refresh() {
+    $('#mapCreator').html($('#mapCreator').html());
+}

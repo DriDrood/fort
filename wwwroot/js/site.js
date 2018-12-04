@@ -35,8 +35,7 @@ $(document).ready(function () {
             }
         }
         // send army
-        else if (clicked.val() == 'sendArmy')
-        {
+        else if (clicked.val() == 'sendArmy') {
             ws.send(JSON.stringify({
                 method: "turn",
                 params: {
@@ -45,14 +44,13 @@ $(document).ready(function () {
                     amount: $('#armySize').val()
                 }
             }));
-            
+
             $('.shadow').css('display', 'none');
             sourceCity = null;
             targetCity = null;
         }
         // hide modal
-        else if (clicked.hasClass('shadow') || clicked.val() == 'cancel')
-        {
+        else if (clicked.hasClass('shadow') || clicked.val() == 'cancel') {
             $('.shadow').css('display', 'none');
             sourceCity = null;
             targetCity = null;
@@ -94,6 +92,9 @@ function createWS() {
     };
 }
 
+var map_walkOut = null;
+var map_walkIn = null;
+var map_turns = null;
 function onMessage(message) {
     console.log(message);
     var data = JSON.parse(message.data);
@@ -118,11 +119,20 @@ function onMessage(message) {
             countDown(data["params"]["duration"]);
             $('#actions .round').html('<i class="fa fa-circle-o-notch" title="Začíná kolo"></i> Kolo ' + data["params"]["roundNumber"]);
             break;
-    }
-}
 
-function refresh() {
-    $('#mapCreator').html($('#mapCreator').html());
+        case "map_walkOut":
+            map_walkOut = data["params"];
+            break
+        case "map_walkIn":
+            map_walkIn = data["params"];
+            break
+        case "turns":
+            map_turns = data["params"];
+            break;
+        case "map_show":
+            $('#map').html(map_walkOut);
+            // TODO
+    }
 }
 
 var countDownTask;

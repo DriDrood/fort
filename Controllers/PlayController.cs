@@ -8,20 +8,14 @@ namespace Fort.Controllers
 {
     public class PlayController : Controller
     {
-        public PlayController(FortDbContext context, CurrentPlayerService currentPlayerService, MapUserService mapUserService, MapTeamService mapTeamService, MapAdminService mapAdminService)
+        public PlayController(FortDbContext context, CurrentPlayerService currentPlayerService)
         {
             _context = context;
             _currentPlayerService = currentPlayerService;
-            _mapUserService = mapUserService;
-            _mapTeamService = mapTeamService;
-            _mapAdminService = mapAdminService;
         }
 
         private FortDbContext _context;
         private CurrentPlayerService _currentPlayerService;
-        private MapUserService _mapUserService;
-        private MapAdminService _mapAdminService;
-        private MapTeamService _mapTeamService;
 
         public IActionResult Login()
         {
@@ -44,18 +38,7 @@ namespace Fort.Controllers
         public IActionResult Map(string code)
         {
             ViewData["player"] = _currentPlayerService;
-            if (_currentPlayerService.Player is User)
-            {
-                if ((_currentPlayerService.Player as User).IsAdmin)
-                    return View(_mapAdminService);
-
-                return View(_mapUserService);
-            }
-
-            if (_currentPlayerService.Player is Team)
-                return View(_mapTeamService);
-
-            throw new FortException(ELogLevel.Warning, "Neplatný kód!");
+            return View(MapBaseService.GetMapServiceForPlayer(_context, _currentPlayerService.Player));
         }
     }
 }

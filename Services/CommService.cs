@@ -115,6 +115,16 @@ namespace Fort.Services
 
             await Task.Run(() => Task.WaitAll(tasks.ToArray()));
         }
+        public async Task SendToEach(string method, Func<string, string> getData)
+        {
+            List<Task> tasks = new List<Task>();
+            foreach (var pair in _playerConnections)
+            {
+                tasks.Add(send(pair.Value, method, getData(pair.Key), pair.Key));
+            }
+
+            await Task.Run(() => Task.WaitAll(tasks.ToArray()));
+        }
 
         public async Task SendToOne(string playerId, string method, object data)
         {

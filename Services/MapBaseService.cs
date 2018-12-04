@@ -2,18 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Fort;
 using Fort.Database;
 using Fort.Database.Entities;
+using Fort.Services;
+using Fort.Utils.Logger;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fort.Services
 {
     public abstract class MapBaseService
     {
-        protected MapBaseService(FortDbContext context, CurrentPlayerService currentPlayerService)
+        protected MapBaseService(FortDbContext context, Player player)
         {
             _context = context;
-            _currentPlayerService = currentPlayerService;
+            _player = player;
             _userImages = new HashSet<(User user, int round)>();
         }
 
@@ -34,7 +37,7 @@ namespace Fort.Services
         protected HashSet<(User user, int round)> _userImages;
 
         protected FortDbContext _context;
-        protected CurrentPlayerService _currentPlayerService;
+        protected Player _player;
 
         public string Print()
         {
@@ -47,7 +50,7 @@ namespace Fort.Services
                 .Include(p => p.Source).ThenInclude(c => c.Owner).ThenInclude(u => u.Team)
                 .Include(p => p.Target).ThenInclude(c => c.Owner).ThenInclude(u => u.Team))
             {
-                var middle = getMiddlePoint(path);
+                var middle = GetMiddlePoint(path);
                 svgMap.AppendLine($"<line x1=\"{path.Source.X}\" y1=\"{path.Source.Y}\" x2=\"{middle.x}\" y2=\"{middle.y}\" style=\"stroke:{GetCityColor(path.Source)};stroke-width:5\" />");
                 svgMap.AppendLine($"<line x1=\"{middle.x}\" y1=\"{middle.y}\" x2=\"{path.Target.X}\" y2=\"{path.Target.Y}\"  style=\"stroke:{GetCityColor(path.Target)};stroke-width:5\" />");
             }
@@ -111,13 +114,33 @@ namespace Fort.Services
             return $"<div id=\"army{turn.Id}\" class=\"army\" style=\"background-color:{turn.SourceCity};top:{turn.SourceCity.Y - 10}px;left:{turn.SourceCity.X - 10}px;\"></div>";
         }
 
-        private static (double x, double y) getMiddlePoint(Path path)
+        public static (double x, double y) GetMiddlePoint(Path path)
+        {
+            return GetMiddlePoint(path.Source.X, path.Source.Y, path.Target.X, path.Target.Y);
+        }
+        public static (double x, double y) GetMiddlePoint(double sourceX, double sourceY, double targetX, double targetY)
         {
             (double x, double y) result = (0, 0);
-            result.x = ((path.Target.X - path.Source.X) / 2) + path.Source.X;
-            result.y = ((path.Target.Y - path.Source.Y) / 2) + path.Source.Y;
+            result.x = ((targetX - sourceX) / 2) + sourceX;
+            result.y = ((targetY - sourceY) / 2) + sourceY;
 
             return result;
+        }
+
+        public static MapBaseService GetMapServiceForPlayer(FortDbContext context, Player player)
+        {
+            if (player is User)
+            {
+                if ((player as User).IsAdmin)
+                    return new MapAdminService(context, player);
+
+                return new MapUserService(context, player);
+            }
+
+            if (player is Team)
+                return new MapTeamService(context, player);
+
+            throw new FortException(ELogLevel.Warning, "Neplatný kód!");
         }
     }
 }

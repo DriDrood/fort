@@ -5,13 +5,13 @@ namespace Fort.Services
 {
     public class MapTeamService : MapBaseService
     {
-        public MapTeamService(FortDbContext context, CurrentPlayerService currentPlayerService) : base(context, currentPlayerService)
+        public MapTeamService(FortDbContext context, Player player) : base(context, player)
         {
         }
 
         protected override int? GetCityArmy(City city)
         {
-            if (city.Owner?.TeamId == _currentPlayerService.Team.Id)
+            if (city.Owner?.TeamId == _player.Id)
                 return city.Army;
 
             return null;
@@ -24,7 +24,7 @@ namespace Fort.Services
                 return "gray";
 
             // ally
-            if (city.Owner.TeamId == _currentPlayerService.Team.Id)
+            if (city.Owner.TeamId == _player.Id)
                 return "#0a8524";
 
             // enemy
@@ -35,7 +35,7 @@ namespace Fort.Services
         protected override bool ShowCityAvatar(City city)
         {
             // ally
-            if (city.Owner?.TeamId == _currentPlayerService.Team.Id)
+            if (city.Owner?.TeamId == _player.Id)
                 return true;
 
 #warning TODO: near cities
