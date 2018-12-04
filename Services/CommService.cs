@@ -72,22 +72,27 @@ namespace Fort.Services
                         case "turn":
                             Turn playerTurn = data["params"].ToObject<Turn>();
                             _actionService.Turn(user, playerTurn);
+                            await SendToOne(playerId, "notification", new { type = "success", message = "Tah úspěšně zadán" });
                             break;
 
                         case "play":
                             _actionService.Play(user);
+                            await SendToOne(playerId, "notification", new { type = "success", message = "Hra začíná" });
                             break;
 
                         case "pause":
                             await _actionService.Pause(user);
+                            await SendToOne(playerId, "notification", new { type = "success", message = "Hra pozastavena" });
                             break;
 
                         case "resume":
                             await _actionService.Resume(user);
+                            await SendToOne(playerId, "notification", new { type = "success", message = "Hra obnovena" });
                             break;
 
                         case "end":
                             _actionService.End(user);
+                            await SendToOne(playerId, "notification", new { type = "success", message = "Kolo ukončeno" });
                             break;
 
                         default:
@@ -98,10 +103,12 @@ namespace Fort.Services
             catch (FortException ex)
             {
                 Logger.Log(ex.LogLevel, playerId, ex.Message, ex.StackTrace);
+                await SendToOne(playerId, "notification", new { type = "error", message = ex.Message });
             }
             catch (Exception ex)
             {
                 Logger.Log(ELogLevel.UnknownException, playerId, ex.Message, ex.StackTrace);
+                await SendToOne(playerId, "notification", new { type = "exception", message = ex.Message });
             }
         }
 

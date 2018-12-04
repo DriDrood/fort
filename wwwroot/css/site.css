@@ -66,6 +66,33 @@ body.login form .error {
     text-align: center;
 }
 
+/* notification */
+#notification {
+    position: fixed;
+    display: none;
+    top: 0px;
+    left: 50%;
+
+    width: 200px;
+    margin-left: -100px;
+    padding: 20px;
+
+    border-width: 0 1px 1px 1px;
+    border-color: #888;
+    border-style: solid;
+    border-radius: 0 0 15px 15px;
+}
+#notification.error {
+    background-color: #f33;
+}
+#notification.exception {
+    background-color: #a00;
+}
+#notification.success {
+    background-color: rgb(118, 189, 26);
+}
+
+
 /* actions */
 #actions {
     position: absolute;
