@@ -17,7 +17,10 @@ $(document).ready(function () {
         if (clicked.prop('tagName') == 'circle') {
             // source
             if (sourceCity == null) {
-                sourceCity = { id: clicked.attr('data-city-id'), army: clicked.attr('data-army') };
+                if (clicked.attr('data-owned') != 'True')
+                    notification('warning', 'Toto město není vaše');
+                else
+                    sourceCity = { id: clicked.attr('data-city-id'), army: clicked.attr('data-army') };
             }
 
             // target
@@ -99,6 +102,9 @@ function onMessage(message) {
     console.log(message);
     var data = JSON.parse(message.data);
     switch (data["method"]) {
+        case "notification":
+            notification(data['params']['type'], data['params']['message']);
+            break;
         case "StartRound":
         case "Resume":
             stopCountDown();
@@ -130,9 +136,20 @@ function onMessage(message) {
             map_turns = data["params"];
             break;
         case "map_show":
-            $('#map').html(map_walkOut);
-            // TODO
+            $('#map').html(map_walkIn);
+        // TODO
     }
+}
+
+function notification(type, message) {
+    $('#notification')
+        .css('display', 'block')
+        .addClass(type)
+        .html(message);
+    setTimeout(function () {
+        document.getElementById('notification').className = '';
+        $('#notification').css('display', 'none');
+    }, 3000);
 }
 
 var countDownTask;

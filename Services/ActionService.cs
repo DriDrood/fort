@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Fort.Database;
 using Fort.Database.Entities;
@@ -14,6 +15,9 @@ namespace Fort.Services
         {
             if (_roundService.State != Utils.Timer.Status.Running)
                 throw new FortException(ELogLevel.Warning, "Kolo neběží");
+
+            if (!user.Cities.Any(c => c.Id == turn.SourceCityId))
+                throw new FortException(ELogLevel.Warning, "Zdrojové město není vaše");
 
             using (FortDbContext context = new FortDbContext())
             {

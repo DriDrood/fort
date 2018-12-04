@@ -91,6 +91,9 @@ body.login form .error {
 #notification.success {
     background-color: rgb(118, 189, 26);
 }
+#notification.warning {
+    background-color: rgb(228, 224, 7);
+}
 
 
 /* actions */

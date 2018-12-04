@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Fort.Database;
 using Fort.Database.Entities;
 using Fort.Utils.Logger;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -65,7 +66,7 @@ namespace Fort.Services
 
                 using (FortDbContext context = new FortDbContext())
                 {
-                    User user = await Task.Run(() => context.Users.Find(playerId));
+                    User user = await Task.Run(() => context.Users.Include(u => u.Cities).First(u => u.Id == playerId));
 
                     switch (data["method"].Value<string>().ToLower())
                     {
