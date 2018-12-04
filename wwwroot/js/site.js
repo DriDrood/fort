@@ -136,7 +136,7 @@ function onMessage(message) {
             map_turns = data["params"];
             break;
         case "map_show":
-            $('#map').html(map_walkIn);
+            $('#map_holder').html(map_walkIn);
         // TODO
     }
 }

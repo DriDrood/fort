@@ -226,12 +226,16 @@ namespace Fort.Services
                 if (city.Army == 0)
                     city.OwnerId = null;
                 else if (city.Army < 0)
-                    city.Owner = turns.First(t => t.TargetCityId == city.Id && t.SourceCity.Owner.TeamId != city.Owner.TeamId).SourceCity.Owner;
+                {
+                    city.Owner = turns.First(t => t.TargetCityId == city.Id && t.SourceCity.Owner.TeamId != city.Owner?.TeamId).SourceCity.Owner;
+                    city.Army = -city.Army;
+                }
 
                 // grow
-                if (city.OwnerId != null)
+                if (city.Owner != null)
                     city.Army += city.Grow ?? Program.Config.DefaultPopulationGrow;
             }
+            _context.SaveChanges();
             // print
             await _commService.SendToEach("map_walkIn", (playerId) =>
             {

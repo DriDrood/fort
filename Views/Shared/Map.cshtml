@@ -4,7 +4,9 @@
     ViewData["page"] = "map";
 }
 
-@Html.Raw(Model.Print())
+<div id="map_holder">
+    @Html.Raw(Model.Print())
+</div>
 
 <div class="shadow">
     <div id="sendArmy" class="modal">

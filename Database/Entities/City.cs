@@ -33,6 +33,6 @@ namespace Fort.Database.Entities
         public virtual ICollection<Turn> TargetToTurns { get; set; }
 
         [NotMapped]
-        public int Radius => (int)(System.Math.Log10(Army) * 10);
+        public int Radius => (int)(Army == 0 ? 3 : (System.Math.Log10(Army) * 10 + 2));
     }
 }
