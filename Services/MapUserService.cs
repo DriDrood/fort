@@ -1,3 +1,4 @@
+using System.Linq;
 using Fort.Database;
 using Fort.Database.Entities;
 
@@ -38,11 +39,17 @@ namespace Fort.Services
 
         protected override bool ShowCityAvatar(City city)
         {
+            // neutral
+            if (city.Owner == null)
+                return false;
+
             // ally
             if (city.Owner?.TeamId == (_player as User).TeamId)
                 return true;
 
-#warning TODO: near cities
+            // city near enemy border
+            if (city.Neighbour.Any(c => c.Owner?.TeamId == (_player as User).TeamId))
+                return true;
 
             return false;
         }

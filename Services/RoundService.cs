@@ -78,6 +78,13 @@ namespace Fort.Services
             {
                 while (_context.Teams.Count(t => t.Members.Any(m => m.Cities.Any())) > 1)
                 {
+                    if (CurrentRound.RoundNumber > 1 || CurrentRound.Turns.Any())
+                    {
+                        _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
+                        await Init(_timer.Remains.Value);
+                        await _timer.Start();
+                    }
+
                     _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultRoundDurationSec));
                     Start();
                     await _timer.Start();
@@ -90,11 +97,9 @@ namespace Fort.Services
                     await tt;
 
                     await ShowFinalize();
-
-                    _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
-                    await Init(_timer.Remains.Value);
-                    await _timer.Start();
                 }
+
+                EndGame();
             });
         }
         public void EndGame()
@@ -184,18 +189,19 @@ namespace Fort.Services
                 if (second != null && turn.Amount < second.Amount)
                 {
                     var middle = MapBaseService.GetMiddlePoint(turn.SourceCity.X, turn.SourceCity.Y, turn.TargetCity.X, turn.TargetCity.Y);
-                    jTurns.Add(new JObject(new
+                    jTurns.Add(new JObject
                     {
-                        sourceX = turn.SourceCity.X,
-                        sourceY = turn.SourceCity.Y,
-                        targetX = middle.x,
-                        targetY = middle.y,
-                        amount = turn.Amount,
-                        isHalfWay = true
-                    }));
+                        { "sourceX", turn.SourceCity.X },
+                        { "sourceY", turn.SourceCity.Y },
+                        { "targetX", middle.x },
+                        { "targetY", middle.y },
+                        { "amount", turn.Amount },
+                        { "isHalfWay", true }
+                    });
                 }
                 // no turn on same path || bigger army
                 else
+                {
                     jTurns.Add(new JObject
                     {
                         { "sourceX", turn.SourceCity.X },
@@ -205,6 +211,7 @@ namespace Fort.Services
                         { "amount", turn.Amount },
                         { "isHalfWay", false }
                     });
+                }
             }
             await _commService.SendToAll("turns", jTurns);
 

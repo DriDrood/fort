@@ -58,7 +58,7 @@ namespace Fort.Services
             // cities
             foreach (City city in _context.Cities)
             {
-                svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"{city.Radius}\" data-city-id=\"{city.Id}\" data-owned=\"{city.OwnerId == _player.Id}\" data-army=\"{(city.OwnerId == _player.Id ? city.Army : 0)}\" fill=\"{GetCityFill(city)}\" style=\"stroke:{GetCityColor(city)};stroke-width:2\" />");
+                svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"{city.Radius}\" data-city-id=\"{city.Id}\" data-neighbours=\"{string.Join(" ", city.Neighbour.Select(c => c.Id))}\" data-owned=\"{city.OwnerId == _player.Id}\" data-army=\"{(city.OwnerId == _player.Id ? city.Army : 0)}\" fill=\"{GetCityFill(city)}\" style=\"stroke:{GetCityColor(city)};stroke-width:2\" />");
             }
             // users image
             svgMap.AppendLine($"<defs>");
