@@ -8,6 +8,7 @@ namespace Fort.Database.Entities
         public int Id { get; set; }
 
         public int Amount { get; set; }
+        public int? ModifiedAmount { get; set; }
         public DateTime CreatedAt { get; set; }
 
         [Required]

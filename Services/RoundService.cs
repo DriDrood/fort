@@ -166,12 +166,13 @@ namespace Fort.Services
 
         public async Task Finalize()
         {
-            var turns = _context.Turns.Where(t => t.RoundId == CurrentRound.Id).OrderBy(t => t.CreatedAt).ToList();
+            var turns = _context.Turns.Where(t => t.RoundId == CurrentRound.Id).ToList();
+            var cities = _context.Cities.ToList();
 
             /// walk out
-            foreach (Turn turn in turns)
+            foreach (City city in cities)
             {
-                turn.SourceCity.Army -= turn.Amount;
+                city.Army -= turns.Where(t => t.SourceCityId == city.Id).Sum(t => t.Amount);
             }
             // print
             await _commService.SendToEach("map_walkOut", (playerId) =>
@@ -184,9 +185,9 @@ namespace Fort.Services
             JArray jTurns = new JArray();
             foreach (Turn turn in turns)
             {
-                Turn second = turns.FirstOrDefault(t => t.SourceCityId == turn.TargetCityId && t.TargetCityId == turn.SourceCityId);
-                // army destroyed
-                if (second != null && turn.Amount < second.Amount)
+                // same path, different teams
+                Turn second = turns.FirstOrDefault(t => t.SourceCityId == turn.TargetCityId && t.TargetCityId == turn.SourceCityId && t.User.TeamId != turn.User.TeamId);
+                if (second != null)
                 {
                     var middle = MapBaseService.GetMiddlePoint(turn.SourceCity.X, turn.SourceCity.Y, turn.TargetCity.X, turn.TargetCity.Y);
                     jTurns.Add(new JObject
@@ -196,10 +197,31 @@ namespace Fort.Services
                         { "targetX", middle.x },
                         { "targetY", middle.y },
                         { "amount", turn.Amount },
-                        { "isHalfWay", true }
+                        { "way", "1"}
                     });
+
+                    // army destroyed
+                    if (turn.Amount < second.Amount)
+                    {
+                        turn.ModifiedAmount = 0;
+                    }
+                    // have greather army
+                    else
+                    {
+                        int modifiedAmount = turn.Amount - second.Amount;
+                        jTurns.Add(new JObject
+                        {
+                            { "sourceX", middle.x },
+                            { "sourceY", middle.y },
+                            { "targetX", turn.TargetCity.X },
+                            { "targetY", turn.TargetCity.Y },
+                            { "amount", modifiedAmount },
+                            { "way", "2"}
+                        });
+                        turn.ModifiedAmount = modifiedAmount;
+                    }
                 }
-                // no turn on same path || bigger army
+                // no turn on same path
                 else
                 {
                     jTurns.Add(new JObject
@@ -209,33 +231,45 @@ namespace Fort.Services
                         { "targetX", turn.TargetCity.X },
                         { "targetY", turn.TargetCity.Y },
                         { "amount", turn.Amount },
-                        { "isHalfWay", false }
+                        { "way", "both" }
                     });
                 }
             }
             await _commService.SendToAll("turns", jTurns);
 
             /// walk in
-            foreach (Turn turn in turns)
+            foreach (City city in cities)
             {
-                // ally
-                if (turn.TargetCity.Owner?.TeamId == turn.SourceCity.Owner.TeamId)
-                    turn.TargetCity.Army += turn.Amount;
-                // enenmy
-                else
-                    turn.TargetCity.Army -= turn.Amount;
-            }
-            _context.SaveChanges();
-            /// city
-            foreach (City city in _context.Cities)
-            {
-                // change owner
-                if (city.Army == 0)
-                    city.OwnerId = null;
-                else if (city.Army < 0)
+                var incoming = turns.Where(t => t.TargetCityId == city.Id).GroupBy(t => t.User.Team).ToList();
+
+                if (incoming.Any())
                 {
-                    city.Owner = turns.First(t => t.TargetCityId == city.Id && t.SourceCity.Owner.TeamId != city.Owner?.TeamId).SourceCity.Owner;
-                    city.Army = -city.Army;
+                    // fights before gates
+                    var armies = incoming.Where(gr => gr.Key != city.Owner?.Team).OrderByDescending(gr => gr.Sum(t => t.ModifiedAmount ?? t.Amount)).ToList();
+                    IGrouping<Team, Turn> winnerFightBeforeGates = armies.First();
+                    int winnerArmy = winnerFightBeforeGates.Sum(t => t.ModifiedAmount ?? t.Amount);
+                    if (armies.Count() > 1)
+                        winnerArmy -= armies.ElementAt(1).Sum(t => t.ModifiedAmount ?? t.Amount);
+
+                    // fights for city
+                    int defendingArmy = (incoming.SingleOrDefault(gr => gr.Key == city.Owner?.Team)?.Sum(t => t.ModifiedAmount ?? t.Amount) ?? 0) + city.Army;
+                    // defended
+                    if (defendingArmy > winnerArmy)
+                    {
+                        city.Army = defendingArmy - winnerArmy;
+                    }
+                    // empty
+                    else if (defendingArmy == winnerArmy)
+                    {
+                        city.Army = 0;
+                        city.Owner = null;
+                    }
+                    // conquered
+                    else
+                    {
+                        city.Army = winnerArmy - defendingArmy;
+                        city.Owner = winnerFightBeforeGates.OrderBy(t => t.CreatedAt).First().User;
+                    }
                 }
 
                 // grow
