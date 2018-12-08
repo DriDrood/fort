@@ -9,7 +9,7 @@ namespace Fort.Services
         {
         }
 
-        protected override int? GetCityArmy(City city)
+        protected override int GetCityArmy(City city)
         {
             return city.Army;
         }

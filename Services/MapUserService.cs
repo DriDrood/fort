@@ -10,12 +10,12 @@ namespace Fort.Services
         {
         }
 
-        protected override int? GetCityArmy(City city)
+        protected override int GetCityArmy(City city)
         {
             if (city.Owner?.TeamId == (_player as User).TeamId)
                 return city.Army;
 
-            return null;
+            return -1;
         }
 
         protected override string GetCityColor(City city)

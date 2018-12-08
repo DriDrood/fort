@@ -21,7 +21,7 @@ namespace Fort.Services
         }
 
         protected abstract string GetCityColor(City city);
-        protected abstract int? GetCityArmy(City city);
+        protected abstract int GetCityArmy(City city);
         protected abstract bool ShowCityAvatar(City city);
         protected virtual string GetCityFill(City city)
         {
@@ -44,6 +44,7 @@ namespace Fort.Services
             StringBuilder svgMap = new StringBuilder();
 
             svgMap.AppendLine($"<svg id=\"map\" viewBox=\"0 0 1600 794\">");
+            svgMap.AppendLine("<style> .armyText { font-size: 18px; } </style>");
 
             // paths
             foreach (Path path in _context.Paths
@@ -58,7 +59,13 @@ namespace Fort.Services
             // cities
             foreach (City city in _context.Cities)
             {
-                svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"{city.Radius}\" data-city-id=\"{city.Id}\" data-neighbours=\"{string.Join(" ", city.Neighbour.Select(c => c.Id))}\" data-owned=\"{city.OwnerId == _player.Id}\" data-army=\"{(city.OwnerId == _player.Id ? city.Army : 0)}\" fill=\"{GetCityFill(city)}\" style=\"stroke:{GetCityColor(city)};stroke-width:2\" />");
+                int cityArmy = GetCityArmy(city);
+                if (cityArmy > 0)
+                {
+                    svgMap.AppendLine($"<circle cx=\"{city.X - city.Radius}\" cy=\"{city.Y - city.Radius}\" r=\"14\" fill=\"white\" style=\"stroke:black;stroke-width:2;\" />");
+                    svgMap.AppendLine($"<text x=\"{city.X - city.Radius}\" y=\"{city.Y - city.Radius + 6}\" text-anchor=\"middle\" class=\"armyText\">{cityArmy}</text>");
+                }
+                svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"{city.Radius}\" data-city-id=\"{city.Id}\" data-neighbours=\"{string.Join(" ", city.Neighbour.Select(c => c.Id))}\" data-owned=\"{city.OwnerId == _player.Id}\" data-army=\"{(cityArmy)}\" fill=\"{GetCityFill(city)}\" style=\"stroke:{GetCityColor(city)};stroke-width:2\" />");
             }
             // users image
             svgMap.AppendLine($"<defs>");
