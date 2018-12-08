@@ -244,31 +244,40 @@ namespace Fort.Services
 
                 if (incoming.Any())
                 {
-                    // fights before gates
-                    var armies = incoming.Where(gr => gr.Key != city.Owner?.Team).OrderByDescending(gr => gr.Sum(t => t.ModifiedAmount ?? t.Amount)).ToList();
-                    IGrouping<Team, Turn> winnerFightBeforeGates = armies.First();
-                    int winnerArmy = winnerFightBeforeGates.Sum(t => t.ModifiedAmount ?? t.Amount);
-                    if (armies.Count() > 1)
-                        winnerArmy -= armies.ElementAt(1).Sum(t => t.ModifiedAmount ?? t.Amount);
+                    var enemyArmies = incoming.Where(gr => gr.Key != city.Owner?.Team).OrderByDescending(gr => gr.Sum(t => t.ModifiedAmount ?? t.Amount)).ToList();
 
-                    // fights for city
-                    int defendingArmy = (incoming.SingleOrDefault(gr => gr.Key == city.Owner?.Team)?.Sum(t => t.ModifiedAmount ?? t.Amount) ?? 0) + city.Army;
-                    // defended
-                    if (defendingArmy > winnerArmy)
+                    // fights before gates
+                    if (enemyArmies.Any())
                     {
-                        city.Army = defendingArmy - winnerArmy;
+                        IGrouping<Team, Turn> winnerFightBeforeGates = enemyArmies.First();
+                        int winnerArmy = winnerFightBeforeGates.Sum(t => t.ModifiedAmount ?? t.Amount);
+                        if (enemyArmies.Count() > 1)
+                            winnerArmy -= enemyArmies.ElementAt(1).Sum(t => t.ModifiedAmount ?? t.Amount);
+
+                        // fights for city
+                        int defendingArmy = (incoming.SingleOrDefault(gr => gr.Key == city.Owner?.Team)?.Sum(t => t.ModifiedAmount ?? t.Amount) ?? 0) + city.Army;
+                        // defended
+                        if (defendingArmy > winnerArmy)
+                        {
+                            city.Army = defendingArmy - winnerArmy;
+                        }
+                        // empty
+                        else if (defendingArmy == winnerArmy)
+                        {
+                            city.Army = 0;
+                            city.Owner = null;
+                        }
+                        // conquered
+                        else
+                        {
+                            city.Army = winnerArmy - defendingArmy;
+                            city.Owner = winnerFightBeforeGates.OrderBy(t => t.CreatedAt).First().User;
+                        }
                     }
-                    // empty
-                    else if (defendingArmy == winnerArmy)
-                    {
-                        city.Army = 0;
-                        city.Owner = null;
-                    }
-                    // conquered
+                    // no fight, just ally
                     else
                     {
-                        city.Army = winnerArmy - defendingArmy;
-                        city.Owner = winnerFightBeforeGates.OrderBy(t => t.CreatedAt).First().User;
+                        city.Army += incoming.First().Sum(t => t.ModifiedAmount ?? t.Amount);
                     }
                 }
 
