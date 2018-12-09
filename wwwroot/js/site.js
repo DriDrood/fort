@@ -81,7 +81,7 @@ $(document).ready(function () {
             sourceCity.attr('data-army', sourceCity.attr('data-army') - (-originalArmy) - armySize);
 
             // show shadow
-            $('[data-source-id="' + sourceCity.attr('data-city-id') + '"][data-target-id="' + targetCity.attr('data-city-id') + '"]').attr('filter', armySize == 0 ? '' : 'url(#shadow)');
+            $('[data-source-id="' + sourceCity.attr('data-city-id') + '"][data-target-id="' + targetCity.attr('data-city-id') + '"],[data-source-id="' + targetCity.attr('data-city-id') + '"][data-target-id="' + sourceCity.attr('data-city-id') + '"]').attr('filter', armySize == 0 ? '' : 'url(#shadow)');
             refresh();
 
             $('.shadow').css('display', 'none');

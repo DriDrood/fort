@@ -21,7 +21,7 @@ namespace Fort.Services
 
             using (FortDbContext context = new FortDbContext())
             {
-                if (!context.Paths.Any(p => p.SourceId == turn.SourceCityId && p.TargetId == turn.TargetCityId))
+                if (!context.Paths.Any(p => (p.SourceId == turn.SourceCityId && p.TargetId == turn.TargetCityId) || (p.SourceId == turn.TargetCityId && p.TargetId == turn.SourceCityId)))
                     throw new FortException(ELogLevel.Warning, "Zde není cesta");
 
                 Turn dbTurn = context.Turns.SingleOrDefault(t => t.SourceCityId == turn.SourceCityId && t.TargetCityId == turn.TargetCityId && t.RoundId == _roundService.CurrentRound.Id);
