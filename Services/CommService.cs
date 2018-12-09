@@ -96,6 +96,10 @@ namespace Fort.Services
                             await SendToOne(playerId, "notification", new { type = "success", message = "Kolo ukončeno" });
                             break;
 
+                        case "jserror":
+                            Logger.Log(ELogLevel.JS, playerId, data["params"]["message"].Value<string>(), $"{data["params"]["url"].Value<string>()} - line {data["params"]["line"].Value<string>()}");
+                            break;
+
                         default:
                             throw new FortException(ELogLevel.Warning, "Neznámá funkce");
                     }

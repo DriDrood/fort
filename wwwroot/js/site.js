@@ -3,6 +3,7 @@
 
 // Write your JavaScript code.
 
+// Click handling
 $(document).ready(function () {
     var sourceCity = null;
     var targetCity = null;
@@ -117,6 +118,7 @@ $(document).ready(function () {
     });
 });
 
+// WebSocket
 var ws = null;
 function createWS() {
     var url = 'ws://' + location.hostname + (location.port != '' ? (':' + location.port) : '') + location.pathname;
@@ -133,6 +135,7 @@ function createWS() {
     };
 }
 
+// Message Handling
 var map_walkOut = null;
 var map_walkIn = null;
 var map_turns = null;
@@ -178,10 +181,8 @@ function onMessage(message) {
         // TODO
     }
 }
-function refresh() {
-    $('#map_holder').html($('#map_holder').html());
-}
 
+// Notifications
 function notification(type, message) {
     $('#notification')
         .css('display', 'block')
@@ -193,6 +194,7 @@ function notification(type, message) {
     }, 3000);
 }
 
+// CountDown
 var countDownTask;
 function countDown(total_seconds) {
     countDownTask = setInterval(function () {
@@ -217,3 +219,17 @@ function stopCountDown() {
     clearInterval(countDownTask);
 }
 
+// System
+function refresh() {
+    $('#map_holder').html($('#map_holder').html());
+}
+window.onerror = function(errorMsg, url, lineNumber) {
+    ws.send(JSON.stringify({
+        method: 'jsError',
+        params: {
+            message: errorMsg,
+            url: url,
+            line: lineNumber
+        }
+    }));
+}
