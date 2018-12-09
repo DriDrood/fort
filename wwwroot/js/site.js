@@ -20,7 +20,7 @@ $(document).ready(function () {
                 if (clicked.attr('data-owned') != 'True')
                     notification('warning', 'Toto město není vaše');
                 else {
-                    sourceCity = { id: clicked.attr('data-city-id'), army: clicked.attr('data-army') };
+                    sourceCity = clicked;
                     clicked.attr('filter', 'url(#shadow)');
                     refresh();
                 }
@@ -28,21 +28,34 @@ $(document).ready(function () {
 
             // target
             else {
+                // target = source
+                if (sourceCity.attr('data-city-id') == clicked.attr('data-city-id')) {
+                    console.log('a');
+                    sourceCity.attr('filter', '');
+                    sourceCity = null;
+                    refresh();
+                    return;
+                }
+
+                // has no path there
+                if (!sourceCity.attr('data-neighbours').split(' ').includes(clicked.attr('data-city-id')))
+                    return;
+
                 // save target city
-                targetCity = { id: clicked.attr('data-city-id'), army: clicked.attr('data-army') };
+                targetCity = clicked;
 
                 // show modal
                 var modal = $('#sendArmy');
                 modal.parent().css('display', 'flex');
 
                 // get current army
-                var army = $('[data-city-id="' + sourceCity.id + '"]').data('army-sent-' + targetCity.id);
+                var army = sourceCity.attr('data-army-sent-' + targetCity.attr('data-city-id'));
                 if (army === undefined || army == null)
                     army = 0;
 
                 // set max army
                 modal.find('#armySize')
-                    .attr('max', sourceCity['army'] - (-army))
+                    .attr('max', sourceCity.attr('data-army') - (-army))
                     .val(army)
                     .trigger('change', null);
             }
@@ -53,34 +66,33 @@ $(document).ready(function () {
             ws.send(JSON.stringify({
                 method: "turn",
                 params: {
-                    SourceCityId: sourceCity.id,
-                    TargetCityId: targetCity.id,
+                    SourceCityId: sourceCity.attr('data-city-id'),
+                    TargetCityId: targetCity.attr('data-city-id'),
                     amount: armySize
                 }
             }));
 
             // update army send
-            var city = $('[data-city-id="' + sourceCity.id + '"]');
-            var originalArmy = city.attr('data-army-sent-' + targetCity.id);
+            var originalArmy = sourceCity.attr('data-army-sent-' + targetCity.attr('data-city-id'));
             if (originalArmy === undefined || originalArmy == null)
                 originalArmy = 0;
 
-            city.attr('data-army-sent-' + targetCity.id, armySize);
-            city.attr('data-army', city.attr('data-army') - (-originalArmy) - armySize);
+            sourceCity.attr('data-army-sent-' + targetCity.attr('data-city-id'), armySize);
+            sourceCity.attr('data-army', sourceCity.attr('data-army') - (-originalArmy) - armySize);
 
             // show shadow
-            $('[data-source-id="' + sourceCity.id + '"][data-target-id="' + targetCity.id + '"]').attr('filter', armySize == 0 ? '' : 'url(#shadow)');
+            $('[data-source-id="' + sourceCity.attr('data-city-id') + '"][data-target-id="' + targetCity.attr('data-city-id') + '"]').attr('filter', armySize == 0 ? '' : 'url(#shadow)');
             refresh();
 
             $('.shadow').css('display', 'none');
-            $('[data-city-id="' + sourceCity.id + '"]').attr('filter', '');
+            sourceCity.attr('filter', '');
             sourceCity = null;
             targetCity = null;
         }
         // hide modal
         else if (clicked.hasClass('shadow') || clicked.val() == 'cancel') {
             $('.shadow').css('display', 'none');
-            $('[data-city-id="' + sourceCity.id + '"]').attr('filter', '');
+            sourceCity.attr('filter', '');
             sourceCity = null;
             targetCity = null;
         }
