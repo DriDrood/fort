@@ -19,42 +19,64 @@ $(document).ready(function () {
             if (sourceCity == null) {
                 if (clicked.attr('data-owned') != 'True')
                     notification('warning', 'Toto město není vaše');
-                else
+                else {
                     sourceCity = { id: clicked.attr('data-city-id'), army: clicked.attr('data-army') };
+                    clicked.attr('filter', 'url(#shadow)');
+                    refresh();
+                }
             }
 
             // target
             else {
+                // save target city
                 targetCity = { id: clicked.attr('data-city-id'), army: clicked.attr('data-army') };
+
+                // show modal
                 var modal = $('#sendArmy');
                 modal.parent().css('display', 'flex');
 
+                // get current army
+                var army = $('[data-city-id="' + sourceCity.id + '"]').data('army-sent-' + targetCity.id);
+                if (army === undefined || army == null)
+                    army = 0;
+
                 // set max army
                 modal.find('#armySize')
-                    .attr('max', sourceCity['army'])
-                    .val(0);
-                // move point
-                modal.find('.slider_point').css('left', '');
+                    .attr('max', sourceCity['army'] - (-army))
+                    .val(army)
+                    .trigger('change', null);
             }
         }
         // send army
         else if (clicked.val() == 'sendArmy') {
+            var armySize = $('#armySize').val();
             ws.send(JSON.stringify({
                 method: "turn",
                 params: {
                     SourceCityId: sourceCity.id,
                     TargetCityId: targetCity.id,
-                    amount: $('#armySize').val()
+                    amount: armySize
                 }
             }));
 
+            // update army send
+            var city = $('[data-city-id="' + sourceCity.id + '"]');
+            city.attr('data-army-sent-' + targetCity.id, armySize);
+            city.attr('data-army', city.attr('data-army') - armySize);
+
+            // show shadow
+            $('[data-source-id="' + sourceCity.id + '"][data-target-id="' + targetCity.id + '"]').attr('filter', armySize == 0 ? '' : 'url(#shadow)');
+            refresh();
+
             $('.shadow').css('display', 'none');
+            $('[data-city-id="' + sourceCity.id + '"]').attr('filter', '');
             sourceCity = null;
             targetCity = null;
         }
         // hide modal
         else if (clicked.hasClass('shadow') || clicked.val() == 'cancel') {
             $('.shadow').css('display', 'none');
+            $('[data-city-id="' + sourceCity.id + '"]').attr('filter', '');
             sourceCity = null;
             targetCity = null;
         }
@@ -139,6 +161,9 @@ function onMessage(message) {
             $('#map_holder').html(map_walkIn);
         // TODO
     }
+}
+function refresh() {
+    $('#map_holder').html($('#map_holder').html());
 }
 
 function notification(type, message) {

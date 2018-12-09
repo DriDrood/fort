@@ -52,8 +52,8 @@ namespace Fort.Services
                 .Include(p => p.Target).ThenInclude(c => c.Owner).ThenInclude(u => u.Team))
             {
                 var middle = GetMiddlePoint(path);
-                svgMap.AppendLine($"<line x1=\"{path.Source.X}\" y1=\"{path.Source.Y}\" x2=\"{middle.x}\" y2=\"{middle.y}\" style=\"stroke:{GetCityColor(path.Source)};stroke-width:5\" />");
-                svgMap.AppendLine($"<line x1=\"{middle.x}\" y1=\"{middle.y}\" x2=\"{path.Target.X}\" y2=\"{path.Target.Y}\"  style=\"stroke:{GetCityColor(path.Target)};stroke-width:5\" />");
+                svgMap.AppendLine($"<line x1=\"{path.Source.X}\" y1=\"{path.Source.Y}\" x2=\"{middle.x}\" y2=\"{middle.y}\" data-source-id=\"{path.SourceId}\" data-target-id=\"{path.TargetId}\" style=\"stroke:{GetCityColor(path.Source)};stroke-width:5\" />");
+                svgMap.AppendLine($"<line x1=\"{middle.x}\" y1=\"{middle.y}\" x2=\"{path.Target.X}\" y2=\"{path.Target.Y}\" data-source-id=\"{path.SourceId}\" data-target-id=\"{path.TargetId}\" style=\"stroke:{GetCityColor(path.Target)};stroke-width:5\" />");
             }
 
             // cities
@@ -69,6 +69,10 @@ namespace Fort.Services
             }
             // users image
             svgMap.AppendLine($"<defs>");
+
+            svgMap.AppendLine("<filter id=\"shadow\"  filterUnits=\"userSpaceOnUse\">");
+            svgMap.AppendLine("<feDropShadow dx=\"0\" dy=\"0\" stdDeviation=\"5\" flood-color=\"rgb(0, 173, 204)\" flood-opacity=\"1\" />");
+            svgMap.AppendLine("</filter>");
             foreach ((User user, int round) in _userImages)
             {
                 svgMap.AppendLine($"<pattern id=\"U_{user.Id}_{round}\" width=\"1\" height=\"1\">");
