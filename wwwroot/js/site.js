@@ -61,8 +61,12 @@ $(document).ready(function () {
 
             // update army send
             var city = $('[data-city-id="' + sourceCity.id + '"]');
+            var originalArmy = city.attr('data-army-sent-' + targetCity.id);
+            if (originalArmy === undefined || originalArmy == null)
+                originalArmy = 0;
+
             city.attr('data-army-sent-' + targetCity.id, armySize);
-            city.attr('data-army', city.attr('data-army') - armySize);
+            city.attr('data-army', city.attr('data-army') - (-originalArmy) - armySize);
 
             // show shadow
             $('[data-source-id="' + sourceCity.id + '"][data-target-id="' + targetCity.id + '"]').attr('filter', armySize == 0 ? '' : 'url(#shadow)');
