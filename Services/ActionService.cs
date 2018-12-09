@@ -21,11 +21,20 @@ namespace Fort.Services
 
             using (FortDbContext context = new FortDbContext())
             {
-                turn.UserId = user.Id;
-                turn.RoundId = _roundService.CurrentRound.Id;
-                turn.CreatedAt = DateTime.UtcNow;
+                Turn dbTurn = context.Turns.SingleOrDefault(t => t.SourceCityId == turn.SourceCityId && t.TargetCityId == turn.TargetCityId && t.RoundId == _roundService.CurrentRound.Id);
+                if (dbTurn != null)
+                {
+                    dbTurn.Amount = turn.Amount;
+                    dbTurn.CreatedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    turn.UserId = user.Id;
+                    turn.RoundId = _roundService.CurrentRound.Id;
+                    turn.CreatedAt = DateTime.UtcNow;
+                    context.Turns.Add(turn);
+                }
 
-                context.Turns.Add(turn);
                 context.SaveChanges();
             }
         }
