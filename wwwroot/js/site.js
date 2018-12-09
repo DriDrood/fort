@@ -223,7 +223,7 @@ function stopCountDown() {
 function refresh() {
     $('#map_holder').html($('#map_holder').html());
 }
-window.onerror = function(errorMsg, url, lineNumber) {
+window.onerror = function (errorMsg, url, lineNumber) {
     ws.send(JSON.stringify({
         method: 'jsError',
         params: {
@@ -233,3 +233,11 @@ window.onerror = function(errorMsg, url, lineNumber) {
         }
     }));
 }
+
+// LoginPage
+$(document).ready(function () {
+    // spinner
+    $('body.login form').on('submit', function () {
+        $('#loginBtn').html('<i class="fa fa-spinner fa-spin fa-fw"></i>');
+    });
+});
