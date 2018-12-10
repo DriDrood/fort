@@ -135,6 +135,12 @@ body.login form .error {
 
     background-color: rgba(0, 0, 0, 0.6);
 }
+.shadow .fa-spinner {
+    display: none;
+
+    font-size: 50px;
+    color: #fff;
+}
 .modal {
     width: 200px;
 

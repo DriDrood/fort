@@ -3,10 +3,14 @@
 
 // Write your JavaScript code.
 
+// DATA
+var sourceCity = null;
+var targetCity = null;
+var ws = null;
+var countDownTask;
+
 // Click handling
 $(document).ready(function () {
-    var sourceCity = null;
-    var targetCity = null;
     if ($('body.map').length > 0) {
         createWS();
     }
@@ -73,29 +77,12 @@ $(document).ready(function () {
                 }
             }));
 
-            // update army send
-            var originalArmy = sourceCity.attr('data-army-sent-' + targetCity.attr('data-city-id'));
-            if (originalArmy === undefined || originalArmy == null)
-                originalArmy = 0;
-
-            sourceCity.attr('data-army-sent-' + targetCity.attr('data-city-id'), armySize);
-            sourceCity.attr('data-army', sourceCity.attr('data-army') - (-originalArmy) - armySize);
-
-            // show shadow
-            $('[data-source-id="' + sourceCity.attr('data-city-id') + '"][data-target-id="' + targetCity.attr('data-city-id') + '"],[data-source-id="' + targetCity.attr('data-city-id') + '"][data-target-id="' + sourceCity.attr('data-city-id') + '"]').attr('filter', armySize == 0 ? '' : 'url(#shadow)');
-            refresh();
-
-            $('.shadow').css('display', 'none');
-            sourceCity.attr('filter', '');
-            sourceCity = null;
-            targetCity = null;
+            $('#sendArmy').css('display', 'none');
+            $('.shadow .fa-spinner').css('display', 'inline');
         }
         // hide modal
         else if (clicked.hasClass('shadow') || clicked.val() == 'cancel') {
-            $('.shadow').css('display', 'none');
-            sourceCity.attr('filter', '');
-            sourceCity = null;
-            targetCity = null;
+            hideModal();
         }
         // actions
         else if (clicked.attr('id') == 'play') {
@@ -119,7 +106,6 @@ $(document).ready(function () {
 });
 
 // WebSocket
-var ws = null;
 function createWS() {
     var url = 'ws://' + location.hostname + (location.port != '' ? (':' + location.port) : '') + location.pathname;
     console.log('connecting to ' + url);
@@ -143,9 +129,12 @@ function onMessage(message) {
     console.log(message);
     var data = JSON.parse(message.data);
     switch (data["method"]) {
+        // notifications
         case "notification":
             notification(data['params']['type'], data['params']['message']);
             break;
+
+        // round lifecycle
         case "StartRound":
         case "Resume":
             stopCountDown();
@@ -167,6 +156,7 @@ function onMessage(message) {
             $('#actions .round').html('<i class="fa fa-circle-o-notch" title="Začíná kolo"></i> Kolo ' + data["params"]["roundNumber"]);
             break;
 
+        // round results
         case "map_walkOut":
             map_walkOut = data["params"];
             break
@@ -178,7 +168,29 @@ function onMessage(message) {
             break;
         case "map_show":
             $('#map_holder').html(map_walkIn);
-        // TODO
+
+        // turn response
+        case "turnOk":
+            var armySize = $('#armySize').val();
+            // update army send
+            var originalArmy = sourceCity.attr('data-army-sent-' + targetCity.attr('data-city-id'));
+            if (originalArmy === undefined || originalArmy == null)
+                originalArmy = 0;
+
+            sourceCity.attr('data-army-sent-' + targetCity.attr('data-city-id'), armySize);
+            sourceCity.attr('data-army', sourceCity.attr('data-army') - (-originalArmy) - armySize);
+
+            // show shadow
+            $('[data-source-id="' + sourceCity.attr('data-city-id') + '"][data-target-id="' + targetCity.attr('data-city-id') + '"],[data-source-id="' + targetCity.attr('data-city-id') + '"][data-target-id="' + sourceCity.attr('data-city-id') + '"]').attr('filter', armySize == 0 ? '' : 'url(#shadow)');
+            refresh();
+
+            hideModal();
+            notification('success', data['params']);
+            break;
+        case "turnError":
+            hideModal();
+            notification('error', data['params']);
+            break;
     }
 }
 
@@ -195,7 +207,6 @@ function notification(type, message) {
 }
 
 // CountDown
-var countDownTask;
 function countDown(total_seconds) {
     countDownTask = setInterval(function () {
         var hours = Math.floor(total_seconds / (60 * 60));
@@ -222,6 +233,14 @@ function stopCountDown() {
 // System
 function refresh() {
     $('#map_holder').html($('#map_holder').html());
+}
+function hideModal() {
+    $('.shadow .fa-spinner').css('display', 'none');
+    $('#sendArmy').css('display', '');
+    $('.shadow').css('display', 'none');
+    sourceCity.attr('filter', '');
+    sourceCity = null;
+    targetCity = null;
 }
 window.onerror = function (errorMsg, url, lineNumber) {
     ws.send(JSON.stringify({
