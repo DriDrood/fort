@@ -94,6 +94,10 @@ $(document).ready(function () {
         else if (clicked.attr('id') == 'end') {
             ws.send(JSON.stringify({ method: "end" }));
         }
+        else if (clicked.attr('id') == 'restart') {
+            if (confirm("Opravdu chcete restartovat celou hru?"))
+                ws.send(JSON.stringify({ method: 'restart' }));
+        }
         // reconect
         else if (clicked.hasClass('fa-chain-broken')) {
             clicked.parent().html('<i class="fa fa-spinner fa-spin fa-fw"></i>')
@@ -152,6 +156,11 @@ function onMessage(message) {
             countDown(data["params"]["duration"]);
             $('#actions .round').html('<i class="fa fa-circle-o-notch" title="Začíná kolo"></i> Kolo ' + data["params"]["roundNumber"]);
             break;
+        case "Restart":
+            stopCountDown();
+            setTime(0);
+            $('#map_holder').html(data["params"]);
+            break;
 
         // round results
         case "map_walkOut":
@@ -206,25 +215,29 @@ function notification(type, message) {
 // CountDown
 function countDown(total_seconds) {
     countDownTask = setInterval(function () {
-        var hours = Math.floor(total_seconds / (60 * 60));
-        var minutes = Math.floor(total_seconds / 60);
-        var seconds = total_seconds % 60;
-        $('#actions .time').html(hours + ':' + pad100(minutes) + ':' + pad100(seconds));
+        setTime(total_seconds);
 
         total_seconds--;
         if (total_seconds < 0)
             stopCountDown();
     }, 1000);
-
+}
+function stopCountDown() {
+    clearInterval(countDownTask);
+}
+function setTime(total_seconds)
+{
+    var hours = Math.floor(total_seconds / (60 * 60));
+    var minutes = Math.floor(total_seconds / 60);
+    var seconds = total_seconds % 60;
+    $('#actions .time').html(hours + ':' + pad100(minutes) + ':' + pad100(seconds));
+    
     function pad100(value) {
         if (value < 10)
             return '0' + value;
 
         return value;
     }
-}
-function stopCountDown() {
-    clearInterval(countDownTask);
 }
 
 // System

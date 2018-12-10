@@ -75,7 +75,7 @@ namespace Fort.Services
                             {
                                 Turn playerTurn = data["params"].ToObject<Turn>();
                                 _actionService.Turn(user, playerTurn);
-                                await SendToOne(playerId, "turnOk", "Tah úspěšně zadán" );
+                                await SendToOne(playerId, "turnOk", "Tah úspěšně zadán");
                             }
                             catch (FortException ex)
                             {
@@ -102,6 +102,11 @@ namespace Fort.Services
                         case "end":
                             _actionService.End(user);
                             await SendToOne(playerId, "notification", new { type = "success", message = "Kolo ukončeno" });
+                            break;
+
+                        case "restart":
+                            await _actionService.RestartAll(user);
+                            await SendToAll("notification", new { type = "warning", message = "Restart hry" });
                             break;
 
                         case "jserror":

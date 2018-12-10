@@ -23,6 +23,7 @@ namespace Fort.Services
         private CommService _commService => Program.GetService<CommService>();
         private Timer _timer;
         private Task _playTask;
+        private bool _playTaskCanceled;
 
         private Dictionary<string, string> _startingPositions;
 
@@ -59,6 +60,8 @@ namespace Fort.Services
             }
 
             _context.SaveChanges();
+
+            _playTaskCanceled = false;
         }
         private int GetNeutralArmySize()
         {
@@ -83,11 +86,13 @@ namespace Fort.Services
                         _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
                         await Init(_timer.Remains.Value);
                         await _timer.Start();
+                        if (_playTaskCanceled) return;
                     }
 
                     _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultRoundDurationSec));
                     Start();
                     await _timer.Start();
+                    if (_playTaskCanceled) return;
 
                     _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultBeforeVisualizationSec));
                     await End();
@@ -95,6 +100,7 @@ namespace Fort.Services
 
                     await Finalize();
                     await tt;
+                    if (_playTaskCanceled) return;
 
                     await ShowFinalize();
                 }
@@ -108,12 +114,20 @@ namespace Fort.Services
         }
         public async Task ResetGame()
         {
+            _playTaskCanceled = true;
+            _timer.End();
+
             CurrentRound = null;
             _timer = new Timer();
-            await _commService.SendToAll("Reset", new { });
 
             LoadStart();
             await Init();
+
+            await _commService.SendToEach("Restart", playerId =>
+            {
+                Player player = (Player)_context.Users.Find(playerId) ?? _context.Teams.Find(playerId);
+                return MapBaseService.GetMapServiceForPlayer(_context, player).Print();
+            });
         }
 
         public async Task Init(TimeSpan? duration = null)
