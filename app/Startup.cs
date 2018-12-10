@@ -55,6 +55,7 @@ namespace Fort
             {
                 app.UseExceptionHandler("/Home/Error");
                 app.UseHsts();
+                MigrateDatabase(app);
             }
 
             app.UseStaticFiles();
@@ -83,6 +84,19 @@ namespace Fort
             Logger.Configure(configuration.GetSection("Logger"));
             app.ApplicationServices.GetService<RoundService>().Setup(configuration.GetSection("StartingPositions"));
             app.ApplicationServices.GetService<RoundService>().Init().GetAwaiter().GetResult();
+        }
+
+        private static void MigrateDatabase(IApplicationBuilder app)
+        {
+            using (var serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope())
+            {
+                using (var context = serviceScope.ServiceProvider.GetService<FortDbContext>())
+                {
+                    context.Database.Migrate();
+                }
+            }
         }
     }
 }
