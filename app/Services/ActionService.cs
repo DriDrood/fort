@@ -13,7 +13,7 @@ namespace Fort.Services
 
         public void Turn(User user, Turn turn)
         {
-            if (_roundService.State != Utils.Timer.Status.Running)
+            if (_roundService.State != Utils.Timer.Status.Running && _roundService.State != Utils.Timer.Status.Paused)
                 throw new FortException(ELogLevel.Warning, "Kolo neběží");
 
             if (!user.Cities.Any(c => c.Id == turn.SourceCityId))
