@@ -90,18 +90,13 @@ namespace Fort.Services
                             break;
 
                         case "play":
-                            _actionService.Play(user);
-                            await SendToAll("notification", new { type = "success", message = "Hra začíná" });
+                            await _actionService.Play(user);
+                            await SendToAll("notification", new { type = "success", message = "Hra spuštěna" });
                             break;
 
                         case "pause":
                             await _actionService.Pause(user);
                             await SendToOne(playerId, "notification", new { type = "success", message = "Hra pozastavena" });
-                            break;
-
-                        case "resume":
-                            await _actionService.Resume(user);
-                            await SendToOne(playerId, "notification", new { type = "success", message = "Hra obnovena" });
                             break;
 
                         case "end":

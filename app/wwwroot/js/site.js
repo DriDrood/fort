@@ -91,9 +91,6 @@ $(document).ready(function () {
         else if (clicked.attr('id') == 'pause') {
             ws.send(JSON.stringify({ method: "pause" }));
         }
-        else if (clicked.attr('id') == 'resume') {
-            ws.send(JSON.stringify({ method: "resume" }));
-        }
         else if (clicked.attr('id') == 'end') {
             ws.send(JSON.stringify({ method: "end" }));
         }
