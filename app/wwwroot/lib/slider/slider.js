@@ -32,7 +32,19 @@ $(document).ready(function () {
         var value = parseInt(thisObject.val());
         var max = parseInt(thisObject.attr('max'));
         var min = parseInt(thisObject.attr('min'));
-        if (thisObject.val() != '' && value <= max && value >= min) {
+
+        if (value > max)
+        {
+            value = max;
+            thisObject.val(value);
+        }
+        if (value < min)
+        {
+            value = min;
+            thisObject.val(value);
+        }
+
+        if (thisObject.val() != '') {
             var field = parseInt(source.css('width')) / (max - min);
             var point = source.find('.slider_point');
             point.css('left', (field * value) - 5);
