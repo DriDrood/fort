@@ -30,6 +30,8 @@ html, body {
 } */
 
 #map {
+    min-width: 1280px;
+
     background-image: url('/images/top-black-and-white-map-of-the-world-1.png');
     background-size: 100% 100%;
 }
