@@ -27,8 +27,8 @@ namespace Fort.Services
         {
             if (ShowCityAvatar(city))
             {
-                _userImages.Add((city.Owner, city.Radius));
-                return $"url(#U_{city.Owner.Id}_{city.Radius})";
+                _userImages.Add((city.Owner, GetRadius(city.Army)));
+                return $"url(#U_{city.Owner.Id}_{GetRadius(city.Army)})";
             }
 
             return GetCityColor(city);
@@ -62,10 +62,10 @@ namespace Fort.Services
                 int cityArmy = GetCityArmy(city);
                 if (cityArmy > 0)
                 {
-                    svgMap.AppendLine($"<circle cx=\"{city.X - city.Radius}\" cy=\"{city.Y - city.Radius}\" r=\"14\" fill=\"white\" style=\"stroke:black;stroke-width:2;\" />");
-                    svgMap.AppendLine($"<text x=\"{city.X - city.Radius}\" y=\"{city.Y - city.Radius + 6}\" text-anchor=\"middle\" class=\"armyText\">{cityArmy}</text>");
+                    svgMap.AppendLine($"<circle cx=\"{city.X - GetRadius(city.Army)}\" cy=\"{city.Y - GetRadius(city.Army)}\" r=\"14\" fill=\"white\" style=\"stroke:black;stroke-width:2;\" />");
+                    svgMap.AppendLine($"<text x=\"{city.X - GetRadius(city.Army)}\" y=\"{city.Y - GetRadius(city.Army) + 6}\" text-anchor=\"middle\" class=\"armyText\">{cityArmy}</text>");
                 }
-                svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"{city.Radius}\" data-city-id=\"{city.Id}\" data-neighbours=\"{string.Join(" ", city.Neighbour.Select(c => c.Id))}\" data-owned=\"{city.OwnerId == _player.Id}\" data-army=\"{(cityArmy)}\" fill=\"{GetCityFill(city)}\" style=\"stroke:{GetCityColor(city)};stroke-width:2\" />");
+                svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"{GetRadius(city.Army)}\" data-city-id=\"{city.Id}\" data-neighbours=\"{string.Join(" ", city.Neighbour.Select(c => c.Id))}\" data-owned=\"{city.OwnerId == _player.Id}\" data-army=\"{(cityArmy)}\" fill=\"{GetCityFill(city)}\" style=\"stroke:{GetCityColor(city)};stroke-width:2\" />");
             }
             // users image
             svgMap.AppendLine($"<defs>");
@@ -120,16 +120,37 @@ namespace Fort.Services
             return $"{rem.Value.Hours}:{rem.Value.Minutes.ToString().PadLeft(2, '0')}:{rem.Value.Seconds.ToString().PadLeft(2, '0')}";
         }
 
-        public string Army(Turn turn)
+        public string[] Army(Turn turn)
         {
-            return $"<div id=\"army{turn.Id}\" class=\"army\" style=\"background-color:{turn.SourceCity};top:{turn.SourceCity.Y - 10}px;left:{turn.SourceCity.X - 10}px;\"></div>";
+            // not changed
+            if (turn.Amount == turn.ModifiedAmount)
+                return
+                    new string[] { $"<div id=\"army{turn.Id}\" class=\"army\" data-time=\"all\" data-final-x=\"{turn.TargetCity.X}\" data-final-y=\"{turn.TargetCity.Y}\" style=\"width:{GetRadius(turn.Amount)}px;height:{GetRadius(turn.Amount)}px;border-radius:{GetRadius(turn.Amount)}px;background-color:{GetCityColor(turn.SourceCity)};top:{turn.SourceCity.Y}px;left:{turn.SourceCity.X}px;\"></div>" };
+
+            var middle = GetMiddlePoint(turn);
+
+            // get smaller
+            if (turn.ModifiedAmount > 0)
+                return new string[]
+                {
+                    $"<div id=\"army{turn.Id}a\" class=\"army\" data-time=\"begin\" data-final-x=\"{middle.x}\" data-final-y=\"{middle.y}\" style=\"width:{GetRadius(turn.Amount)}px;height:{GetRadius(turn.Amount)}px;border-radius:{GetRadius(turn.Amount)}px;background-color:{GetCityColor(turn.SourceCity)};top:{turn.SourceCity.Y}px;left:{turn.SourceCity.X}px;\"></div>",
+                    $"<div id=\"army{turn.Id}b\" class=\"army\" data-time=\"end\" data-final-x=\"{turn.TargetCity.X}\" data-final-y=\"{turn.TargetCity.Y}\" style=\"width:{GetRadius(turn.ModifiedAmount.Value)}px;height:{GetRadius(turn.ModifiedAmount.Value)}px;border-radius:{GetRadius(turn.ModifiedAmount.Value)}px;background-color:{GetCityColor(turn.SourceCity)};top:{middle.y}px;left:{middle.x}px;\"></div>"
+                };
+
+            // destroyed
+            return
+                new string[] { $"<div id=\"army{turn.Id}\" class=\"army\" data-time=\"begin\" data-final-x=\"{middle.x}\" data-final-y=\"{middle.y}\" style=\"width:{GetRadius(turn.Amount)}px;height:{GetRadius(turn.Amount)}px;border-radius:{GetRadius(turn.Amount)}px;background-color:{GetCityColor(turn.SourceCity)};top:{turn.SourceCity.Y}px;left:{turn.SourceCity.X}px;\"></div>" };
         }
 
         public static (double x, double y) GetMiddlePoint(Path path)
         {
             return GetMiddlePoint(path.Source.X, path.Source.Y, path.Target.X, path.Target.Y);
         }
-        public static (double x, double y) GetMiddlePoint(double sourceX, double sourceY, double targetX, double targetY)
+        public static (double x, double y) GetMiddlePoint(Turn turn)
+        {
+            return GetMiddlePoint(turn.SourceCity.X, turn.SourceCity.Y, turn.TargetCity.X, turn.TargetCity.Y);
+        }
+        private static (double x, double y) GetMiddlePoint(double sourceX, double sourceY, double targetX, double targetY)
         {
             (double x, double y) result = (0, 0);
             result.x = ((targetX - sourceX) / 2) + sourceX;
@@ -137,6 +158,8 @@ namespace Fort.Services
 
             return result;
         }
+
+        public int GetRadius(int army) => (int)(army == 0 ? 3 : (System.Math.Log10(army) * 10 + 2));
 
         public static MapBaseService GetMapServiceForPlayer(FortDbContext context, Player player)
         {

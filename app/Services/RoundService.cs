@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Fort.Database;
 using Fort.Database.Entities;
 using Fort.Utils;
 using Fort.Utils.Logger;
 using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Fort.Services
@@ -196,60 +198,35 @@ namespace Fort.Services
             });
 
             /// fights in the middle
-            JArray jTurns = new JArray();
             foreach (Turn turn in turns)
             {
                 // same path, different teams
                 Turn second = turns.FirstOrDefault(t => t.SourceCityId == turn.TargetCityId && t.TargetCityId == turn.SourceCityId && t.User.TeamId != turn.User.TeamId);
                 if (second != null)
                 {
-                    var middle = MapBaseService.GetMiddlePoint(turn.SourceCity.X, turn.SourceCity.Y, turn.TargetCity.X, turn.TargetCity.Y);
-                    jTurns.Add(new JObject
-                    {
-                        { "sourceX", turn.SourceCity.X },
-                        { "sourceY", turn.SourceCity.Y },
-                        { "targetX", middle.x },
-                        { "targetY", middle.y },
-                        { "amount", turn.Amount },
-                        { "way", "1"}
-                    });
-
                     // army destroyed
                     if (turn.Amount < second.Amount)
-                    {
                         turn.ModifiedAmount = 0;
-                    }
                     // have greather army
                     else
-                    {
-                        int modifiedAmount = turn.Amount - second.Amount;
-                        jTurns.Add(new JObject
-                        {
-                            { "sourceX", middle.x },
-                            { "sourceY", middle.y },
-                            { "targetX", turn.TargetCity.X },
-                            { "targetY", turn.TargetCity.Y },
-                            { "amount", modifiedAmount },
-                            { "way", "2"}
-                        });
-                        turn.ModifiedAmount = modifiedAmount;
-                    }
+                        turn.ModifiedAmount = turn.Amount - second.Amount;
                 }
                 // no turn on same path
                 else
                 {
-                    jTurns.Add(new JObject
-                    {
-                        { "sourceX", turn.SourceCity.X },
-                        { "sourceY", turn.SourceCity.Y },
-                        { "targetX", turn.TargetCity.X },
-                        { "targetY", turn.TargetCity.Y },
-                        { "amount", turn.Amount },
-                        { "way", "both" }
-                    });
+                    turn.ModifiedAmount = turn.Amount;
                 }
             }
-            await _commService.SendToAll("turns", jTurns);
+            await _commService.SendToEach("turns", playerId =>
+            {
+                Player player = (Player)_context.Users.Find(playerId) ?? _context.Teams.Find(playerId);
+                MapBaseService mapService = MapBaseService.GetMapServiceForPlayer(_context, player);
+                List<string> result = new List<string>();
+                foreach (Turn turn in turns)
+                    result.AddRange(mapService.Army(turn));
+
+                return JsonConvert.SerializeObject(result);
+            });
 
             /// walk in
             foreach (City city in cities)

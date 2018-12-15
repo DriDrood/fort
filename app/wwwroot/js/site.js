@@ -8,6 +8,7 @@ var sourceCity = null;
 var targetCity = null;
 var ws = null;
 var countDownTask;
+var animationDuration = 3000;
 
 // Click handling
 $(document).ready(function () {
@@ -170,10 +171,36 @@ function onMessage(message) {
             map_walkIn = data["params"];
             break
         case "turns":
-            map_turns = data["params"];
+            map_turns = JSON.parse(data["params"]);
             break;
         case "map_show":
-            $('#map_holder').html(map_walkIn);
+            var mapHolder = $('#map_holder');
+            mapHolder.html(map_walkOut);
+
+            var ratio = parseInt($('#map').css('width')) / parseInt($('#map').attr('viewBox').split(' ')[2]);
+            $.each(map_turns, function (index, turn) {
+                var turnObject = $(turn);
+                turnObject.css('top', marginFromCenter(turnObject.css('top')));
+                turnObject.css('left', marginFromCenter(turnObject.css('left')));
+
+                var duration = turnObject.attr('data-time') == 'all' ? animationDuration : (animationDuration / 2);
+                var delay = turnObject.attr('data-time') == 'end' ? (animationDuration / 2) : 0;
+                setTimeout(function () {
+                    mapHolder.append(turnObject[0].outerHTML);
+                    $('#' + turnObject.attr('id')).animate({ left: marginFromCenter(turnObject.attr('data-final-x')), top: marginFromCenter(turnObject.attr('data-final-y')) }, duration, function () {
+                        $('#' + turnObject.attr('id')).remove();
+                    });
+                }, delay);
+
+                function marginFromCenter(center) {
+                    return (parseInt(center) * ratio) - (parseInt(turnObject.css('width')) / 2) + 'px';
+                }
+            });
+
+            setTimeout(() => {
+                mapHolder.html(map_walkIn);
+            }, animationDuration);
+            break;
 
         // turn response
         case "turnOk":
@@ -225,13 +252,12 @@ function countDown(total_seconds) {
 function stopCountDown() {
     clearInterval(countDownTask);
 }
-function setTime(total_seconds)
-{
+function setTime(total_seconds) {
     var hours = Math.floor(total_seconds / (60 * 60));
     var minutes = Math.floor(total_seconds / 60);
     var seconds = total_seconds % 60;
     $('#actions .time').html(hours + ':' + pad100(minutes) + ':' + pad100(seconds));
-    
+
     function pad100(value) {
         if (value < 10)
             return '0' + value;

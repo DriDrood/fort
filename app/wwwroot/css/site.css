@@ -9,25 +9,10 @@ html, body {
     width: 100%;
 }
 
-/* #turn {
-    position: absolute;
-    top: 50px;
-    right: 100px;
-
-    padding: 3px 8px;
-
-    border: 1px solid black;
-    border-radius: 5px;
-}
-
 .army {
     position: absolute;
-    width: 20px;
-    height: 20px;
     z-index: 10;
-
-    border-radius: 10px;
-} */
+}
 
 #map {
     min-width: 1280px;

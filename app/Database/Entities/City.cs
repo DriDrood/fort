@@ -35,8 +35,5 @@ namespace Fort.Database.Entities
 
         [NotMapped]
         public IEnumerable<City> Neighbour => SourceToPaths.Select(p => p.Target).Union(TargetToPaths.Select(p => p.Source));
-
-        [NotMapped]
-        public int Radius => (int)(Army == 0 ? 3 : (System.Math.Log10(Army) * 10 + 2));
     }
 }
