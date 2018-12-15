@@ -42,7 +42,6 @@ $(document).ready(function () {
             else {
                 // target = source
                 if (sourceCity.attr('data-city-id') == clicked.attr('data-city-id')) {
-                    console.log('a');
                     sourceCity.attr('filter', '');
                     sourceCity = null;
                     refresh();
@@ -64,11 +63,13 @@ $(document).ready(function () {
                 var army = sourceCity.attr('data-army-sent-' + targetCity.attr('data-city-id'));
                 if (army === undefined || army == null)
                     army = 0;
+                    
+                var max = sourceCity.attr('data-army') - (-army);
 
                 // set max army
                 modal.find('#armySize')
-                    .attr('max', sourceCity.attr('data-army') - (-army))
-                    .val(army)
+                    .attr('max', max)
+                    .val(army == 0 ? max : army)
                     .trigger('change', null);
             }
         }
