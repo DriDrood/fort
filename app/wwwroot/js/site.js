@@ -14,6 +14,12 @@ var animationDuration = 3000;
 $(document).ready(function () {
     if ($('body.map').length > 0) {
         createWS();
+
+        // round is running
+        if ($('.round .fa-play').length > 0) {
+            var time = $('.time').html().split(':');
+            countDown(time[0]*60*60 - (-time[1]*60) - (-time[2]));
+        }
     }
 
     $('body.map').on('mousedown', function (e) {
