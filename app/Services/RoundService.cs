@@ -238,7 +238,7 @@ namespace Fort.Services
                     var enemyArmies = incoming.Where(gr => gr.Key != city.Owner?.Team).OrderByDescending(gr => gr.Sum(t => t.ModifiedAmount ?? t.Amount)).ToList();
 
                     // fights before gates
-                    if (enemyArmies.Any())
+                    if (enemyArmies.Any() && enemyArmies.Sum(a => a.Sum(t => t.ModifiedAmount ?? t.Amount)) > 0)
                     {
                         IGrouping<Team, Turn> winnerFightBeforeGates = enemyArmies.First();
                         int winnerArmy = winnerFightBeforeGates.Sum(t => t.ModifiedAmount ?? t.Amount);
