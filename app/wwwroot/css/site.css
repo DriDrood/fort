@@ -33,9 +33,10 @@ body.login {
 }
 body.login form {
     display: inline-block;
+    width: 250px;
 
     margin: auto;
-    padding: 20px;
+    padding: 20px 50px;
 
     border: 2px solid #000;
     border-radius: 10px;
@@ -44,9 +45,22 @@ body.login form {
 }
 body.login form input, body.login form button, body.login form .error {
     display: block;
-    width: 200px;
 
-    margin: 5px;
+    width: 250px;
+
+    margin: 0;
+    padding: 10px 0;
+}
+body.login form input {
+    border: none;
+
+    text-align: center;
+}
+body.login form button {
+    border: none;
+    border-radius: 10px;
+    background-color: rgb(119, 15, 15);
+    color: #fff;
 }
 body.login form .error {
     color: #f00;
@@ -85,7 +99,7 @@ body.login form .error {
 
 /* actions */
 #actions {
-    position: absolute;
+    position: fixed;
     top: 0;
     right: 0;
 

@@ -5,8 +5,8 @@
 }
 
 <form method="POST">
-    <input type="text" name="code" />
-    <button id="loginBtn">Přihlásit</button>
+    <input type="text" name="code" placeholder="Tvůj kód" maxlength="5" />
+    <button id="loginBtn">Jdu na to!</button>
     @if (ViewData["errorMessage"] != null)
     {
         <div class="error">@ViewData["errorMessage"]</div>
