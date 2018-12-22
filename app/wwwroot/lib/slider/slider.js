@@ -2,26 +2,30 @@ $(document).ready(function () {
     var slider = null;
     $('.slider .slider_point').on('mousedown touchstart', function (e) {
         var sliderPoint = $(this);
-        slider = { object: sliderPoint, x: e.originalEvent.clientX, margin: parseInt(sliderPoint.css('left')) };
+        slider = { object: sliderPoint, x: e.touches === undefined ? e.originalEvent.clientX : e.touches[0].clientX, margin: parseInt(sliderPoint.css('left')) };
     });
 
     $('body').on('mousemove touchmove', function (e) {
         if (slider != null) {
             var parentWidth = parseInt(slider.object.parent().css('width'));
-            var xDiff = e.originalEvent.clientX - slider['x'];
+            var currentX = e.touches === undefined ? e.originalEvent.clientX : e.touches[0].clientX;
+            var xDiff = currentX - slider['x'];
             var currentMargin = slider['margin'] + xDiff;
 
             // is in range
-            if (currentMargin > -15 && currentMargin < (parentWidth - 15)) {
-                // move
-                slider['object'].css('left', currentMargin);
+            if (currentMargin < -15)
+                currentMargin = -15;
+            else if (currentMargin > (parentWidth - 15))
+                currentMargin = parentWidth - 15;
 
-                // set output
-                var target = $('#' + slider['object'].parent().attr('data-target'));
-                var fieldSize = parseInt(slider['object'].parent().css('width')) / (target.attr('max') - target.attr('min'));
+            // move
+            slider['object'].css('left', currentMargin);
 
-                target.val(Math.floor((currentMargin + fieldSize / 2) / fieldSize));
-            }
+            // set output
+            var target = $('#' + slider['object'].parent().attr('data-target'));
+            var fieldSize = parseInt(slider['object'].parent().css('width')) / (target.attr('max') - target.attr('min'));
+
+            target.val(Math.floor(((currentMargin + 15) + fieldSize / 2) / fieldSize));
         }
     });
 
@@ -33,13 +37,11 @@ $(document).ready(function () {
         var max = parseInt(thisObject.attr('max'));
         var min = parseInt(thisObject.attr('min'));
 
-        if (value > max)
-        {
+        if (value > max) {
             value = max;
             thisObject.val(value);
         }
-        if (value < min)
-        {
+        if (value < min) {
             value = min;
             thisObject.val(value);
         }
