@@ -231,6 +231,22 @@ function onMessage(message) {
             hideModal();
             notification('error', data['params']);
             break;
+
+        // admin stuff
+        case "playerConnected":
+            if ($('.statistics').length > 0) {
+                $('[data-playerId="' + data['params']['playerId'] + '"]').removeClass('fa-chain-broken').addClass('fa-globe');
+            }
+            break;
+        case "playerDisconnected":
+            if ($('.statistics').length > 0) {
+                $('[data-playerId="' + data['params']['playerId'] + '"]').removeClass('fa-globe').addClass('fa-chain-broken');
+            }
+            break;
+        case "statistics":
+            $('.statistics').remove();
+            $('body').append(data["params"]);
+            break;
     }
 }
 

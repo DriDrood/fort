@@ -132,6 +132,23 @@ body.login form .error {
     color: #0f0;
 }
 
+/* statistics */
+.statistics {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+
+    padding: 10px 20px;
+
+    border-width: 1px 0 0 1px;
+    border-style: solid;
+    border-color: #000;
+    border-radius: 20px 0 0 0;
+
+    background-color: #fff;
+    font-size: 25px;
+}
+
 /* modal */
 .shadow {
     position: fixed;

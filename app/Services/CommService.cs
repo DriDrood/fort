@@ -30,21 +30,13 @@ namespace Fort.Services
             // disconnect previous
             if (_playerConnections.ContainsKey(playerId))
             {
-                try
-                {
-                    await _playerConnections[playerId].CloseAsync(WebSocketCloseStatus.EndpointUnavailable, $"Uživatel {playerId} znovu připojen", CancellationToken.None);
-                }
-                catch (WebSocketException)
-                {
-                    _playerConnections[playerId].Abort();
-                }
-
-                _playerConnections.Remove(playerId);
+                playerDisconected(playerId, _playerConnections[playerId], WebSocketCloseStatus.NormalClosure, "Uživatel se znovu přihlásil");
             }
 
             _playerConnections.Add(playerId, webSocket);
 
             Logger.Log(ELogLevel.Connection, playerId, "User connected");
+            SendToAll("playerConnected", new { playerId = playerId }).GetAwaiter().GetResult();
 
             // wait for messages
             var buffer = new byte[_bufferSize];
@@ -66,17 +58,29 @@ namespace Fort.Services
             }
             while (!result.CloseStatus.HasValue);
 
+            playerDisconected(playerId, webSocket, result.CloseStatus.Value, result.CloseStatusDescription);
+        }
+
+        private void playerDisconected(string playerId, WebSocket webSocket, WebSocketCloseStatus status, string message)
+        {
             try
             {
-                await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+                webSocket.CloseAsync(status, message, CancellationToken.None).GetAwaiter().GetResult();
             }
-            catch(WebSocketException)
+            catch (WebSocketException)
             {
                 webSocket.Abort();
             }
             _playerConnections.Remove(playerId);
 
-            Logger.Log(ELogLevel.Connection, playerId, $"User disconnected - {result.CloseStatusDescription}");
+            SendToAll("playerDisconnected", new { playerId = playerId }).GetAwaiter().GetResult();
+
+            Logger.Log(ELogLevel.Connection, playerId, $"User disconnected - {message}");
+        }
+
+        public bool IsPlayerConnected(string playerId)
+        {
+            return _playerConnections.ContainsKey(playerId);
         }
 
         private async Task recieveMessage(string playerId, string message)
@@ -160,7 +164,8 @@ namespace Fort.Services
                 tasks.Add(send(pair.Value, method, data, pair.Key));
             }
 
-            await Task.Run(() => Task.WaitAll(tasks.ToArray()));
+            foreach (Task task in tasks)
+                await task;
         }
         public async Task SendToEach(string method, Func<string, string> getData)
         {
@@ -170,12 +175,14 @@ namespace Fort.Services
                 tasks.Add(send(pair.Value, method, getData(pair.Key), pair.Key));
             }
 
-            await Task.Run(() => Task.WaitAll(tasks.ToArray()));
+            foreach (Task task in tasks)
+                await task;
         }
 
         public async Task SendToOne(string playerId, string method, object data)
         {
-            await send(_playerConnections[playerId], method, data, playerId);
+            if (_playerConnections.ContainsKey(playerId))
+                await send(_playerConnections[playerId], method, data, playerId);
         }
 
         private async Task send(WebSocket webSocket, string method, object data, string playerId)
@@ -189,12 +196,19 @@ namespace Fort.Services
             Logger.Log(ELogLevel.MessageSend, playerId, messageString);
 
             // split & send
-            while (messageBytes.Length > 0)
+            try
             {
-                byte[] buffer = messageBytes.Take(_bufferSize).ToArray();
-                await webSocket.SendAsync(buffer, WebSocketMessageType.Text, messageBytes.Length < _bufferSize, CancellationToken.None);
+                while (messageBytes.Length > 0)
+                {
+                    byte[] buffer = messageBytes.Take(_bufferSize).ToArray();
+                    await webSocket.SendAsync(buffer, WebSocketMessageType.Text, messageBytes.Length < _bufferSize, CancellationToken.None);
 
-                messageBytes = messageBytes.Skip(_bufferSize).ToArray();
+                    messageBytes = messageBytes.Skip(_bufferSize).ToArray();
+                }
+            }
+            catch (WebSocketException ex)
+            {
+                Logger.Log(ELogLevel.UnknownException, playerId, ex.Message, ex.StackTrace);
             }
         }
     }

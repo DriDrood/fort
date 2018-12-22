@@ -287,6 +287,16 @@ namespace Fort.Services
         public async Task ShowFinalize()
         {
             await _commService.SendToAll("map_show", new { });
+
+            // show statistics to admins
+            List<Task> tasks = new List<Task>();
+            foreach (User user in _context.Users.Where(u => u.IsAdmin))
+            {
+                tasks.Add(_commService.SendToOne(user.Id, "statistics", MapBaseService.GetMapServiceForPlayer(_context, user).ShowStatistics()));
+            }
+
+            foreach (Task task in tasks)
+                await task;
         }
         #endregion
 

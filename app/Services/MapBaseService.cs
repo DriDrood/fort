@@ -20,6 +20,8 @@ namespace Fort.Services
             _userImages = new HashSet<(User user, int round)>();
         }
 
+        public virtual string ShowStatistics() => string.Empty;
+
         protected abstract string GetCityColor(City city);
         protected abstract int GetCityArmy(City city);
         protected abstract bool ShowCityAvatar(City city);
