@@ -4,6 +4,19 @@
     ViewData["page"] = "map";
 }
 
+<div id="actions">
+    @if ((ViewData["player"] as Fort.Services.CurrentPlayerService)?.User?.IsAdmin == true)
+    {
+        <i class="fa fa-play float-left" id="play" title="Spustit hru"></i>
+        <i class="fa fa-pause float-left" id="pause" title="Pozastavit"></i>
+        <i class="fa fa-fast-forward float-left" id="end" title="Ukončit kolo"></i>
+        <i class="fa fa-refresh float-left" id="restart" title="Restartovat hru"></i>
+    }
+    <span class="round float-left">@Html.Raw(Model.GetStatus())</span>
+    <span class="connection float-right"><i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i></span>
+    <span class="time float-right">@Model.GetRemaining()</span>
+</div>
+
 <div id="map_holder">
     @Html.Raw(Model.Print())
 </div>
@@ -11,7 +24,7 @@
 <div class="shadow">
     <div id="sendArmy" class="modal">
         <div class="modal_header">
-
+            Poslat armádu
         </div>
         <div class="modal_content">
             <div id="armySlider" class="slider" data-target="armySize"><div class="slider_point"></div></div>
@@ -24,17 +37,4 @@
 </div>
 
 <div id="notification">
-</div>
-
-<div id="actions">
-    @if ((ViewData["player"] as Fort.Services.CurrentPlayerService)?.User?.IsAdmin == true)
-    {
-        <i class="fa fa-play" id="play" title="Spustit hru"></i>
-        <i class="fa fa-pause" id="pause" title="Pozastavit"></i>
-        <i class="fa fa-fast-forward" id="end" title="Ukončit kolo"></i>
-        <i class="fa fa-refresh" id="restart" title="Restartovat hru"></i>
-    }
-    <span class="round">@Html.Raw(Model.GetStatus())</span>
-    <span class="time">@Model.GetRemaining()</span>
-    <span class="connection"><i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i></span>
 </div>
