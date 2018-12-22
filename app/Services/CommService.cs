@@ -27,11 +27,21 @@ namespace Fort.Services
 
         public async Task CreateNewConnection(string playerId, WebSocket webSocket)
         {
+            // disconnect previous
             if (_playerConnections.ContainsKey(playerId))
             {
-                await _playerConnections[playerId].CloseAsync(WebSocketCloseStatus.NormalClosure, "Znovu připojen", new CancellationToken());
+                try
+                {
+                    await _playerConnections[playerId].CloseAsync(WebSocketCloseStatus.EndpointUnavailable, $"Uživatel {playerId} znovu připojen", CancellationToken.None);
+                }
+                catch(Exception)
+                {
+                    _playerConnections[playerId].Abort();
+                }
+
                 _playerConnections.Remove(playerId);
             }
+
             _playerConnections.Add(playerId, webSocket);
 
             Logger.Log(ELogLevel.Connection, playerId, "User connected");
@@ -59,7 +69,7 @@ namespace Fort.Services
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
             _playerConnections.Remove(playerId);
 
-            Logger.Log(ELogLevel.Connection, playerId, "User disconnected");
+            Logger.Log(ELogLevel.Connection, playerId, $"User disconnected - {result.CloseStatusDescription}");
         }
 
         private async Task recieveMessage(string playerId, string message)

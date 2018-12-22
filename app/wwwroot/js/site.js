@@ -18,7 +18,7 @@ $(document).ready(function () {
         // round is running
         if ($('.round .fa-play').length > 0) {
             var time = $('.time').html().split(':');
-            countDown(time[0]*60*60 - (-time[1]*60) - (-time[2]));
+            countDown(time[0] * 60 * 60 - (-time[1] * 60) - (-time[2]));
         }
     }
 
@@ -63,7 +63,7 @@ $(document).ready(function () {
                 var army = sourceCity.attr('data-army-sent-' + targetCity.attr('data-city-id'));
                 if (army === undefined || army == null)
                     army = 0;
-                    
+
                 var max = sourceCity.attr('data-army') - (-army);
 
                 // set max army
