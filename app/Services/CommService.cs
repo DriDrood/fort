@@ -34,7 +34,7 @@ namespace Fort.Services
                 {
                     await _playerConnections[playerId].CloseAsync(WebSocketCloseStatus.EndpointUnavailable, $"Uživatel {playerId} znovu připojen", CancellationToken.None);
                 }
-                catch(Exception)
+                catch (WebSocketException)
                 {
                     _playerConnections[playerId].Abort();
                 }
@@ -66,7 +66,14 @@ namespace Fort.Services
             }
             while (!result.CloseStatus.HasValue);
 
-            await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+            try
+            {
+                await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+            }
+            catch(WebSocketException)
+            {
+                webSocket.Abort();
+            }
             _playerConnections.Remove(playerId);
 
             Logger.Log(ELogLevel.Connection, playerId, $"User disconnected - {result.CloseStatusDescription}");
