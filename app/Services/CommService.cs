@@ -29,7 +29,7 @@ namespace Fort.Services
         {
             if (_playerConnections.ContainsKey(playerId))
             {
-                await _playerConnections[playerId].CloseAsync();
+                await _playerConnections[playerId].CloseAsync(WebSocketCloseStatus.NormalClosure, "Znovu připojen", new CancellationToken());
                 _playerConnections.Remove(playerId);
             }
             _playerConnections.Add(playerId, webSocket);
