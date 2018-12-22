@@ -40,8 +40,14 @@ namespace Fort.Services
             _startingPositions = new Dictionary<string, string>();
             config.Bind(_startingPositions);
 
-            // save to DB
-            LoadStart();
+            // load last round
+            CurrentRound = _context.Rounds.OrderByDescending(r => r.Id).FirstOrDefault();
+            if (CurrentRound == null)
+            {
+                // save to DB
+                LoadStart();
+                Init().GetAwaiter().GetResult();
+            }
         }
         private void LoadStart()
         {

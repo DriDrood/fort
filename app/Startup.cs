@@ -83,7 +83,6 @@ namespace Fort
 
             Logger.Configure(configuration.GetSection("Logger"));
             app.ApplicationServices.GetService<RoundService>().Setup(configuration.GetSection("StartingPositions"));
-            app.ApplicationServices.GetService<RoundService>().Init().GetAwaiter().GetResult();
         }
 
         private static void MigrateDatabase(IApplicationBuilder app)
