@@ -6,7 +6,7 @@ namespace Fort.Services
     {
         public Player Player { get; set; }
 
-        public User User => (User)Player;
+        public User User => (Player is User) ? (User)Player : null;
         public Team Team => (Team)Player;
 
         public override string ToString()

@@ -44,7 +44,7 @@ namespace Fort.Services
                 return true;
 
             // city near enemy border
-            if (city.Neighbour.Any(c => c.Owner?.TeamId == (_player as User).TeamId))
+            if (city.Neighbour.Any(c => c.Owner?.TeamId == _player.Id))
                 return true;
 
             return false;
