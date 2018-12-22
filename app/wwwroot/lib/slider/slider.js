@@ -5,6 +5,23 @@ $(document).ready(function () {
         slider = { object: sliderPoint, x: e.touches === undefined ? e.originalEvent.clientX : e.touches[0].clientX, margin: parseInt(sliderPoint.css('left')) };
     });
 
+    $('.slider').on('click', function (e) {
+        if (this == e.target)
+        {
+            var sliderObject = $('.slider_point');
+            var currentMargin = e.originalEvent.offsetX - 15;
+            
+            // move
+            sliderObject.css('left', currentMargin);
+
+            // set output
+            var target = $('#' + sliderObject.parent().attr('data-target'));
+            var fieldSize = parseInt(sliderObject.parent().css('width')) / (target.attr('max') - target.attr('min'));
+
+            target.val(Math.floor(((currentMargin + 15) + fieldSize / 2) / fieldSize));
+        }
+    });
+
     $('body').on('mousemove touchmove', function (e) {
         if (slider != null) {
             var parentWidth = parseInt(slider.object.parent().css('width'));
