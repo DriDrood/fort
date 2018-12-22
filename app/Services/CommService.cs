@@ -27,6 +27,11 @@ namespace Fort.Services
 
         public async Task CreateNewConnection(string playerId, WebSocket webSocket)
         {
+            if (_playerConnections.ContainsKey(playerId))
+            {
+                await _playerConnections[playerId].CloseAsync();
+                _playerConnections.Remove(playerId);
+            }
             _playerConnections.Add(playerId, webSocket);
 
             Logger.Log(ELogLevel.Connection, playerId, "User connected");
