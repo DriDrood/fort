@@ -60,6 +60,7 @@ namespace Fort
 
             app.UseStaticFiles();
             app.UseWebSockets();
+            app.UseMiddleware<WSTestMiddleware>();
             app.UseMiddleware<CurrentPlayerMiddleware>();
             app.UseMiddleware<LoggerMiddleware>();
             app.UseMiddleware<WSMiddleware>();
