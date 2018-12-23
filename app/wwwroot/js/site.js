@@ -187,6 +187,7 @@ function onMessage(message) {
         case "map_show":
             var mapHolder = $('#map_holder');
             mapHolder.html(map_walkOut);
+            $('#ready').removeClass('active');
 
             var ratio = parseInt($('#map').css('width')) / parseInt($('#map').attr('viewBox').split(' ')[2]);
             $.each(map_turns, function (index, turn) {
