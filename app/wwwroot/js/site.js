@@ -106,6 +106,10 @@ $(document).ready(function () {
             if (confirm("Opravdu chcete restartovat celou hru?"))
                 ws.send(JSON.stringify({ method: 'restart' }));
         }
+        else if (clicked.attr('id') == 'ready') {
+            clicked.toggleClass('active');
+            ws.send(JSON.stringify({ method: "playerReady", params: { ready: clicked.hasClass('active') } }));
+        }
         // reconect
         else if (clicked.hasClass('fa-chain-broken')) {
             clicked.parent().html('<i class="fa fa-spinner fa-spin fa-fw"></i>')
@@ -235,12 +239,23 @@ function onMessage(message) {
         // admin stuff
         case "playerConnected":
             if ($('.statistics').length > 0) {
-                $('[data-playerId="' + data['params']['playerId'] + '"]').removeClass('fa-chain-broken').addClass('fa-globe');
+                $('[data-playerId="' + data['params']['playerId'] + '"] .fa-chain-broken').removeClass('fa-chain-broken').addClass('fa-globe');
             }
             break;
         case "playerDisconnected":
             if ($('.statistics').length > 0) {
-                $('[data-playerId="' + data['params']['playerId'] + '"]').removeClass('fa-globe').addClass('fa-chain-broken');
+                $('[data-playerId="' + data['params']['playerId'] + '"] .fa-globe').removeClass('fa-globe').addClass('fa-chain-broken');
+            }
+            break;
+        case "playerReady":
+            if ($('.statistics').length > 0) {
+                console.log('a');
+                if (data["params"]["ready"]) {
+                    $('[data-playerId="' + data['params']['playerId'] + '"]').append('<i class="fa fa-flag-checkered"></i>');
+                }
+                else {
+                    $('[data-playerId="' + data['params']['playerId'] + '"] .fa-flag-checkered').remove();
+                }
             }
             break;
         case "statistics":

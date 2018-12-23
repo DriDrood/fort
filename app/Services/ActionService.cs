@@ -10,6 +10,7 @@ namespace Fort.Services
     public class ActionService
     {
         private RoundService _roundService => Program.GetService<RoundService>();
+        private CommService _commService => Program.GetService<CommService>();
 
         public void Turn(User user, Turn turn)
         {
@@ -40,6 +41,16 @@ namespace Fort.Services
 
                 context.SaveChanges();
             }
+        }
+
+        public async Task Ready(User user, bool ready)
+        {
+            if (ready)
+                _roundService.CurrentRound.ReadyUsers.Add(user);
+            else
+                _roundService.CurrentRound.ReadyUsers.Remove(user);
+
+            await _commService.SendToAll("playerReady", new { ready = ready, playerId = user.Id });
         }
 
         public async Task Play(User user)

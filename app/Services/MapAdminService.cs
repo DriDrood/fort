@@ -20,11 +20,11 @@ namespace Fort.Services
             foreach (Team team in _context.Teams)
             {
                 stat.AppendLine($"<div class=\"team\" style=\"color:{Program.Config.ColorsForAdmin[team.Id]}\">");
-                stat.AppendLine($"<div class=\"team_name\"><i data-playerId=\"{team.Id}\" class=\"fa {(_commService.IsPlayerConnected(team.Id) ? "fa-globe" : "fa-chain-broken")}\"></i> {team.Name}: {team.Members.Sum(m => m.Cities.Count())} - {team.Members.Sum(m => m.Cities.Sum(c => c.Army))}</div>");
+                stat.AppendLine($"<div class=\"team_name\" data-playerId=\"{team.Id}\"><i class=\"fa {(_commService.IsPlayerConnected(team.Id) ? "fa-globe" : "fa-chain-broken")}\"></i> {team.Name}: {team.Members.Sum(m => m.Cities.Count())} - {team.Members.Sum(m => m.Cities.Sum(c => c.Army))}</div>");
 
                 foreach (User member in team.Members)
                 {
-                    stat.AppendLine($"<div class=\"player\"><i data-playerId=\"{member.Id}\" class=\"fa {(_commService.IsPlayerConnected(member.Id) ? "fa-globe" : "fa-chain-broken")}\"></i> {member.UserName}: {member.Cities.Count()} - {member.Cities.Sum(c => c.Army)}</div>");
+                    stat.AppendLine($"<div class=\"player\" data-playerId=\"{member.Id}\"><i class=\"fa {(_commService.IsPlayerConnected(member.Id) ? "fa-globe" : "fa-chain-broken")}\"></i> {member.UserName}: {member.Cities.Count()} - {member.Cities.Sum(c => c.Army)}</div>");
                 }
 
                 stat.AppendLine($"</div>");

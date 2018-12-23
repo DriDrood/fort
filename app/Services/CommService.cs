@@ -139,6 +139,10 @@ namespace Fort.Services
                             Logger.Log(ELogLevel.JS, playerId, data["params"]["message"].Value<string>(), $"{data["params"]["url"].Value<string>()} - line {data["params"]["line"].Value<string>()}");
                             break;
 
+                        case "playerready":
+                            await _actionService.Ready(user, data["params"]["ready"].Value<bool>());
+                            break;
+
                         default:
                             throw new FortException(ELogLevel.Warning, "Neznámá funkce");
                     }

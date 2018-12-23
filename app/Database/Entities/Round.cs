@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fort.Database.Entities
 {
@@ -9,6 +10,7 @@ namespace Fort.Database.Entities
         public Round()
         {
             Turns = new HashSet<Turn>();
+            ReadyUsers = new HashSet<User>();
         }
 
         public int Id { get; set; }
@@ -21,5 +23,8 @@ namespace Fort.Database.Entities
         public DateTime? EndsAt { get; set; }
 
         public virtual ICollection<Turn> Turns { get; set; }
+
+        [NotMapped]
+        public HashSet<User> ReadyUsers { get; set; }
     }
 }

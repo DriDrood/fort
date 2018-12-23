@@ -12,6 +12,11 @@
         <i class="fa fa-fast-forward float-left" id="end" title="Ukončit kolo"></i>
         <i class="fa fa-refresh float-left" id="restart" title="Restartovat hru"></i>
     }
+    @if ((ViewData["player"] as Fort.Services.CurrentPlayerService)?.User != null)
+    {
+        <i class="fa fa-flag-checkered float-left" id="ready" title="Připraven na další kolo"></i>
+    }
+    |
     <span class="round float-left">@Html.Raw(Model.GetStatus())</span>
     <span class="connection float-right"><i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i></span>
     <span class="time float-right">@Model.GetRemaining()</span>
