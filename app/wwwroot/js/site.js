@@ -192,20 +192,20 @@ function onMessage(message) {
             var ratio = parseInt($('#map').css('width')) / parseInt($('#map').attr('viewBox').split(' ')[2]);
             $.each(map_turns, function (index, turn) {
                 var turnObject = $(turn);
-                turnObject.css('top', marginFromCenter(turnObject.css('top')));
-                turnObject.css('left', marginFromCenter(turnObject.css('left')));
+                turnObject.css('top', marginFromCenter(turnObject.css('top'), $('#map').css('margin-top')));
+                turnObject.css('left', marginFromCenter(turnObject.css('left'), 0));
 
                 var duration = turnObject.attr('data-time') == 'all' ? animationDuration : (animationDuration / 2);
                 var delay = turnObject.attr('data-time') == 'end' ? (animationDuration / 2) : 0;
                 setTimeout(function () {
                     mapHolder.append(turnObject[0].outerHTML);
-                    $('#' + turnObject.attr('id')).animate({ left: marginFromCenter(turnObject.attr('data-final-x')), top: marginFromCenter(turnObject.attr('data-final-y')) }, duration, function () {
+                    $('#' + turnObject.attr('id')).animate({ left: marginFromCenter(turnObject.attr('data-final-x'), 0), top: marginFromCenter(turnObject.attr('data-final-y'), $('#map').css('margin-top')) }, duration, function () {
                         $('#' + turnObject.attr('id')).remove();
                     });
                 }, delay);
 
-                function marginFromCenter(center) {
-                    return (parseInt(center) * ratio) - (parseInt(turnObject.css('width')) / 2) + 'px';
+                function marginFromCenter(center, margin) {
+                    return (parseInt(center) * ratio) - (parseInt(turnObject.css('width')) / 2) - (-parseInt(margin)) + 'px';
                 }
             });
 
