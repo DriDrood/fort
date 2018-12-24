@@ -188,6 +188,10 @@ namespace Fort.Services
 
         public async Task Finalize()
         {
+            // refresh context
+            _context.Dispose();
+            _context = new FortDbContext();
+
             var turns = _context.Turns.Where(t => t.RoundId == CurrentRound.Id).ToList();
             var cities = _context.Cities.ToList();
 
@@ -210,12 +214,11 @@ namespace Fort.Services
                 Turn second = turns.FirstOrDefault(t => t.SourceCityId == turn.TargetCityId && t.TargetCityId == turn.SourceCityId && t.User.TeamId != turn.User.TeamId);
                 if (second != null)
                 {
-                    // army destroyed
-                    if (turn.Amount < second.Amount)
-                        turn.ModifiedAmount = 0;
-                    // have greather army
-                    else
-                        turn.ModifiedAmount = turn.Amount - second.Amount;
+                    (int finalArmy, var winner) = fight(turn, second);
+
+                    turn.ModifiedAmount = (winner == turn)
+                        ? finalArmy
+                        : 0;
                 }
                 // no turn on same path
                 else
@@ -241,35 +244,20 @@ namespace Fort.Services
 
                 if (incoming.Any())
                 {
-                    var enemyArmies = incoming.Where(gr => gr.Key != city.Owner?.Team).OrderByDescending(gr => gr.Sum(t => t.ModifiedAmount ?? t.Amount)).ToList();
+                    var enemyArmies = incoming.Where(gr => gr.Key != city.Owner?.Team).ToList();
 
                     // fights before gates
                     if (enemyArmies.Any() && enemyArmies.Sum(a => a.Sum(t => t.ModifiedAmount ?? t.Amount)) > 0)
                     {
-                        IGrouping<Team, Turn> winnerFightBeforeGates = enemyArmies.First();
-                        int winnerArmy = winnerFightBeforeGates.Sum(t => t.ModifiedAmount ?? t.Amount);
-                        if (enemyArmies.Count() > 1)
-                            winnerArmy -= enemyArmies.ElementAt(1).Sum(t => t.ModifiedAmount ?? t.Amount);
+                        (int winnerArmy, IGrouping<Team, Turn> winnerFightBeforeGates) = fight(enemyArmies.ToArray());
 
                         // fights for city
-                        int defendingArmy = (incoming.SingleOrDefault(gr => gr.Key == city.Owner?.Team)?.Sum(t => t.ModifiedAmount ?? t.Amount) ?? 0) + city.Army;
-                        // defended
-                        if (defendingArmy > winnerArmy)
-                        {
-                            city.Army = defendingArmy - winnerArmy;
-                        }
-                        // empty
-                        else if (defendingArmy == winnerArmy)
-                        {
-                            city.Army = 0;
-                            city.Owner = null;
-                        }
-                        // conquered
-                        else
-                        {
-                            city.Army = winnerArmy - defendingArmy;
-                            city.Owner = winnerFightBeforeGates.OrderBy(t => t.CreatedAt).First().User;
-                        }
+                        var fightForCityWinner = fight(city, incoming.SingleOrDefault(gr => gr.Key == city.Owner?.Team), winnerFightBeforeGates, winnerArmy);
+
+                        city.Army = fightForCityWinner.army;
+                        city.Owner = fightForCityWinner.winnerId == city.OwnerId
+                            ? city.Owner
+                            : winnerFightBeforeGates.OrderBy(t => t.CreatedAt).First().User;
                     }
                     // no fight, just ally
                     else
@@ -280,7 +268,7 @@ namespace Fort.Services
 
                 // grow
                 if (city.Owner != null)
-                    city.Army += city.Grow ?? Program.Config.DefaultPopulationGrow;
+                    city.Army += city.Grow ?? city.Owner.Team.PopulationGrowth ?? Program.Config.DefaultPopulationGrow;
             }
             _context.SaveChanges();
             // print
@@ -290,6 +278,42 @@ namespace Fort.Services
                 return MapBaseService.GetMapServiceForPlayer(_context, player).Print();
             });
         }
+        private (int army, string winnerId) fight(City city, IGrouping<Team, Turn> ally, IGrouping<Team, Turn> attacker, int attackerRealArmy)
+        {
+            var defender = (city.Army + (ally?.Sum(a => a.ModifiedAmount ?? a.Amount) ?? 0), city.Owner?.Team.ArmyStrengthCoef ?? 1, city.OwnerId);
+            var result = fight(defender, (attackerRealArmy, attacker.Key.ArmyStrengthCoef, attacker.Key.Id));
+
+            return result;
+        }
+        private (int army, Turn winner) fight(params Turn[] sides)
+        {
+            var result = fight(sides.Select(s => (s.Amount, s.User.Team.ArmyStrengthCoef, s.UserId)).ToArray());
+
+            return (result.army, sides.FirstOrDefault(s => s.UserId == result.winnerId));
+        }
+        private (int army, IGrouping<Team, Turn> winner) fight(params IGrouping<Team, Turn>[] sides)
+        {
+            var result = fight(sides.Select(s => (s.Sum(t => t.ModifiedAmount ?? t.Amount), s.Key.ArmyStrengthCoef, s.Key.Id)).ToArray());
+
+            return (result.army, sides.FirstOrDefault(s => s.Key.Id == result.winnerId));
+        }
+        private (int army, string winnerId) fight(params (int army, double coef, string id)[] sides)
+        {
+            if (sides.Count() == 0)
+                return (0, null);
+            if (sides.Count() == 1)
+                return (sides[0].army, sides[0].id);
+
+            var orderedSides = sides.OrderByDescending(s => s.army * s.coef);
+            var winner = orderedSides.First();
+            var second = orderedSides.ElementAt(1);
+
+            if (winner.army * winner.coef == second.army * second.coef)
+                return (0, null);
+
+            return (winner.army - (int)(second.army * second.coef / winner.coef), winner.id);
+        }
+
         public async Task ShowFinalize()
         {
             await _commService.SendToAll("map_show", new { });

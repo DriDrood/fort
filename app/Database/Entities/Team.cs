@@ -12,6 +12,8 @@ namespace Fort.Database.Entities
 
         [StringLength(50)]
         public string Name { get; set; }
+        public double ArmyStrengthCoef { get; set; }
+        public int? PopulationGrowth { get; set; }
 
         public virtual ICollection<User> Members { get; set; }
     }
