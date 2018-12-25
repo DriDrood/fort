@@ -19,8 +19,13 @@ namespace Fort.Services
         {
             _context = new FortDbContext();
             _timer = new Timer();
+            _rand = new Random();
+            _currentDeaths = new List<string>();
         }
 
+        private List<string> _deathStories;
+        private Random _rand;
+        private List<string> _currentDeaths;
         private FortDbContext _context;
         private CommService _commService => Program.GetService<CommService>();
         private Timer _timer;
@@ -36,6 +41,8 @@ namespace Fort.Services
         #region  Setup
         public void Setup(IConfigurationSection config)
         {
+            _deathStories = Program.GetService<IConfiguration>().GetSection("DeathStories").Get<List<string>>() ?? new List<string>();
+
             // load from config
             _startingPositions = new Dictionary<string, string>();
             config.Bind(_startingPositions);
@@ -189,8 +196,10 @@ namespace Fort.Services
         public async Task Finalize()
         {
             // refresh context
+            _context.SaveChanges();
             _context.Dispose();
             _context = new FortDbContext();
+            CurrentRound = _context.Rounds.Find(CurrentRound.Id);
 
             var turns = _context.Turns.Where(t => t.RoundId == CurrentRound.Id).ToList();
             var cities = _context.Cities.ToList();
@@ -255,6 +264,15 @@ namespace Fort.Services
                         var fightForCityWinner = fight(city, incoming.SingleOrDefault(gr => gr.Key == city.Owner?.Team), winnerFightBeforeGates, winnerArmy);
 
                         city.Army = fightForCityWinner.army;
+                        // owner changed
+                        if (fightForCityWinner.winnerId != city.OwnerId)
+                        {
+                            // last players city
+                            if (city.Owner?.Cities.Count() == 1)
+                                PlayerDeath(city.Owner);
+
+                            city.Owner = winnerFightBeforeGates.OrderBy(t => t.CreatedAt).First().User;
+                        }
                         city.Owner = fightForCityWinner.winnerId == city.OwnerId
                             ? city.Owner
                             : winnerFightBeforeGates.OrderBy(t => t.CreatedAt).First().User;
@@ -313,13 +331,22 @@ namespace Fort.Services
 
             return (winner.army - (int)(second.army * second.coef / winner.coef), winner.id);
         }
+        private void PlayerDeath(User user)
+        {
+            string story = _deathStories[_rand.Next() % _deathStories.Count].Replace("{playerName}", user.UserName);
+            _currentDeaths.Add(story);
+        }
 
         public async Task ShowFinalize()
         {
             await _commService.SendToAll("map_show", new { });
+            List<Task> tasks = new List<Task>();
+
+            foreach (string story in _currentDeaths)
+                tasks.Add(_commService.SendToAll("notification", new { type = "death", message = story }));
+            _currentDeaths.Clear();
 
             // show statistics to admins
-            List<Task> tasks = new List<Task>();
             foreach (User user in _context.Users.Where(u => u.IsAdmin))
             {
                 tasks.Add(_commService.SendToOne(user.Id, "statistics", MapBaseService.GetMapServiceForPlayer(_context, user).ShowStatistics()));

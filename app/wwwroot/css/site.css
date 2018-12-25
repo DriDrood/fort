@@ -103,7 +103,10 @@ body.login form .error {
 #notification.warning {
     background-color: rgb(228, 224, 7);
 }
-
+#notification.death {
+    background-color: #000;
+    color: #fff;
+}
 
 /* actions */
 #actions {
