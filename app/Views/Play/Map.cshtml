@@ -1,18 +1,20 @@
 @model Fort.Services.MapBaseService
 @{
+    Fort.Services.CurrentPlayerService currPlayer = (Fort.Services.CurrentPlayerService)ViewData["player"];
     ViewData["Title"] = "Mapa";
     ViewData["page"] = "map";
+    ViewData["type"] = currPlayer.Player.GetType().Name;
 }
 
 <div id="actions">
-    @if ((ViewData["player"] as Fort.Services.CurrentPlayerService)?.User?.IsAdmin == true)
+    @if (currPlayer?.User?.IsAdmin == true)
     {
         <i class="fa fa-play float-left" id="play" title="Spustit hru"></i>
         <i class="fa fa-pause float-left" id="pause" title="Pozastavit"></i>
         <i class="fa fa-fast-forward float-left" id="end" title="Ukončit kolo"></i>
         <i class="fa fa-refresh float-left" id="restart" title="Restartovat hru"></i>
     }
-    @if ((ViewData["player"] as Fort.Services.CurrentPlayerService)?.User != null)
+    @if (currPlayer?.User != null)
     {
         <i class="fa fa-flag-checkered float-left" id="ready" title="Připraven na další kolo"></i>
     }

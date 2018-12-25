@@ -7,7 +7,7 @@ namespace Fort.Services
         public Player Player { get; set; }
 
         public User User => (Player is User) ? (User)Player : null;
-        public Team Team => (Team)Player;
+        public Team Team => (Player is Team) ? (Team)Player : null;
 
         public override string ToString()
         {

@@ -92,7 +92,7 @@ namespace Fort.Services
 
                 using (FortDbContext context = new FortDbContext())
                 {
-                    User user = await Task.Run(() => context.Users.Include(u => u.Cities).First(u => u.Id == playerId));
+                    User user = await Task.Run(() => context.Users.Include(u => u.Cities).FirstOrDefault(u => u.Id == playerId));
 
                     switch (data["method"].Value<string>().ToLower())
                     {

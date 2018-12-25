@@ -9,6 +9,7 @@ var targetCity = null;
 var ws = null;
 var countDownTask;
 var animationDuration = 3000;
+var audioMarching = new Audio('/audio/soldiers-marching.mp3');
 
 // Click handling
 $(document).ready(function () {
@@ -188,6 +189,8 @@ function onMessage(message) {
             var mapHolder = $('#map_holder');
             mapHolder.html(map_walkOut);
             $('#ready').removeClass('active');
+            if ($('body.Team').length > 0)
+                audioMarching.play();
 
             var ratio = parseInt($('#map').css('width')) / parseInt($('#map').attr('viewBox').split(' ')[2]);
             $.each(map_turns, function (index, turn) {
@@ -211,6 +214,8 @@ function onMessage(message) {
 
             setTimeout(() => {
                 mapHolder.html(map_walkIn);
+                audioMarching.pause();
+                audioMarching.currentTime = 0;
             }, animationDuration);
             break;
 
