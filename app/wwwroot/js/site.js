@@ -255,7 +255,6 @@ function onMessage(message) {
             break;
         case "playerReady":
             if ($('.statistics').length > 0) {
-                console.log('a');
                 if (data["params"]["ready"]) {
                     $('[data-playerId="' + data['params']['playerId'] + '"]').append('<i class="fa fa-flag-checkered"></i>');
                 }
