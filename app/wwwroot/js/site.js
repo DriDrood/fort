@@ -50,7 +50,12 @@ $(document).ready(function () {
                 }
 
                 // has no path there
-                if (!sourceCity.attr('data-neighbours').split(' ').includes(clicked.attr('data-city-id')))
+                var included = false;
+                $.each(sourceCity.attr('data-neighbours').split(' '), function (index, element) {
+                    if (element == clicked.attr('data-city-id'))
+                        included = true;
+                });
+                if (!included)
                     return;
 
                 // save target city
@@ -212,7 +217,7 @@ function onMessage(message) {
                 }
             });
 
-            setTimeout(() => {
+            setTimeout(function () {
                 mapHolder.html(map_walkIn);
                 audioMarching.pause();
                 audioMarching.currentTime = 0;
