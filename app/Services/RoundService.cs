@@ -333,7 +333,7 @@ namespace Fort.Services
         }
         private void PlayerDeath(User user)
         {
-            string story = _deathStories[_rand.Next() % _deathStories.Count].Replace("{playerName}", user.UserName);
+            string story = _deathStories[_rand.Next() % _deathStories.Count].Replace("{playerName}", user.Name);
             _currentDeaths.Add(story);
         }
 

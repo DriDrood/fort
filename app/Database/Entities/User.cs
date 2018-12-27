@@ -11,9 +11,6 @@ namespace Fort.Database.Entities
             Turns = new HashSet<Turn>();
         }
 
-        [Required]
-        [StringLength(50)]
-        public string UserName { get; set; }
         [StringLength(100)]
         public string ImageUrl { get; set; }
         public bool IsAdmin { get; set; }

@@ -6,5 +6,9 @@ namespace Fort.Database.Entities
     {
         [StringLength(5)]
         public string Id { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        public string Name { get; set; }
     }
 }

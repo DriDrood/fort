@@ -13,6 +13,7 @@ var audioMarching = new Audio('/audio/soldiers-marching.mp3');
 
 // Click handling
 $(document).ready(function () {
+    notification('success', 'Jste přihlášeni jako ' + $('body').attr('data-player-name'));
     if ($('body.map').length > 0) {
         createWS();
 

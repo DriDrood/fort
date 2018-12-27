@@ -18,7 +18,7 @@
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
 </head>
-<body class="@ViewData["page"] @ViewData["type"]">
+<body class="@ViewData["page"] @ViewData["type"]" data-player-name="@ViewData["playerName"]">
     @RenderBody()
 
     <environment include="Development">

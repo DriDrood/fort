@@ -24,7 +24,7 @@ namespace Fort.Services
 
                 foreach (User member in team.Members)
                 {
-                    stat.AppendLine($"<div class=\"player\" data-playerId=\"{member.Id}\"><i class=\"fa {(_commService.IsPlayerConnected(member.Id) ? "fa-globe" : "fa-chain-broken")}\"></i> {member.UserName}: {member.Cities.Count()} - {member.Cities.Sum(c => c.Army)}</div>");
+                    stat.AppendLine($"<div class=\"player\" data-playerId=\"{member.Id}\"><i class=\"fa {(_commService.IsPlayerConnected(member.Id) ? "fa-globe" : "fa-chain-broken")}\"></i> {member.Name}: {member.Cities.Count()} - {member.Cities.Sum(c => c.Army)}</div>");
                 }
 
                 stat.AppendLine($"</div>");

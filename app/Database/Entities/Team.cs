@@ -10,8 +10,6 @@ namespace Fort.Database.Entities
             Members = new HashSet<User>();
         }
 
-        [StringLength(50)]
-        public string Name { get; set; }
         public double ArmyStrengthCoef { get; set; }
         public int? PopulationGrowth { get; set; }
 
