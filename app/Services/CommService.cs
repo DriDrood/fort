@@ -5,6 +5,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Fort.Utils.Channels;
 using Fort.Database;
 using Fort.Database.Entities;
 using Fort.Utils.Logger;
@@ -18,72 +19,33 @@ namespace Fort.Services
     {
         public CommService()
         {
-            _playerConnections = new Dictionary<string, WebSocket>();
+            _playerConnections = new Dictionary<string, IChannel>();
         }
 
-        private int _bufferSize = 4096;
         private ActionService _actionService => Program.GetService<ActionService>();
-        private Dictionary<string, WebSocket> _playerConnections;
+        private Dictionary<string, IChannel> _playerConnections;
 
-        public async Task CreateNewConnection(string playerId, WebSocket webSocket)
+        public void CreateNewConnection(IChannel channel)
         {
             // disconnect previous
-            if (_playerConnections.ContainsKey(playerId))
-            {
-                playerDisconected(playerId, _playerConnections[playerId], WebSocketCloseStatus.NormalClosure, "Uživatel se znovu přihlásil");
-            }
+            if (_playerConnections.ContainsKey(channel.PlayerId))
+                _playerConnections[channel.PlayerId].Disconnect("Uživatel se znovu přihlásil");
 
-            _playerConnections.Add(playerId, webSocket);
+            channel.OnMessage = recieveMessage;
+            channel.OnDisconnect = playerDisconected;
+            _playerConnections.Add(channel.PlayerId, channel);
 
-            Logger.Log(ELogLevel.Connection, playerId, "User connected");
-            SendToAll("playerConnected", new { playerId = playerId }).GetAwaiter().GetResult();
-
-            // wait for messages
-            var buffer = new byte[_bufferSize];
-            WebSocketReceiveResult result;
-            do
-            {
-                StringBuilder message = new StringBuilder();
-                do
-                {
-                    result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
-                    string messagePart = Encoding.UTF8.GetString(buffer.Take(result.Count).ToArray());
-                    message.Append(messagePart);
-                }
-                while (!result.EndOfMessage);
-
-                // ignore closing
-                if (!result.CloseStatus.HasValue)
-                    await recieveMessage(playerId, message.ToString());
-            }
-            while (!result.CloseStatus.HasValue);
-
-            playerDisconected(playerId, webSocket, result.CloseStatus.Value, result.CloseStatusDescription);
+            Logger.Log(ELogLevel.Connection, channel.PlayerId, "User connected");
+            SendToAll("playerConnected", new { playerId = channel.PlayerId });
         }
 
-        private void playerDisconected(string playerId, WebSocket webSocket, WebSocketCloseStatus status, string message)
-        {
-            try
-            {
-                webSocket.CloseAsync(status, message, CancellationToken.None).GetAwaiter().GetResult();
-            }
-            catch (WebSocketException)
-            {
-                webSocket.Abort();
-            }
-            _playerConnections.Remove(playerId);
-
-            SendToAll("playerDisconnected", new { playerId = playerId }).GetAwaiter().GetResult();
-
-            Logger.Log(ELogLevel.Connection, playerId, $"User disconnected - {message}");
-        }
 
         public bool IsPlayerConnected(string playerId)
         {
             return _playerConnections.ContainsKey(playerId);
         }
 
-        private async Task recieveMessage(string playerId, string message)
+        private void recieveMessage(string playerId, string message)
         {
             Logger.Log(ELogLevel.MessageReceive, playerId, message);
             try
@@ -92,55 +54,55 @@ namespace Fort.Services
 
                 using (FortDbContext context = new FortDbContext())
                 {
-                    User user = await Task.Run(() => context.Users.Include(u => u.Cities).FirstOrDefault(u => u.Id == playerId));
+                    User user = context.Users.Include(u => u.Cities).FirstOrDefault(u => u.Id == playerId);
 
                     switch (data["method"].Value<string>().ToLower())
                     {
                         case "turn":
                             try
                             {
-                                Turn playerTurn = data["params"].ToObject<Turn>();
+                                Turn playerTurn = data["param"].ToObject<Turn>();
                                 _actionService.Turn(user, playerTurn);
-                                await SendToOne(playerId, "turnOk", "Tah úspěšně zadán");
+                                SendToOne(playerId, "turnOk", "Tah úspěšně zadán");
                             }
                             catch (FortException ex)
                             {
-                                await SendToOne(playerId, "turnError", ex.Message);
+                                SendToOne(playerId, "turnError", ex.Message);
                                 Logger.Log(ELogLevel.Warning, playerId, ex.Message, ex.StackTrace);
                             }
                             catch (Exception ex)
                             {
-                                await SendToOne(playerId, "turnError", ex.Message);
+                                SendToOne(playerId, "turnError", ex.Message);
                                 throw;
                             }
                             break;
 
                         case "play":
-                            await _actionService.Play(user);
-                            await SendToAll("notification", new { type = "success", message = "Hra spuštěna" });
+                            _actionService.Play(user);
+                            SendToAll("notification", new { type = "success", message = "Hra spuštěna" });
                             break;
 
                         case "pause":
-                            await _actionService.Pause(user);
-                            await SendToOne(playerId, "notification", new { type = "success", message = "Hra pozastavena" });
+                            _actionService.Pause(user);
+                            SendToOne(playerId, "notification", new { type = "success", message = "Hra pozastavena" });
                             break;
 
                         case "end":
                             _actionService.End(user);
-                            await SendToOne(playerId, "notification", new { type = "success", message = "Kolo ukončeno" });
+                            SendToOne(playerId, "notification", new { type = "success", message = "Kolo ukončeno" });
                             break;
 
                         case "restart":
-                            await _actionService.RestartAll(user);
-                            await SendToAll("notification", new { type = "warning", message = "Restart hry" });
+                            _actionService.RestartAll(user);
+                            SendToAll("notification", new { type = "warning", message = "Restart hry" });
                             break;
 
                         case "jserror":
-                            Logger.Log(ELogLevel.JS, playerId, data["params"]["message"].Value<string>(), $"{data["params"]["url"].Value<string>()} - line {data["params"]["line"].Value<string>()}");
+                            Logger.Log(ELogLevel.JS, playerId, data["param"]["message"].Value<string>(), $"{data["param"]["url"].Value<string>()} - line {data["param"]["line"].Value<string>()}");
                             break;
 
                         case "playerready":
-                            await _actionService.Ready(user, data["params"]["ready"].Value<bool>());
+                            _actionService.Ready(user, data["param"]["ready"].Value<bool>());
                             break;
 
                         default:
@@ -151,64 +113,57 @@ namespace Fort.Services
             catch (FortException ex)
             {
                 Logger.Log(ex.LogLevel, playerId, ex.Message, ex.StackTrace);
-                await SendToOne(playerId, "notification", new { type = "error", message = ex.Message });
+                SendToOne(playerId, "notification", new { type = "error", message = ex.Message });
             }
             catch (Exception ex)
             {
                 Logger.Log(ELogLevel.UnknownException, playerId, ex.Message, ex.StackTrace);
-                await SendToOne(playerId, "notification", new { type = "exception", message = ex.Message });
+                SendToOne(playerId, "notification", new { type = "exception", message = ex.Message });
             }
         }
+        private void playerDisconected(string playerId, string message)
+        {
+            _playerConnections.Remove(playerId);
 
-        public async Task SendToAll(string method, object data)
+            Logger.Log(ELogLevel.Connection, playerId, $"User disconnected - {message}");
+            SendToAll("playerDisconnected", new { playerId = playerId });
+        }
+
+        public void SendToAll(string method, object data)
         {
             List<Task> tasks = new List<Task>();
             foreach (var pair in _playerConnections)
             {
-                tasks.Add(send(pair.Value, method, data, pair.Key));
+                tasks.Add(Task.Run(() => send(pair.Value, method, data, pair.Key)));
             }
 
             foreach (Task task in tasks)
-                await task;
+                task.GetAwaiter().GetResult();
         }
-        public async Task SendToEach(string method, Func<string, string> getData)
+        public void SendToEach(string method, Func<string, string> getData)
         {
             List<Task> tasks = new List<Task>();
             foreach (var pair in _playerConnections)
             {
-                tasks.Add(send(pair.Value, method, getData(pair.Key), pair.Key));
+                var data = getData(pair.Key);
+                tasks.Add(Task.Run(() => send(pair.Value, method, data, pair.Key)));
             }
 
             foreach (Task task in tasks)
-                await task;
+                task.GetAwaiter().GetResult();
         }
 
-        public async Task SendToOne(string playerId, string method, object data)
+        public void SendToOne(string playerId, string method, object data)
         {
             if (_playerConnections.ContainsKey(playerId))
-                await send(_playerConnections[playerId], method, data, playerId);
+                send(_playerConnections[playerId], method, data, playerId);
         }
 
-        private async Task send(WebSocket webSocket, string method, object data, string playerId)
+        private void send(IChannel channel, string method, object data, string playerId)
         {
-            // create message
-            object message = new { method = method, @params = data };
-            string messageString = JsonConvert.SerializeObject(message);
-            byte[] messageBytes = Encoding.UTF8.GetBytes(messageString);
-
-            // log
-            Logger.Log(ELogLevel.MessageSend, playerId, messageString);
-
-            // split & send
             try
             {
-                while (messageBytes.Length > 0)
-                {
-                    byte[] buffer = messageBytes.Take(_bufferSize).ToArray();
-                    await webSocket.SendAsync(buffer, WebSocketMessageType.Text, messageBytes.Length < _bufferSize, CancellationToken.None);
-
-                    messageBytes = messageBytes.Skip(_bufferSize).ToArray();
-                }
+                channel.SendMessage(method, data);
             }
             catch (WebSocketException ex)
             {

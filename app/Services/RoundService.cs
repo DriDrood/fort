@@ -53,7 +53,7 @@ namespace Fort.Services
             {
                 // save to DB
                 LoadStart();
-                Init().GetAwaiter().GetResult();
+                Init();
             }
         }
         private void LoadStart()
@@ -92,32 +92,32 @@ namespace Fort.Services
         #region Lifecycle
         public void StartGame()
         {
-            _playTask = Task.Run(async () =>
+            _playTask = Task.Run(() =>
             {
                 while (_context.Teams.Count(t => t.Members.Any(m => m.Cities.Any())) > 1)
                 {
                     if (CurrentRound.RoundNumber > 1 || CurrentRound.Turns.Any())
                     {
                         _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
-                        await Init(_timer.Remains.Value);
-                        await _timer.Start();
+                        Init(_timer.Remains.Value);
+                        _timer.Start().GetAwaiter().GetResult();
                         if (_playTaskCanceled) return;
                     }
 
                     _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultRoundDurationSec));
                     Start();
-                    await _timer.Start();
+                    _timer.Start().GetAwaiter().GetResult();
                     if (_playTaskCanceled) return;
 
                     _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultBeforeVisualizationSec));
-                    await End();
+                    End();
                     var tt = _timer.Start();
 
-                    await Finalize();
-                    await tt;
+                    CountResult();
+                    tt.GetAwaiter().GetResult();
                     if (_playTaskCanceled) return;
 
-                    await ShowFinalize();
+                    ShowFinalize();
                 }
 
                 EndGame();
@@ -127,7 +127,7 @@ namespace Fort.Services
         {
 #warning TODO: show result
         }
-        public async Task ResetGame()
+        public void ResetGame()
         {
             _playTaskCanceled = true;
             _timer.End();
@@ -136,16 +136,16 @@ namespace Fort.Services
             _timer = new Timer();
 
             LoadStart();
-            await Init();
+            Init();
 
-            await _commService.SendToEach("Restart", playerId =>
+            _commService.SendToEach("Restart", playerId =>
             {
                 Player player = (Player)_context.Users.Find(playerId) ?? _context.Teams.Find(playerId);
                 return MapBaseService.GetMapServiceForPlayer(_context, player).Print();
             });
         }
 
-        public async Task Init(TimeSpan? duration = null)
+        public void Init(TimeSpan? duration = null)
         {
             int currentRoundNumber = CurrentRound?.RoundNumber + 1 ?? 1;
             CurrentRound = new Round
@@ -157,7 +157,7 @@ namespace Fort.Services
             _context.Rounds.Add(CurrentRound);
             _context.SaveChanges();
 
-            await _commService.SendToAll("InitRound", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
+            _commService.SendToAll("InitRound", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
         }
 
         public void Start()
@@ -165,19 +165,19 @@ namespace Fort.Services
             CurrentRound.StartsAt = DateTime.UtcNow;
             _context.SaveChanges();
 
-            var startMessageTask = _commService.SendToAll("StartRound", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
+            _commService.SendToAll("StartRound", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
         }
 
-        public async Task Pause()
+        public void Pause()
         {
             _timer.Pause();
-            await _commService.SendToAll("Pause", new { roundNumber = CurrentRound.RoundNumber });
+            _commService.SendToAll("Pause", new { roundNumber = CurrentRound.RoundNumber });
         }
 
-        public async Task Resume()
+        public void Resume()
         {
             _timer.Resume();
-            await _commService.SendToAll("Resume", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
+            _commService.SendToAll("Resume", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
         }
 
         public void ForceEnd()
@@ -185,15 +185,15 @@ namespace Fort.Services
             _timer.End();
         }
 
-        public async Task End()
+        public void End()
         {
             CurrentRound.EndsAt = DateTime.UtcNow;
             _context.SaveChanges();
 
-            await _commService.SendToAll("EndRound", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
+            _commService.SendToAll("EndRound", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
         }
 
-        public async Task Finalize()
+        public void CountResult()
         {
             // refresh context
             _context.SaveChanges();
@@ -210,7 +210,7 @@ namespace Fort.Services
                 city.Army -= turns.Where(t => t.SourceCityId == city.Id).Sum(t => t.Amount);
             }
             // print
-            await _commService.SendToEach("map_walkOut", (playerId) =>
+            _commService.SendToEach("map_walkOut", (playerId) =>
             {
                 Player player = (Player)_context.Users.Find(playerId) ?? _context.Teams.Find(playerId);
                 return MapBaseService.GetMapServiceForPlayer(_context, player).Print();
@@ -235,7 +235,7 @@ namespace Fort.Services
                     turn.ModifiedAmount = turn.Amount;
                 }
             }
-            await _commService.SendToEach("turns", playerId =>
+            _commService.SendToEach("turns", playerId =>
             {
                 Player player = (Player)_context.Users.Find(playerId) ?? _context.Teams.Find(playerId);
                 MapBaseService mapService = MapBaseService.GetMapServiceForPlayer(_context, player);
@@ -290,7 +290,7 @@ namespace Fort.Services
             }
             _context.SaveChanges();
             // print
-            await _commService.SendToEach("map_walkIn", (playerId) =>
+            _commService.SendToEach("map_walkIn", (playerId) =>
             {
                 Player player = (Player)_context.Users.Find(playerId) ?? _context.Teams.Find(playerId);
                 return MapBaseService.GetMapServiceForPlayer(_context, player).Print();
@@ -337,23 +337,23 @@ namespace Fort.Services
             _currentDeaths.Add(story);
         }
 
-        public async Task ShowFinalize()
+        public void ShowFinalize()
         {
-            await _commService.SendToAll("map_show", new { });
+            _commService.SendToAll("map_show", new { });
             List<Task> tasks = new List<Task>();
 
             foreach (string story in _currentDeaths)
-                tasks.Add(_commService.SendToAll("notification", new { type = "death", message = story }));
+                tasks.Add(Task.Run(() => _commService.SendToAll("notification", new { type = "death", message = story })));
             _currentDeaths.Clear();
 
             // show statistics to admins
             foreach (User user in _context.Users.Where(u => u.IsAdmin))
             {
-                tasks.Add(_commService.SendToOne(user.Id, "statistics", MapBaseService.GetMapServiceForPlayer(_context, user).ShowStatistics()));
+                tasks.Add(Task.Run(() => _commService.SendToOne(user.Id, "statistics", MapBaseService.GetMapServiceForPlayer(_context, user).ShowStatistics())));
             }
 
             foreach (Task task in tasks)
-                await task;
+                task.GetAwaiter().GetResult();
         }
         #endregion
 

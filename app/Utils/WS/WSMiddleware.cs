@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Fort.Utils.Channels;
 using Fort.Services;
 using Microsoft.AspNetCore.Http;
 
@@ -17,7 +18,11 @@ namespace Fort.Utils.WS
         public async Task Invoke(HttpContext context, CommService commService, CurrentPlayerService currentPlayer)
         {
             if (context.WebSockets.IsWebSocketRequest)
-                await commService.CreateNewConnection(currentPlayer.ToString(), await context.WebSockets.AcceptWebSocketAsync());
+            {
+                var channel = new WebSocketChannel(currentPlayer.ToString(), await context.WebSockets.AcceptWebSocketAsync());
+                commService.CreateNewConnection(channel);
+                await channel.WaitingLoop;
+            }
             else
                 await _next.Invoke(context);
         }

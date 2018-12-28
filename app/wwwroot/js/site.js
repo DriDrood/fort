@@ -7,6 +7,7 @@
 var sourceCity = null;
 var targetCity = null;
 var ws = null;
+var httpDone = true;
 var countDownTask;
 var animationDuration = 3000;
 var audioMarching = new Audio('/audio/soldiers-marching.mp3');
@@ -15,7 +16,7 @@ var audioMarching = new Audio('/audio/soldiers-marching.mp3');
 $(document).ready(function () {
     notification('success', 'Jste přihlášeni jako ' + $('body').attr('data-player-name'));
     if ($('body.map').length > 0) {
-        createWS();
+        CreateConnection();
 
         // round is running
         if ($('.round .fa-play').length > 0) {
@@ -83,14 +84,11 @@ $(document).ready(function () {
         // send army
         else if (clicked.val() == 'sendArmy') {
             var armySize = $('#armySize').val();
-            ws.send(JSON.stringify({
-                method: "turn",
-                params: {
-                    SourceCityId: sourceCity.attr('data-city-id'),
-                    TargetCityId: targetCity.attr('data-city-id'),
-                    amount: armySize
-                }
-            }));
+            Send("turn", {
+                SourceCityId: sourceCity.attr('data-city-id'),
+                TargetCityId: targetCity.attr('data-city-id'),
+                amount: armySize
+            });
 
             $('#sendArmy').css('display', 'none');
             $('.shadow .fa-spinner').css('display', 'inline');
@@ -101,95 +99,79 @@ $(document).ready(function () {
         }
         // actions
         else if (clicked.attr('id') == 'play') {
-            ws.send(JSON.stringify({ method: "play" }));
+            Send("play");
         }
         else if (clicked.attr('id') == 'pause') {
-            ws.send(JSON.stringify({ method: "pause" }));
+            Send("pause");
         }
         else if (clicked.attr('id') == 'end') {
-            ws.send(JSON.stringify({ method: "end" }));
+            Send("end");
         }
         else if (clicked.attr('id') == 'restart') {
             if (confirm("Opravdu chcete restartovat celou hru?"))
-                ws.send(JSON.stringify({ method: 'restart' }));
+                Send("restart");
         }
         else if (clicked.attr('id') == 'ready') {
             clicked.toggleClass('active');
-            ws.send(JSON.stringify({ method: "playerReady", params: { ready: clicked.hasClass('active') } }));
+            Send("playerReady", { ready: clicked.hasClass('active') });
         }
         // reconect
         else if (clicked.hasClass('fa-chain-broken')) {
             clicked.parent().html('<i class="fa fa-spinner fa-spin fa-fw"></i>')
-            createWS();
+            CreateConnection();
         }
     });
 });
 
-// WebSocket
-function createWS() {
-    var url = 'ws://' + location.hostname + (location.port != '' ? (':' + location.port) : '') + location.pathname;
-    console.log('connecting to ' + url);
-    ws = new WebSocket(url);
-    ws.onopen = function () {
-        $('#actions .connection').html('<i class="fa fa-globe" title="Připojen k serveru"></i>');
-    };
-    ws.onmessage = function (message) {
-        onMessage(message);
-    };
-    ws.onclose = function () {
-        $('#actions .connection').html('<i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i>');
-    };
-}
+
 
 // Message Handling
 var map_walkOut = null;
 var map_walkIn = null;
 var map_turns = null;
-function onMessage(message) {
-    console.log(message);
-    var data = JSON.parse(message.data);
+function onMessage(data) {
     switch (data["method"]) {
         // notifications
         case "notification":
-            notification(data['params']['type'], data['params']['message']);
+            notification(data['param']['type'], data['param']['message']);
             break;
 
         // round lifecycle
         case "StartRound":
         case "Resume":
             stopCountDown();
-            countDown(data["params"]["duration"]);
-            $('#actions .round').html('<i class="fa fa-play" title="Kolo běží"></i> kolo ' + data["params"]["roundNumber"]);
+            countDown(data["param"]["duration"]);
+            $('#actions .round').html('<i class="fa fa-play" title="Kolo běží"></i> kolo ' + data["param"]["roundNumber"]);
             break;
         case "Pause":
             stopCountDown();
-            $('#actions .round').html('<i class="fa fa-pause" title="Kolo je pozastavené"></i> Kolo ' + data["params"]["roundNumber"]);
+            $('#actions .round').html('<i class="fa fa-pause" title="Kolo je pozastavené"></i> Kolo ' + data["param"]["roundNumber"]);
             break;
         case "EndRound":
             stopCountDown();
-            countDown(data["params"]["duration"]);
-            $('#actions .round').html('<i class="fa fa-flag-checkered" title="Kolo skončilo"></i> Kolo ' + data["params"]["roundNumber"]);
+            countDown(data["param"]["duration"]);
+            $('#actions .round').html('<i class="fa fa-flag-checkered" title="Kolo skončilo"></i> Kolo ' + data["param"]["roundNumber"]);
             break;
         case "InitRound":
             stopCountDown();
-            countDown(data["params"]["duration"]);
-            $('#actions .round').html('<i class="fa fa-circle-o-notch" title="Začíná kolo"></i> Kolo ' + data["params"]["roundNumber"]);
+            countDown(data["param"]["duration"]);
+            $('#actions .round').html('<i class="fa fa-circle-o-notch" title="Začíná kolo"></i> Kolo ' + data["param"]["roundNumber"]);
             break;
         case "Restart":
             stopCountDown();
             setTime(0);
-            $('#map_holder').html(data["params"]);
+            $('#map_holder').html(data["param"]);
             break;
 
         // round results
         case "map_walkOut":
-            map_walkOut = data["params"];
+            map_walkOut = data["param"];
             break
         case "map_walkIn":
-            map_walkIn = data["params"];
+            map_walkIn = data["param"];
             break
         case "turns":
-            map_turns = JSON.parse(data["params"]);
+            map_turns = JSON.parse(data["param"]);
             break;
         case "map_show":
             var mapHolder = $('#map_holder');
@@ -241,38 +223,109 @@ function onMessage(message) {
             refresh();
 
             hideModal();
-            notification('success', data['params']);
+            notification('success', data['param']);
             break;
         case "turnError":
             hideModal();
-            notification('error', data['params']);
+            notification('error', data['param']);
             break;
 
         // admin stuff
         case "playerConnected":
             if ($('.statistics').length > 0) {
-                $('[data-playerId="' + data['params']['playerId'] + '"] .fa-chain-broken').removeClass('fa-chain-broken').addClass('fa-globe');
+                $('[data-playerId="' + data['param']['playerId'] + '"] .fa-chain-broken').removeClass('fa-chain-broken').addClass('fa-globe');
             }
             break;
         case "playerDisconnected":
             if ($('.statistics').length > 0) {
-                $('[data-playerId="' + data['params']['playerId'] + '"] .fa-globe').removeClass('fa-globe').addClass('fa-chain-broken');
+                $('[data-playerId="' + data['param']['playerId'] + '"] .fa-globe').removeClass('fa-globe').addClass('fa-chain-broken');
             }
             break;
         case "playerReady":
             if ($('.statistics').length > 0) {
-                if (data["params"]["ready"]) {
-                    $('[data-playerId="' + data['params']['playerId'] + '"]').append('<i class="fa fa-flag-checkered"></i>');
+                if (data["param"]["ready"]) {
+                    $('[data-playerId="' + data['param']['playerId'] + '"]').append('<i class="fa fa-flag-checkered"></i>');
                 }
                 else {
-                    $('[data-playerId="' + data['params']['playerId'] + '"] .fa-flag-checkered').remove();
+                    $('[data-playerId="' + data['param']['playerId'] + '"] .fa-flag-checkered').remove();
                 }
             }
             break;
         case "statistics":
             $('.statistics').remove();
-            $('body').append(data["params"]);
+            $('body').append(data["param"]);
             break;
+    }
+}
+
+// Connection
+function CreateConnection() {
+    // WebSocket
+    if (window.WebSocket) {
+        var url = 'ws://' + location.hostname + (location.port != '' ? (':' + location.port) : '') + location.pathname;
+        console.log('connecting to ' + url);
+        ws = new WebSocket(url);
+        ws.onopen = function () {
+            $('#actions .connection').html('<i class="fa fa-globe" title="Připojen k serveru"></i>');
+        };
+        ws.onmessage = function (message) {
+            onMessage(JSON.parse(message.data));
+        };
+        ws.onclose = function () {
+            $('#actions .connection').html('<i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i>');
+        };
+    }
+    // Http
+    else {
+        var baseUrl = 'http://' + location.hostname + (location.port != '' ? (':' + location.port) : '') + location.pathname;
+        $.ajax({
+            url: baseUrl + '/Connect',
+            success: function (data) {
+                if (data == 'Done') {
+                    $('#actions .connection').html('<i class="fa fa-globe" title="Připojen k serveru"></i>');
+                }
+            }
+        });
+        setInterval(function () {
+            if (!httpDone)
+                return;
+
+            httpDone = false;
+            $.ajax({
+                url: baseUrl + '/GetQueue',
+                success: function (data) {
+                    console.log(data);
+                    var jsonData = JSON.parse(data);
+                    $.each(jsonData, function (index, message) {
+                        onMessage(message);
+                    });
+                },
+                error: function () {
+                    $('#actions .connection').html('<i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i>');
+                },
+                complete: function () {
+                    httpDone = true;
+                }
+            })
+        }, 1000);
+    }
+}
+function Send(method, message) {
+    if (message === undefined || message == null)
+        message = {};
+
+    var data = JSON.stringify({ method: method, param: message });
+    if (window.WebSocket) {
+        ws.send(data);
+    }
+    else {
+        var baseUrl = 'http://' + location.hostname + (location.port != '' ? (':' + location.port) : '') + location.pathname;
+        $.ajax({
+            url: baseUrl + '/PostMessage',
+            method: 'POST',
+            contentType: 'application/json',
+            data: data
+        });
     }
 }
 
@@ -328,14 +381,11 @@ function hideModal() {
     targetCity = null;
 }
 window.onerror = function (errorMsg, url, lineNumber) {
-    ws.send(JSON.stringify({
-        method: 'jsError',
-        params: {
-            message: errorMsg,
-            url: url,
-            line: lineNumber
-        }
-    }));
+    Send("jsError", {
+        message: errorMsg,
+        url: url,
+        line: lineNumber
+    });
 }
 
 // LoginPage

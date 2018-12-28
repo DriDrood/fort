@@ -43,17 +43,17 @@ namespace Fort.Services
             }
         }
 
-        public async Task Ready(User user, bool ready)
+        public void Ready(User user, bool ready)
         {
             if (ready)
                 _roundService.CurrentRound.ReadyUsers.Add(user);
             else
                 _roundService.CurrentRound.ReadyUsers.Remove(user);
 
-            await _commService.SendToAll("playerReady", new { ready = ready, playerId = user.Id });
+            _commService.SendToAll("playerReady", new { ready = ready, playerId = user.Id });
         }
 
-        public async Task Play(User user)
+        public void Play(User user)
         {
             if (!user.IsAdmin)
                 throw new FortException(ELogLevel.Warning, "Nejste správce");
@@ -62,14 +62,14 @@ namespace Fort.Services
                 _roundService.StartGame();
 
             if (_roundService.State == Utils.Timer.Status.Paused)
-                await _roundService.Resume();
+                _roundService.Resume();
         }
-        public async Task Pause(User user)
+        public void Pause(User user)
         {
             if (!user.IsAdmin)
                 throw new FortException(ELogLevel.Warning, "Nejste správce");
 
-            await _roundService.Pause();
+            _roundService.Pause();
         }
 
         public void End(User user)
@@ -80,12 +80,12 @@ namespace Fort.Services
             _roundService.ForceEnd();
         }
 
-        public async Task RestartAll(User user)
+        public void RestartAll(User user)
         {
             if (!user.IsAdmin)
                 throw new FortException(ELogLevel.Warning, "Nejste správce");
 
-            await _roundService.ResetGame();
+            _roundService.ResetGame();
         }
     }
 }
