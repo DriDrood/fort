@@ -244,10 +244,10 @@ function onMessage(data) {
         case "playerReady":
             if ($('.statistics').length > 0) {
                 if (data["param"]["ready"]) {
-                    $('[data-playerId="' + data['param']['playerId'] + '"]').append('<i class="fa fa-flag-checkered"></i>');
+                    $('[data-playerId="' + data['param']['playerId'] + '"]').append('<i class="fa fa-check"></i>');
                 }
                 else {
-                    $('[data-playerId="' + data['param']['playerId'] + '"] .fa-flag-checkered').remove();
+                    $('[data-playerId="' + data['param']['playerId'] + '"] .fa-check').remove();
                 }
             }
             break;
