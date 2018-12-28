@@ -12,6 +12,7 @@ namespace Fort.Utils.Logger
     public static class Logger
     {
         private static LoggerConfig _config;
+        private static object _fileLock = new object();
 
         public static void Log(ELogLevel logLevel, string player, string message, string stackTrace = null)
         {
@@ -51,9 +52,12 @@ namespace Fort.Utils.Logger
                 // log to file
                 if (_config.File.Contains(logLevel.ToString()))
                 {
-                    File.AppendAllText(
-                        System.IO.Path.Combine(_config.Path, $"{DateTime.UtcNow.ToString("yyyy-MM-dd")}.log"),
-                        fullText.ToString());
+                    lock (_fileLock)
+                    {
+                        File.AppendAllText(
+                            System.IO.Path.Combine(_config.Path, $"{DateTime.UtcNow.ToString("yyyy-MM-dd")}.log"),
+                            fullText.ToString());
+                    }
                 }
 
                 // log to DB
@@ -75,7 +79,7 @@ namespace Fort.Utils.Logger
             }
             catch (Exception ex)
             {
-                #warning What TODO?
+#warning What TODO?
             }
         }
 
