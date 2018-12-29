@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Fort.Database;
 using Fort.Database.Entities;
@@ -38,6 +39,23 @@ namespace Fort.Controllers
             Logger.Log(ELogLevel.Warning, code, "Neplatný kód!");
             ViewData["errorMessage"] = "Neplatný kód!";
             return View();
+        }
+
+        public string GenerateGuid()
+        {
+            Random rand = new Random();
+            char[] guid = new char[5];
+            for (int i = 0; i < 5; i++)
+            {
+                var chI = rand.Next() % 36;
+                // char
+                if (chI < 26)
+                    guid[i] = (char)(chI + 97);
+                else
+                    guid[i] = (char)(chI - 26 + 48);
+            }
+            
+            return new string(guid);
         }
 
         public IActionResult Map(string code)

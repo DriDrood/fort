@@ -67,6 +67,11 @@ namespace Fort
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
+                    name: "Guid",
+                    template: "GenerateGuid",
+                    defaults: new { controller = "Play", action = "GenerateGuid" });
+
+                routes.MapRoute(
                     name: "MapCreator",
                     template: "{code}/MapCreator/{action=Index}",
                     defaults: new { controller = "MapCreator" });
