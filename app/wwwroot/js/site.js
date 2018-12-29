@@ -68,7 +68,7 @@ $(document).ready(function () {
 
                 // show modal
                 var modal = $('#sendArmy');
-                modal.parent().css('display', 'flex');
+                modal.parent().css('display', 'block').css('display', 'flex');
 
                 // get current army
                 var army = sourceCity.attr('data-army-sent-' + targetCity.attr('data-city-id'));
@@ -310,7 +310,7 @@ function CreateConnection() {
                     httpDone = true;
                 }
             })
-        }, 1000);
+        }, 2000);
     }
 }
 function Send(method, message) {
