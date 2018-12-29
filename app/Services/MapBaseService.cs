@@ -68,6 +68,7 @@ namespace Fort.Services
                     svgMap.AppendLine($"<text x=\"{city.X - GetRadius(city.Army)}\" y=\"{city.Y - GetRadius(city.Army) + 6}\" text-anchor=\"middle\" class=\"armyText\">{cityArmy}</text>");
                 }
                 svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"{GetRadius(city.Army)}\" data-city-id=\"{city.Id}\" data-neighbours=\"{string.Join(" ", city.Neighbour.Select(c => c.Id))}\" data-owned=\"{city.OwnerId == _player.Id}\" data-army=\"{(cityArmy)}\" fill=\"{GetCityFill(city)}\" style=\"stroke:{GetCityColor(city)};stroke-width:2\" />");
+                svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"25\" data-for=\"{city.Id}\" fill-opacity=\"0\" />");
             }
             // users image
             svgMap.AppendLine($"<defs>");

@@ -12,7 +12,6 @@ var countDownTask;
 var animationDuration = 3000;
 var audioMarching = new Audio('/audio/soldiers-marching.mp3');
 
-// Click handling
 $(document).ready(function () {
     notification('success', 'Jste přihlášeni jako ' + $('body').attr('data-player-name'));
     if ($('body.map').length > 0) {
@@ -25,11 +24,15 @@ $(document).ready(function () {
         }
     }
 
+    // Click handling
     $('body.map').on('mousedown', function (e) {
         var clicked = $(e.target);
 
         // click on circle
         if (clicked.prop('tagName') == 'circle') {
+            if (clicked.attr('data-for') !== undefined || clicked.attr('data-for') != null)
+                clicked = $('circle[data-city-id=' + clicked.attr('data-for') + ']');
+
             // source
             if (sourceCity == null) {
                 if (clicked.attr('data-owned') != 'True')
