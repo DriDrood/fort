@@ -13,6 +13,8 @@ namespace Fort.Database.Entities
             TargetToPaths = new HashSet<Path>();
             SourceToTurns = new HashSet<Turn>();
             TargetToTurns = new HashSet<Turn>();
+
+            Start = new HashSet<StartingPosition>();
         }
 
         public int Id { get; set; }
@@ -32,6 +34,8 @@ namespace Fort.Database.Entities
         public virtual ICollection<Path> TargetToPaths { get; set; }
         public virtual ICollection<Turn> SourceToTurns { get; set; }
         public virtual ICollection<Turn> TargetToTurns { get; set; }
+        
+        public virtual ICollection<StartingPosition> Start { get; set; }
 
         [NotMapped]
         public IEnumerable<City> Neighbour => SourceToPaths.Select(p => p.Target).Union(TargetToPaths.Select(p => p.Source));

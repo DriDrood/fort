@@ -12,6 +12,7 @@ namespace Fort.Database
         public virtual DbSet<City> Cities { get; set; }
         public virtual DbSet<Path> Paths { get; set; }
         public virtual DbSet<Round> Rounds { get; set; }
+        public virtual DbSet<StartingPosition> StartingPositions { get; set; }
         public virtual DbSet<Team> Teams { get; set; }
         public virtual DbSet<Turn> Turns { get; set; }
         public virtual DbSet<User> Users { get; set; }

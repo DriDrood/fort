@@ -7,6 +7,7 @@ using Fort.Database;
 using Fort.Database.Entities;
 using Fort.Utils;
 using Fort.Utils.Logger;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -32,8 +33,6 @@ namespace Fort.Services
         private Task _playTask;
         private bool _playTaskCanceled;
 
-        private Dictionary<string, string> _startingPositions;
-
         public Round CurrentRound { get; private set; }
         public Timer.Status State => _timer.State;
         public TimeSpan? Remaining => _timer.Remains;
@@ -42,10 +41,6 @@ namespace Fort.Services
         public void Setup(IConfigurationSection config)
         {
             _deathStories = Program.GetService<IConfiguration>().GetSection("DeathStories").Get<List<string>>() ?? new List<string>();
-
-            // load from config
-            _startingPositions = new Dictionary<string, string>();
-            config.Bind(_startingPositions);
 
             // load last round
             CurrentRound = _context.Rounds.OrderByDescending(r => r.Id).FirstOrDefault();
@@ -58,13 +53,14 @@ namespace Fort.Services
         }
         private void LoadStart()
         {
-            foreach (City city in _context.Cities)
+            foreach (City city in _context.Cities.Include(c => c.Start))
             {
                 // city has owner
-                if (_startingPositions.ContainsKey(city.Id.ToString()))
+                var start = city.Start.FirstOrDefault();
+                if (start != null)
                 {
-                    city.Army = Program.Config.DefaultPopulationStart;
-                    city.OwnerId = _startingPositions[city.Id.ToString()];
+                    city.Army = start.Army ?? Program.Config.DefaultPopulationStart;
+                    city.OwnerId = start.UserId;
                 }
                 // city is neutral
                 else
