@@ -140,17 +140,17 @@ body.login form .error {
 .statistics {
     position: absolute;
     bottom: 0;
-    right: 0;
+    left: 0;
 
     padding: 10px 20px;
 
-    border-width: 1px 0 0 1px;
+    border-width: 1px 1px 0 0;
     border-style: solid;
     border-color: #000;
-    border-radius: 20px 0 0 0;
+    border-radius: 0 20px 0 0;
 
     background-color: #fff;
-    font-size: 25px;
+    font-size: 20px;
 }
 
 /* modal */
