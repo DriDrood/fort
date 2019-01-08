@@ -359,7 +359,7 @@ function stopCountDown() {
 }
 function setTime(total_seconds) {
     var hours = Math.floor(total_seconds / (60 * 60));
-    var minutes = Math.floor(total_seconds / 60);
+    var minutes = Math.floor(total_seconds / 60) % 60;
     var seconds = total_seconds % 60;
     $('#actions .time').html(hours + ':' + pad100(minutes) + ':' + pad100(seconds));
 

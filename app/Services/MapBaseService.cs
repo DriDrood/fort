@@ -120,7 +120,7 @@ namespace Fort.Services
             if (rem == null)
                 return "0:00:00";
 
-            return $"{rem.Value.Hours}:{rem.Value.Minutes.ToString().PadLeft(2, '0')}:{rem.Value.Seconds.ToString().PadLeft(2, '0')}";
+            return $"{(int)rem.Value.TotalHours}:{rem.Value.Minutes.ToString().PadLeft(2, '0')}:{rem.Value.Seconds.ToString().PadLeft(2, '0')}";
         }
 
         public string[] Army(Turn turn)
