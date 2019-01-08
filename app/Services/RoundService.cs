@@ -100,7 +100,8 @@ namespace Fort.Services
                         if (_playTaskCanceled) return;
                     }
 
-                    _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultRoundDurationSec));
+                    var roundDuration = DateTime.UtcNow.Date.AddDays(1).AddHours(21) - DateTime.UtcNow;
+                    _timer.SetTime(roundDuration);
                     Start();
                     _timer.Start().GetAwaiter().GetResult();
                     if (_playTaskCanceled) return;
