@@ -100,7 +100,12 @@ namespace Fort.Services
                         if (_playTaskCanceled) return;
                     }
 
-                    var roundDuration = DateTime.UtcNow.Date.AddDays(1).AddHours(21) - DateTime.UtcNow;
+                    var cestNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time"));
+                    var endRound = cestNow.Date.AddHours(21);
+                    if (endRound < cestNow)
+                        endRound = endRound.AddDays(1);
+                    var roundDuration = endRound - cestNow; // CEST
+
                     _timer.SetTime(roundDuration);
                     Start();
                     _timer.Start().GetAwaiter().GetResult();
