@@ -180,8 +180,8 @@ function onMessage(data) {
             var mapHolder = $('#map_holder');
             mapHolder.html(map_walkOut);
             $('#ready').removeClass('active');
-            if ($('body.Team').length > 0)
-                audioMarching.play();
+            // if ($('body.Team').length > 0)
+            audioMarching.play();
 
             var ratio = parseInt($('#map').css('width')) / parseInt($('#map').attr('viewBox').split(' ')[2]);
             $.each(map_turns, function (index, turn) {
