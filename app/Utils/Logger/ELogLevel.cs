@@ -7,6 +7,7 @@ namespace Fort.Utils.Logger
         Connection,
         JS,
         MessageSend,
-        MessageReceive
+        MessageReceive,
+        Fatal
     }
 }

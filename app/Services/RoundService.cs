@@ -90,39 +90,46 @@ namespace Fort.Services
         {
             _playTask = Task.Run(() =>
             {
-                while (_context.Teams.Count(t => t.Members.Any(m => m.Cities.Any())) > 1)
+                try
                 {
-                    if (CurrentRound.RoundNumber > 1 || CurrentRound.Turns.Any())
+                    while (_context.Teams.Count(t => t.Members.Any(m => m.Cities.Any())) > 1)
                     {
-                        _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
-                        Init(_timer.Remains.Value);
+                        if (CurrentRound.RoundNumber > 1 || CurrentRound.Turns.Any())
+                        {
+                            _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
+                            Init(_timer.Remains.Value);
+                            _timer.Start().GetAwaiter().GetResult();
+                            if (_playTaskCanceled) return;
+                        }
+
+                        var cestNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Prague"));
+                        var endRound = cestNow.Date.AddHours(21);
+                        if (endRound < cestNow)
+                            endRound = endRound.AddDays(1);
+                        var roundDuration = endRound - cestNow; // CEST
+
+                        _timer.SetTime(roundDuration);
+                        Start();
                         _timer.Start().GetAwaiter().GetResult();
                         if (_playTaskCanceled) return;
+
+                        _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultBeforeVisualizationSec));
+                        End();
+                        var tt = _timer.Start();
+
+                        CountResult();
+                        tt.GetAwaiter().GetResult();
+                        if (_playTaskCanceled) return;
+
+                        ShowFinalize();
                     }
 
-                    var cestNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time"));
-                    var endRound = cestNow.Date.AddHours(21);
-                    if (endRound < cestNow)
-                        endRound = endRound.AddDays(1);
-                    var roundDuration = endRound - cestNow; // CEST
-
-                    _timer.SetTime(roundDuration);
-                    Start();
-                    _timer.Start().GetAwaiter().GetResult();
-                    if (_playTaskCanceled) return;
-
-                    _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultBeforeVisualizationSec));
-                    End();
-                    var tt = _timer.Start();
-
-                    CountResult();
-                    tt.GetAwaiter().GetResult();
-                    if (_playTaskCanceled) return;
-
-                    ShowFinalize();
+                    EndGame();
                 }
-
-                EndGame();
+                catch (Exception ex)
+                {
+                    Logger.Log(ELogLevel.Fatal, "round", ex.Message, ex.StackTrace);
+                }
             });
         }
         public void EndGame()
