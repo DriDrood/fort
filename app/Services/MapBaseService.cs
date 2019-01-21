@@ -56,7 +56,7 @@ namespace Fort.Services
             {
                 var middle = GetMiddlePoint(path);
                 
-                string armySent = _context.Turns.Any(t => t.RoundId == roundId && t.UserId == _player.Id && t.SourceCityId == path.SourceId && t.TargetCityId == path.TargetId)
+                string armySent = _context.Turns.Any(t => t.RoundId == roundId && t.UserId == _player.Id && ((t.SourceCityId == path.SourceId && t.TargetCityId == path.TargetId) || (t.SourceCityId == path.TargetId && t.TargetCityId == path.SourceId)))
                     ? "filter=\"url(#shadow)\""
                     : "";
                 svgMap.AppendLine($"<line x1=\"{path.Source.X}\" y1=\"{path.Source.Y}\" x2=\"{middle.x}\" y2=\"{middle.y}\" data-source-id=\"{path.SourceId}\" data-target-id=\"{path.TargetId}\" style=\"stroke:{GetCityColor(path.Source)};stroke-width:5\" {armySent} />");
