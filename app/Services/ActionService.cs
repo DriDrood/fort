@@ -28,8 +28,15 @@ namespace Fort.Services
                 Turn dbTurn = context.Turns.SingleOrDefault(t => t.SourceCityId == turn.SourceCityId && t.TargetCityId == turn.TargetCityId && t.RoundId == _roundService.CurrentRound.Id);
                 if (dbTurn != null)
                 {
-                    dbTurn.Amount = turn.Amount;
-                    dbTurn.CreatedAt = DateTime.UtcNow;
+                    if (turn.Amount == 0)
+                    {
+                        context.Turns.Remove(dbTurn);
+                    }
+                    else
+                    {
+                        dbTurn.Amount = turn.Amount;
+                        dbTurn.CreatedAt = DateTime.UtcNow;
+                    }
                 }
                 else
                 {
