@@ -102,7 +102,9 @@ namespace Fort.Services
                             if (_playTaskCanceled) return;
                         }
 
-                        var cestNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Prague"));
+                        TimeZoneInfo timezonePrague = TimeZoneInfo.GetSystemTimeZones().FirstOrDefault(tz => tz.Id == "Europe/Prague")
+                            ?? TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
+                        var cestNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezonePrague);
                         var endRound = cestNow.Date.AddHours(21);
                         if (endRound < cestNow)
                             endRound = endRound.AddDays(1);
