@@ -75,24 +75,31 @@ namespace Fort.Utils.Channels
                 // wait for messages
                 var buffer = new byte[_bufferSize];
                 WebSocketReceiveResult result;
-                do
+                try
                 {
-                    StringBuilder message = new StringBuilder();
                     do
                     {
-                        result = _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None).GetAwaiter().GetResult();
-                        string messagePart = Encoding.UTF8.GetString(buffer.Take(result.Count).ToArray());
-                        message.Append(messagePart);
+                        StringBuilder message = new StringBuilder();
+                        do
+                        {
+                            result = _webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None).GetAwaiter().GetResult();
+                            string messagePart = Encoding.UTF8.GetString(buffer.Take(result.Count).ToArray());
+                            message.Append(messagePart);
+                        }
+                        while (!result.EndOfMessage);
+
+                        // ignore closing
+                        if (!result.CloseStatus.HasValue)
+                            OnMessage(PlayerId, message.ToString());
                     }
-                    while (!result.EndOfMessage);
+                    while (!result.CloseStatus.HasValue);
 
-                    // ignore closing
-                    if (!result.CloseStatus.HasValue)
-                        OnMessage(PlayerId, message.ToString());
+                    OnDisconnect(PlayerId, result.CloseStatusDescription);
                 }
-                while (!result.CloseStatus.HasValue);
-
-                OnDisconnect(PlayerId, result.CloseStatusDescription);
+                catch (WebSocketException ex)
+                {
+                    OnDisconnect(PlayerId, ex.Message);
+                }
             });
         }
     }

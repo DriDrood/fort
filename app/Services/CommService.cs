@@ -161,14 +161,7 @@ namespace Fort.Services
 
         private void send(IChannel channel, string method, object data, string playerId)
         {
-            try
-            {
-                channel.SendMessage(method, data);
-            }
-            catch (WebSocketException ex)
-            {
-                Logger.Log(ELogLevel.UnknownException, playerId, ex.Message, ex.StackTrace);
-            }
+            channel.SendMessage(method, data);
         }
     }
 }
