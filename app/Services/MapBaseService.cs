@@ -21,6 +21,7 @@ namespace Fort.Services
         }
 
         public virtual string ShowStatistics() => string.Empty;
+        public Round CurrentRound => Program.GetService<RoundService>().CurrentRound;
 
         protected abstract string GetCityColor(City city);
         protected abstract int GetCityArmy(City city);
@@ -44,7 +45,7 @@ namespace Fort.Services
         public string Print()
         {
             StringBuilder svgMap = new StringBuilder();
-            int roundId = Program.GetService<RoundService>().CurrentRound.Id;
+            int roundId = CurrentRound.Id;
 
             svgMap.AppendLine($"<svg id=\"map\" viewBox=\"0 0 1600 794\">");
             svgMap.AppendLine("<style> .armyText { font-size: 18px; } </style>");

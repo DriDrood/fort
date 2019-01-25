@@ -15,6 +15,7 @@ namespace Fort.Services
 
         public override string ShowStatistics()
         {
+            var readyUsers = CurrentRound.ReadyUserIds;
             StringBuilder stat = new StringBuilder();
             stat.AppendLine("<div class=\"statistics\">");
             foreach (Team team in _context.Teams)
@@ -24,7 +25,7 @@ namespace Fort.Services
 
                 foreach (User member in team.Members)
                 {
-                    stat.AppendLine($"<div class=\"player\" data-playerId=\"{member.Id}\"><i class=\"fa {(_commService.IsPlayerConnected(member.Id) ? "fa-globe" : "fa-chain-broken")}\"></i> {member.Name}: {member.Cities.Count()} - {member.Cities.Sum(c => c.Army)}</div>");
+                    stat.AppendLine($"<div class=\"player\" data-playerId=\"{member.Id}\"><i class=\"fa {(_commService.IsPlayerConnected(member.Id) ? "fa-globe" : "fa-chain-broken")}\"></i> {member.Name}: {member.Cities.Count()} - {member.Cities.Sum(c => c.Army)}{(readyUsers.Contains(member.Id) ? "<i class=\"fa fa-check\"></i>" : "")}</div>");
                 }
 
                 stat.AppendLine($"</div>");

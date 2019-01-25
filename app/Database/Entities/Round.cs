@@ -10,7 +10,7 @@ namespace Fort.Database.Entities
         public Round()
         {
             Turns = new HashSet<Turn>();
-            ReadyUsers = new HashSet<User>();
+            ReadyUserIds = new HashSet<string>();
         }
 
         public int Id { get; set; }
@@ -25,6 +25,6 @@ namespace Fort.Database.Entities
         public virtual ICollection<Turn> Turns { get; set; }
 
         [NotMapped]
-        public HashSet<User> ReadyUsers { get; set; }
+        public HashSet<string> ReadyUserIds { get; set; }
     }
 }

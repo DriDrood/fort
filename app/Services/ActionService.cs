@@ -53,9 +53,9 @@ namespace Fort.Services
         public void Ready(User user, bool ready)
         {
             if (ready)
-                _roundService.CurrentRound.ReadyUsers.Add(user);
+                _roundService.CurrentRound.ReadyUserIds.Add(user.Id);
             else
-                _roundService.CurrentRound.ReadyUsers.Remove(user);
+                _roundService.CurrentRound.ReadyUserIds.Remove(user.Id);
 
             _commService.SendToAll("playerReady", new { ready = ready, playerId = user.Id });
         }
