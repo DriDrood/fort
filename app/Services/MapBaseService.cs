@@ -65,7 +65,7 @@ namespace Fort.Services
             }
 
             // cities
-            foreach (City city in _context.Cities)
+            foreach (City city in _context.Cities.Include(c => c.Owner).ThenInclude(o => o.Team))
             {
                 int cityArmy = GetCityArmy(city);
                 var turnsFromThis = _context.Turns.Where(t => t.RoundId == roundId && t.SourceCityId == city.Id).ToList();
