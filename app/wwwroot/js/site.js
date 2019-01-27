@@ -346,13 +346,17 @@ function notification(type, message) {
 
 // CountDown
 function countDown(total_seconds) {
+    var endTime = Date.now() + (total_seconds * 1000);
     countDownTask = setInterval(function () {
-        setTime(total_seconds);
-
-        total_seconds--;
-        if (total_seconds < 0)
+        var now = Date.now()
+        if (endTime <= now) {
             stopCountDown();
-    }, 1000);
+            setTime(0);
+            return;
+        }
+
+        setTime(Math.floor((endTime - now) / 1000));
+    }, 100);
 }
 function stopCountDown() {
     clearInterval(countDownTask);
