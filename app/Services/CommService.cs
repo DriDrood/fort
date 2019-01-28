@@ -132,9 +132,10 @@ namespace Fort.Services
         public void SendToAll(string method, object data)
         {
             List<Task> tasks = new List<Task>();
-            foreach (var pair in _playerConnections)
+            foreach (var key in _playerConnections.Keys.ToList())
             {
-                tasks.Add(Task.Run(() => send(pair.Value, method, data, pair.Key)));
+                if (_playerConnections.ContainsKey(key))
+                    tasks.Add(Task.Run(() => send(_playerConnections[key], method, data, key)));
             }
 
             foreach (Task task in tasks)
@@ -143,10 +144,13 @@ namespace Fort.Services
         public void SendToEach(string method, Func<string, string> getData)
         {
             List<Task> tasks = new List<Task>();
-            foreach (var pair in _playerConnections)
+            foreach (var key in _playerConnections.Keys.ToList())
             {
-                var data = getData(pair.Key);
-                tasks.Add(Task.Run(() => send(pair.Value, method, data, pair.Key)));
+                if (_playerConnections.ContainsKey(key))
+                {
+                    var data = getData(key);
+                    tasks.Add(Task.Run(() => send(_playerConnections[key], method, data, key)));
+                }
             }
 
             foreach (Task task in tasks)
