@@ -358,7 +358,7 @@ namespace Fort.Services
             _currentDeaths.Clear();
 
             // show statistics to admins
-            foreach (User user in _context.Users.Where(u => u.IsAdmin))
+            foreach (User user in _context.Users.Where(u => u.IsAdmin).ToList())
             {
                 tasks.Add(Task.Run(() => _commService.SendToOne(user.Id, "statistics", MapBaseService.GetMapServiceForPlayer(_context, user).ShowStatistics())));
             }
