@@ -69,7 +69,7 @@ namespace Fort.Services
             {
                 foreach (Turn turn in _context.Turns.Include(t => t.SourceCity).Include(t => t.TargetCity).Where(t => t.RoundId == roundId && t.UserId == _player.Id))
                 {
-                    var coords = GetArmyOrderPosition(turn.SourceCity, turn.TargetCity);
+                    var coords = GetMiddlePoint(turn, 0.25);
 
                     svgMap.AppendLine($"<circle cx=\"{coords.x}\" cy=\"{coords.y}\" r=\"12\" class=\"armyOrder-{turn.SourceCityId}-{turn.TargetCityId}\" fill=\"{GetCityColor(turn.SourceCity)}\" />"); // 
                     svgMap.AppendLine($"<text x=\"{coords.x}\" y=\"{coords.y + 4}\" text-anchor=\"middle\" class=\"armyOrder-{turn.SourceCityId}-{turn.TargetCityId} armyOrderText\">{turn.Amount}</text>");
@@ -165,19 +165,19 @@ namespace Fort.Services
                 new string[] { $"<div id=\"army{turn.Id}\" class=\"army\" data-time=\"begin\" data-final-x=\"{middle.x}\" data-final-y=\"{middle.y}\" style=\"width:{GetRadius(turn.Amount)}px;height:{GetRadius(turn.Amount)}px;border-radius:{GetRadius(turn.Amount)}px;background-color:{GetCityColor(turn.SourceCity)};top:{turn.SourceCity.Y}px;left:{turn.SourceCity.X}px;\"></div>" };
         }
 
-        private static (double x, double y) GetMiddlePoint(Path path)
+        private static (double x, double y) GetMiddlePoint(Path path, double ratio = 0.5)
         {
-            return GetMiddlePoint(path.Source.X, path.Source.Y, path.Target.X, path.Target.Y);
+            return GetMiddlePoint(path.Source.X, path.Source.Y, path.Target.X, path.Target.Y, ratio);
         }
-        private static (double x, double y) GetMiddlePoint(Turn turn)
+        private static (double x, double y) GetMiddlePoint(Turn turn, double ratio = 0.5)
         {
-            return GetMiddlePoint(turn.SourceCity.X, turn.SourceCity.Y, turn.TargetCity.X, turn.TargetCity.Y);
+            return GetMiddlePoint(turn.SourceCity.X, turn.SourceCity.Y, turn.TargetCity.X, turn.TargetCity.Y, ratio);
         }
-        private static (double x, double y) GetMiddlePoint(double sourceX, double sourceY, double targetX, double targetY)
+        private static (double x, double y) GetMiddlePoint(double sourceX, double sourceY, double targetX, double targetY, double ratio = 0.5)
         {
             (double x, double y) result = (0, 0);
-            result.x = ((targetX - sourceX) / 2) + sourceX;
-            result.y = ((targetY - sourceY) / 2) + sourceY;
+            result.x = ((targetX - sourceX) * ratio) + sourceX;
+            result.y = ((targetY - sourceY) * ratio) + sourceY;
 
             return result;
         }
@@ -185,7 +185,7 @@ namespace Fort.Services
         public (double x, double y, string color) GetOrder(Turn turn)
         {
             var color = GetCityColor(turn.SourceCity);
-            var coords = GetArmyOrderPosition(turn.SourceCity, turn.TargetCity);
+            var coords = GetMiddlePoint(turn, 0.25);
             return (coords.x, coords.y, color);
         }
         private static (double x, double y) GetArmyOrderPosition(City sourceCity, City targetCity)
