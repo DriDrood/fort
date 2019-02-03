@@ -48,7 +48,7 @@ namespace Fort.Services
             int roundId = CurrentRound.Id;
 
             svgMap.AppendLine($"<svg id=\"map\" viewBox=\"0 0 1600 794\">");
-            svgMap.AppendLine("<style> .armyText { font-size: 18px; } </style>");
+            svgMap.AppendLine("<style> .armyText { font-size: 18px; } .armyOrderText { font-size: 12px; fill: #fff; } </style>");
 
             // paths
             foreach (Path path in _context.Paths
@@ -56,12 +56,21 @@ namespace Fort.Services
                 .Include(p => p.Target).ThenInclude(c => c.Owner).ThenInclude(u => u.Team))
             {
                 var middle = GetMiddlePoint(path);
-                
+
                 string armySent = _context.Turns.Any(t => t.RoundId == roundId && t.UserId == _player.Id && ((t.SourceCityId == path.SourceId && t.TargetCityId == path.TargetId) || (t.SourceCityId == path.TargetId && t.TargetCityId == path.SourceId)))
                     ? "filter=\"url(#shadow)\""
                     : "";
                 svgMap.AppendLine($"<line x1=\"{path.Source.X}\" y1=\"{path.Source.Y}\" x2=\"{middle.x}\" y2=\"{middle.y}\" data-source-id=\"{path.SourceId}\" data-target-id=\"{path.TargetId}\" style=\"stroke:{GetCityColor(path.Source)};stroke-width:5\" {armySent} />");
                 svgMap.AppendLine($"<line x1=\"{middle.x}\" y1=\"{middle.y}\" x2=\"{path.Target.X}\" y2=\"{path.Target.Y}\" data-source-id=\"{path.SourceId}\" data-target-id=\"{path.TargetId}\" style=\"stroke:{GetCityColor(path.Target)};stroke-width:5\" {armySent} />");
+            }
+
+            // army orders
+            foreach (Turn turn in _context.Turns.Include(t => t.SourceCity).Include(t => t.TargetCity).Where(t => t.RoundId == roundId && t.UserId == _player.Id))
+            {
+                var coords = GetArmyOrderPosition(turn.SourceCity, turn.TargetCity);
+
+                svgMap.AppendLine($"<circle cx=\"{coords.x}\" cy=\"{coords.y}\" r=\"12\" class=\"armyOrder-{turn.SourceCityId}-{turn.TargetCityId}\" fill=\"{GetCityColor(turn.SourceCity)}\" />"); // 
+                svgMap.AppendLine($"<text x=\"{coords.x}\" y=\"{coords.y + 4}\" text-anchor=\"middle\" class=\"armyOrder-{turn.SourceCityId}-{turn.TargetCityId} armyOrderText\">{turn.Amount}</text>");
             }
 
             // cities
@@ -70,9 +79,9 @@ namespace Fort.Services
                 int cityArmy = GetCityArmy(city);
                 var turnsFromThis = _context.Turns.Where(t => t.RoundId == roundId && t.SourceCityId == city.Id).ToList();
                 string sentArmies = string.Join(" ", turnsFromThis.Select(t => $"data-army-sent-{t.TargetCityId}=\"{t.Amount}\""));
-                if (cityArmy > 0)
+                if (cityArmy >= 0)
                 {
-                    svgMap.AppendLine($"<circle cx=\"{city.X - GetRadius(city.Army)}\" cy=\"{city.Y - GetRadius(city.Army)}\" r=\"14\" fill=\"white\" style=\"stroke:black;stroke-width:2;\" />");
+                    svgMap.AppendLine($"<circle cx=\"{city.X - GetRadius(city.Army)}\" cy=\"{city.Y - GetRadius(city.Army)}\" r=\"14\" class=\"cityArmy\" data-for=\"{city.Id}\" fill=\"white\" style=\"stroke:black;stroke-width:2;\" />");
                     svgMap.AppendLine($"<text x=\"{city.X - GetRadius(city.Army)}\" y=\"{city.Y - GetRadius(city.Army) + 6}\" text-anchor=\"middle\" class=\"armyText\">{cityArmy}</text>");
                 }
                 svgMap.AppendLine($"<circle cx=\"{city.X}\" cy=\"{city.Y}\" r=\"{GetRadius(city.Army)}\" data-city-id=\"{city.Id}\" data-neighbours=\"{string.Join(" ", city.Neighbour.Select(c => c.Id))}\" data-owned=\"{city.OwnerId == _player.Id}\" data-army=\"{(cityArmy - turnsFromThis.Sum(t => t.Amount))}\" {sentArmies} fill=\"{GetCityFill(city)}\" style=\"stroke:{GetCityColor(city)};stroke-width:2\" />");
@@ -153,11 +162,11 @@ namespace Fort.Services
                 new string[] { $"<div id=\"army{turn.Id}\" class=\"army\" data-time=\"begin\" data-final-x=\"{middle.x}\" data-final-y=\"{middle.y}\" style=\"width:{GetRadius(turn.Amount)}px;height:{GetRadius(turn.Amount)}px;border-radius:{GetRadius(turn.Amount)}px;background-color:{GetCityColor(turn.SourceCity)};top:{turn.SourceCity.Y}px;left:{turn.SourceCity.X}px;\"></div>" };
         }
 
-        public static (double x, double y) GetMiddlePoint(Path path)
+        private static (double x, double y) GetMiddlePoint(Path path)
         {
             return GetMiddlePoint(path.Source.X, path.Source.Y, path.Target.X, path.Target.Y);
         }
-        public static (double x, double y) GetMiddlePoint(Turn turn)
+        private static (double x, double y) GetMiddlePoint(Turn turn)
         {
             return GetMiddlePoint(turn.SourceCity.X, turn.SourceCity.Y, turn.TargetCity.X, turn.TargetCity.Y);
         }
@@ -170,7 +179,26 @@ namespace Fort.Services
             return result;
         }
 
-        public int GetRadius(int army) => (int)(army == 0 ? 3 : (System.Math.Log10(army) * 10 + 2));
+        public (double x, double y, string color) GetOrder(Turn turn)
+        {
+            var color = GetCityColor(turn.SourceCity);
+            var coords = GetArmyOrderPosition(turn.SourceCity, turn.TargetCity);
+            return (coords.x, coords.y, color);
+        }
+        private static (double x, double y) GetArmyOrderPosition(City sourceCity, City targetCity)
+        {
+            int range = GetRadius(sourceCity.Army) + 9;
+            double deltaX = targetCity.X - sourceCity.X;
+            double deltaY = targetCity.Y - sourceCity.Y;
+            double ratio = deltaX / deltaY;
+            double deltaFinalY = Math.Sign(deltaY) * Math.Sqrt(Math.Pow(range, 2) / (Math.Pow(ratio, 2) + 1));
+            double finalY = deltaFinalY + sourceCity.Y;
+            double finalX = (ratio * deltaFinalY) + sourceCity.X;
+
+            return (finalX, finalY);
+        }
+
+        public static int GetRadius(int army) => (int)(army == 0 ? 3 : (System.Math.Log10(army) * 10 + 2));
 
         public static MapBaseService GetMapServiceForPlayer(FortDbContext context, Player player)
         {

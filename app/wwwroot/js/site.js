@@ -224,9 +224,26 @@ function onMessage(data) {
             // show shadow
             $('[data-source-id="' + sourceCity.attr('data-city-id') + '"][data-target-id="' + targetCity.attr('data-city-id') + '"],[data-source-id="' + targetCity.attr('data-city-id') + '"][data-target-id="' + sourceCity.attr('data-city-id') + '"]').attr('filter', armySize == 0 ? '' : 'url(#shadow)');
             refresh();
+            // show order
+            $('.armyOrder-' + sourceCity.attr('data-city-id') + '-' + targetCity.attr('data-city-id')).remove();
+
+            var order = document.createElementNS("http://www.w3.org/2000/svg", 'circle');
+            order.setAttribute('cx', data['param']['order']['x']);
+            order.setAttribute('cy', data['param']['order']['y']);
+            order.setAttribute('r', '12');
+            order.setAttribute('fill', data['param']['order']['color']);
+            order.setAttribute('class', 'armyOrder-' + sourceCity.attr('data-city-id') + '-' + targetCity.attr('data-city-id'));
+            $('.cityArmy[data-for="' + sourceCity.attr('data-city-id') + '"]').before(order);
+            var orderText = document.createElementNS("http://www.w3.org/2000/svg", 'text');
+            orderText.setAttribute('x', data['param']['order']['x']);
+            orderText.setAttribute('y', data['param']['order']['y'] - (-4));
+            orderText.setAttribute('text-anchor', 'middle');
+            orderText.setAttribute('class', 'armyOrder-' + sourceCity.attr('data-city-id') + '-' + targetCity.attr('data-city-id') + ' armyOrderText');
+            orderText.appendChild(document.createTextNode(armySize));
+            $('.cityArmy[data-for="' + sourceCity.attr('data-city-id') + '"]').before(orderText);
 
             hideModal();
-            notification('success', data['param']);
+            notification('success', data['param']['message']);
             break;
         case "turnError":
             hideModal();

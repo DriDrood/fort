@@ -63,7 +63,12 @@ namespace Fort.Services
                             {
                                 Turn playerTurn = data["param"].ToObject<Turn>();
                                 _actionService.Turn(user, playerTurn);
-                                SendToOne(playerId, "turnOk", "Tah úspěšně zadán");
+                                playerTurn.User = user;
+                                playerTurn.SourceCity = context.Cities.Find(playerTurn.SourceCityId);
+                                playerTurn.TargetCity = context.Cities.Find(playerTurn.TargetCityId);
+                                user.Team = context.Teams.Find(user.TeamId);
+                                var order = MapBaseService.GetMapServiceForPlayer(context, user).GetOrder(playerTurn);
+                                SendToOne(playerId, "turnOk", new { message = "Tah úspěšně zadán", order = new { x = order.x, y = order.y, color = order.color } });
                             }
                             catch (FortException ex)
                             {
