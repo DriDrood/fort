@@ -224,7 +224,7 @@ namespace Fort.Services
             _commService.SendToEach("map_walkOut", (playerId) =>
             {
                 Player player = (Player)_context.Users.Find(playerId) ?? _context.Teams.Find(playerId);
-                return MapBaseService.GetMapServiceForPlayer(_context, player).Print();
+                return MapBaseService.GetMapServiceForPlayer(_context, player).Print(false);
             });
 
             /// fights in the middle
@@ -304,7 +304,7 @@ namespace Fort.Services
             _commService.SendToEach("map_walkIn", (playerId) =>
             {
                 Player player = (Player)_context.Users.Find(playerId) ?? _context.Teams.Find(playerId);
-                return MapBaseService.GetMapServiceForPlayer(_context, player).Print();
+                return MapBaseService.GetMapServiceForPlayer(_context, player).Print(false);
             });
         }
         private (int army, string winnerId) fight(City city, IGrouping<Team, Turn> ally, IGrouping<Team, Turn> attacker, int attackerRealArmy)
