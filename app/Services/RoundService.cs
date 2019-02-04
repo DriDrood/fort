@@ -212,7 +212,7 @@ namespace Fort.Services
             _context = new FortDbContext();
             CurrentRound = _context.Rounds.Find(CurrentRound.Id);
 
-            var turns = _context.Turns.Where(t => t.RoundId == CurrentRound.Id).ToList();
+            var turns = _context.Turns.Include(t => t.User).Where(t => t.RoundId == CurrentRound.Id).ToList();
             var cities = _context.Cities.ToList();
 
             /// walk out
