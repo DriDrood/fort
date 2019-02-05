@@ -3,21 +3,22 @@ var ws = null;
 var Comm = {
     'connection': null,
     'status': {
-        'isConnected': false,
+        'active': 'disconnected',
         'connected': function () {
-            Comm.status.isConnected = true;
+            Comm.status.active = 'connected';
             $('#actions .connection').html('<i class="fa fa-globe" title="Připojen k serveru"></i>');
         },
         'disconnected': function () {
-            Comm.status.isConnected = false;
+            Comm.status.active = 'disconnected';
             $('#actions .connection').html('<i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i>');
         },
         'connecting': function () {
-            Comm.status.isConnected = false;
+            Comm.status.active = 'connecting';
             $('#actions .connection').html('<i class="fa fa-spinner fa-spin fa-fw" title="Navazuji spojení..."></i>');
         }
     },
     'createConnection': function () {
+        Comm.status.connecting();
         var url = 'ws://' + location.hostname + (location.port != '' ? (':' + location.port) : '') + location.pathname;
         console.log('connecting to ' + url);
         ws = new WebSocket(url);
@@ -34,9 +35,14 @@ var Comm = {
         };
     },
     'send': function (method, data) {
-        if (!Comm.status.isConnected) {
-            Utils.notification('warning', 'Nejste připojen');
-            return;
+        if (Comm.status.active != 'connected') {
+            if (Comm.status.active == 'disconnected') {
+                Comm.createConnection();
+            }
+            else {
+                Utils.notification('warning', 'Nejste připojen');
+                return;
+            }
         }
 
         if (data === undefined || data == null)
