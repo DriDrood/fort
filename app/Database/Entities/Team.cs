@@ -14,5 +14,7 @@ namespace Fort.Database.Entities
         public int? PopulationGrowth { get; set; }
 
         public virtual ICollection<User> Members { get; set; }
+
+        public override bool IsUser() => false;
     }
 }

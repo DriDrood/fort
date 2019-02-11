@@ -5,13 +5,13 @@ namespace app.Module.Comm
 {
     public class QueueItem
     {
-        public QueueItem(TimeSpan lifetime)
+        public QueueItem()
         {
-            LifetimeEndsAt = DateTime.UtcNow + lifetime;
+            Id = Guid.NewGuid();
         }
         
-        public string Method { get; set; }
-        public JToken Message { get; set; }
-        public DateTime LifetimeEndsAt { get; }
+        public Guid Id { get; set; }
+        public string Data { get; set; }
+        public Lifetime Lifetime { get; set; }
     }
 }

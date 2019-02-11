@@ -14,6 +14,7 @@ namespace Fort.Database.Entities
         [StringLength(100)]
         public string ImageUrl { get; set; }
         public bool IsAdmin { get; set; }
+        public int LastRoundReady { get; set; }
 
         [StringLength(5)]
         public string TeamId { get; set; }
@@ -21,5 +22,7 @@ namespace Fort.Database.Entities
 
         public virtual ICollection<City> Cities { get; set; }
         public virtual ICollection<Turn> Turns { get; set; }
+
+        public override bool IsUser() => true;
     }
 }

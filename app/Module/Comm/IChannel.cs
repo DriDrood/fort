@@ -1,13 +1,16 @@
 using System;
+using System.Threading.Tasks;
 
 namespace app.Module.Comm
 {
     public interface IChannel
     {
         string PlayerId { get; }
-        void SendMessage(string method, object data);
+        bool ReadyToSend { get; }
+        CommService Comm { set; }
+        Queue Q { set; }
+
+        Task SendMessage(string method, object data);
         void Disconnect(string reason);
-        Action<string, string> OnMessage { set; }
-        Action<string, string> OnDisconnect { set; }
     }
 }
