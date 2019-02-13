@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json.Linq;
 
-namespace app.Module.Comm
+namespace Fort.Module.Comm
 {
     public class QueueItem
     {

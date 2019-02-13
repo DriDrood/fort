@@ -1,7 +1,7 @@
 using System;
 using Fort.Database.Entities;
 
-namespace app.Models
+namespace Fort.Models
 {
     public class CurrentRound
     {

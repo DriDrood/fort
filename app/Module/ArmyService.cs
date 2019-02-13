@@ -1,4 +1,4 @@
-namespace app.Module
+namespace Fort.Module
 {
     public class ArmyService
     {

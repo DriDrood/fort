@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using app.Models;
+using Fort.Models;
 using Fort.Database;
 using Fort.Database.Entities;
 using Fort.Utils;
@@ -10,7 +10,7 @@ using Fort.Utils.Logger;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
-namespace app.Module
+namespace Fort.Module
 {
     public class RoundService
     {

@@ -1,6 +1,7 @@
+@using Fort.Module
 @model Fort.Services.MapBaseService
 @{
-    Fort.Services.CurrentPlayerService currPlayer = (Fort.Services.CurrentPlayerService)ViewData["player"];
+    ContextService currPlayer = Program.GetService<ContextService>();
     ViewData["Title"] = "Mapa";
     ViewData["page"] = "map";
     ViewData["type"] = currPlayer.Player.GetType().Name;

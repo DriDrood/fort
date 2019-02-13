@@ -2,7 +2,7 @@ using System;
 using Fort.Database;
 using Fort.Database.Entities;
 
-namespace app.Module
+namespace Fort.Module
 {
     public class ContextService : IDisposable
     {

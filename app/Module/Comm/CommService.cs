@@ -7,7 +7,7 @@ using Fort.Utils.Logger;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace app.Module.Comm
+namespace Fort.Module.Comm
 {
     public class CommService
     {

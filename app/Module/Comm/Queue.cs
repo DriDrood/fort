@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace app.Module.Comm
+namespace Fort.Module.Comm
 {
     public class Queue
     {

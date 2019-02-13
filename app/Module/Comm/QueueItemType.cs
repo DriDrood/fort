@@ -1,4 +1,4 @@
-namespace app.Module.Comm
+namespace Fort.Module.Comm
 {
     public enum Lifetime
     {

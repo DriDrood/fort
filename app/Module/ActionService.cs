@@ -2,7 +2,7 @@ using System;
 using Fort;
 using Fort.Database.Entities;
 
-namespace app.Module
+namespace Fort.Module
 {
     public class ActionService
     {
