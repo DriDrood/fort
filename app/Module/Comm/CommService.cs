@@ -16,7 +16,7 @@ namespace Fort.Module.Comm
             _activeChannels = new Dictionary<string, IChannel>();
             _queues = new Dictionary<string, Queue>();
 
-            // create Q for each user
+            // create Q for each player
             foreach (var user in context.Database.Users)
                 _queues.Add(user.Id, new Queue(this));
             foreach (var team in context.Database.Teams)

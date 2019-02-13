@@ -4,11 +4,12 @@ var Events = {
         'target': null
     },
     'select': function (city) {
+        var cityId = city.getAttribute('data-city-id');
         // source
         if (Events.selected.source == null) {
-            if (city.hasAttribute('data-owned') && city.getAttribute('data-owned')) {
+            if (city.hasAttribute('data-owned') && city.getAttribute('data-owned') == 'true') {
                 Events.selected.source = city;
-                Builder.city.highlight(city.getAttribute('data-city-id'));
+                Builder.city.highlight(cityId);
             }
             else {
                 Utils.notification('warning', 'Toto město není vaše');
@@ -17,8 +18,30 @@ var Events = {
 
         // target
         else {
+            // is neighbour
+            if (Events.selected.source.getAttribute('data-neighbours').split(',').includes(cityId)) {
+                Events.selected.target = city;
+                var sourceCity = Events.selected.source;
 
+                var armySent = sourceCity.getAttribute('data-army-sent-' + cityId);
+                var maxArmy = sourceCity.getAttribute('data-army') - (-armySent);
+
+                Utils.modal.setValues(armySent, maxArmy);
+
+                Utils.modal.show();
+            }
+            else {
+                Utils.notification('warning', 'Zde není cesta');
+            }
         }
+    },
+    'deselect': function () {
+        if (Events.selected.source == null)
+            return;
+
+        Builder.city.unhighlight(Events.selected.source.getAttribute('data-city-id'));
+        Events.selected.source = null;
+        Events.selected.target = null;
     }
 }
 
@@ -26,12 +49,15 @@ $('body').on('click', function (event) {
     var target = event.target;
     //// alias
     if (target.hasAttribute('data-for-id')) {
-        target = document.getElementById(target.getAttribute('data-for-id'));
+        target = document.getElementById('city-' + target.getAttribute('data-for-id'));
     }
 
     //// city
     if (target.hasAttribute('data-city-id')) {
-        Events.select(target);
+        if (Events.selected.source != target)
+            Events.select(target);
+        else
+            Events.deselect(target);
     }
     //// buttons
     // play
@@ -71,16 +97,15 @@ $('body').on('click', function (event) {
     else if (target.value == 'sendArmy') {
         var armySize = document.getElementById('armySize').value;
         Comm.send("turn", {
-            SourceCityId: Events.selected.source.attr('data-city-id'),
-            TargetCityId: Events.selected.target.attr('data-city-id'),
+            SourceCityId: Events.selected.source.getAttribute('data-city-id'),
+            TargetCityId: Events.selected.target.getAttribute('data-city-id'),
             amount: armySize
         });
 
-        $('#sendArmy').css('display', 'none');
-        $('.shadow .fa-spinner').css('display', 'inline');
+        Utils.modal.hide();
     }
     // close modal
-    else if (target.classList.contains('shadow') || target.value == 'cancel') {
+    else if (target.id == 'modal_shadow' || target.value == 'cancel') {
         Utils.modal.hide();
     }
 });

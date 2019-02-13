@@ -21,6 +21,11 @@ html, body {
     z-index: 10;
 }
 
+#map_holder, #map {
+    width: 100%;
+    height: 100%;
+}
+
 #map {
     background-image: url('/images/top-black-and-white-map-of-the-world-1.png');
     background-size: 100% 100%;
@@ -154,7 +159,7 @@ body.login form .error {
 }
 
 /* modal */
-.shadow {
+#modal_shadow {
     position: fixed;
     display: none; /* flex */
     top: 0;
@@ -167,7 +172,7 @@ body.login form .error {
 
     background-color: rgba(0, 0, 0, 0.6);
 }
-.shadow .fa-spinner {
+#modal_shadow .fa-spinner {
     display: none;
 
     font-size: 50px;

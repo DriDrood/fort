@@ -1,35 +1,37 @@
 @using Fort.Module
 @model Fort.Services.MapBaseService
 @{
-    ContextService currPlayer = Program.GetService<ContextService>();
+    ContextService context = Program.GetService<ContextService>();
     ViewData["Title"] = "Mapa";
     ViewData["page"] = "map";
-    ViewData["type"] = currPlayer.Player.GetType().Name;
-    ViewData["playerName"] = currPlayer.Player.Name;
+    ViewData["type"] = context.CurrentPlayer.GetType().Name;
+    ViewData["playerName"] = context.CurrentPlayer.Name;
 }
 
 <div id="actions">
-    @if (currPlayer?.User?.IsAdmin == true)
+    @if (context.CurrentPlayer.IsUser() && (context.CurrentPlayer as Fort.Database.Entities.User).IsAdmin == true)
     {
         <i class="fa fa-play float-left" id="play" title="Spustit hru"></i>
         <i class="fa fa-pause float-left" id="pause" title="Pozastavit"></i>
         <i class="fa fa-fast-forward float-left" id="end" title="Ukončit kolo"></i>
         <i class="fa fa-refresh float-left" id="restart" title="Restartovat hru"></i>
     }
-    @if (currPlayer?.User != null)
+    @if (context.CurrentPlayer.IsUser())
     {
-        <i class="fa fa-check float-left @(Model.CurrentRound.ReadyUserIds.Contains(currPlayer.Player.Id) ? "active" : "")" id="ready" title="Připraven na další kolo"></i>
+        <i class="fa fa-check float-left" id="ready" title="Připraven na další kolo"></i>
     }
-    <span class="round float-left">@Html.Raw(Model.GetStatus())</span>
+    <span class="round float-left"></span>
     <span class="connection float-right"><i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i></span>
-    <span class="time float-right">@Model.GetRemaining()</span>
+    <span class="time float-right"></span>
 </div>
 
 <div id="map_holder">
-    @Html.Raw(Model.Print())
+    <svg id="map">
+        <g id="paths"></g>
+        <g id="turns"></g>
+        <g id="cities"></g>
+    </svg>
 </div>
-
-@Html.Raw(Model.ShowStatistics())
 
 <div class="shadow">
     <div id="sendArmy" class="modal">

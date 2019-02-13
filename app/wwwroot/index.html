@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fort: Mapa</title>
+
+    <link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css" />
+    <!-- <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" /> -->
+    <link rel="stylesheet" href="/lib/slider/slider.css" asp-append-version="true" />
+    <link rel="stylesheet" href="/css/site.css" asp-append-version="true" />
+</head>
+
+<body id="body" class="map user" data-player-name="Samuel" data-player-color="green">
+    <div id="actions">
+        <i class="fa fa-check float-left" id="ready" title="Připraven na další kolo"></i>
+        <span id="round" class="float-left"></span>
+        <span class="connection float-right"><i class="fa fa-chain-broken"
+                title="Spojení se servererm přerušeno"></i></span>
+        <span class="time float-right"></span>
+    </div>
+
+    <div id="map_holder">
+        <svg id="map">
+            <defs>
+                <filter id="shadow" filterUnits="userSpaceOnUse">
+                    <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="rgb(0, 173, 204)"
+                        flood-opacity="1" />
+                </filter>
+            </defs>
+            <g id="paths"></g>
+            <g id="turns"></g>
+            <g id="cities"></g>
+        </svg>
+    </div>
+
+    <div id="modal_shadow">
+        <div id="sendArmy" class="modal">
+            <div class="modal_header">
+                Poslat armádu
+            </div>
+            <div class="modal_content">
+                <div id="armySlider" class="slider" data-target="armySize">
+                    <div class="slider_point"></div>
+                </div>
+                <input id="armySize" type="number" min="0" max="0" value="0" data-source="armySlider" />
+                <button value="sendArmy">Ok</button>
+                <button value="cancel">Zrušit</button>
+            </div>
+        </div>
+        <i id="modal_spinner" class="fa fa-spinner fa-spin fa-fw"></i>
+    </div>
+
+    <div id="notification">
+    </div>
+
+    <script src="/lib/jquery/dist/jquery.js"></script>
+    <!-- <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script> -->
+    <script src="/lib/slider/slider.js"></script>
+    <script src="/js/utils.js"></script>
+    <script src="/js/comm.js"></script>
+    <script src="/js/events.js"></script>
+    <script src="/js/builder.js"></script>
+
+    <script>
+        Builder.INIT({
+            'paths': [
+                { 'id': 1, 'x1': 20, 'y1': 21, 'x2': 40, 'y2': 41, 'color1': 'green', 'color2': 'red' },
+                { 'id': 2, 'x1': 20, 'y1': 61, 'x2': 40, 'y2': 41, 'color1': 'blue', 'color2': 'red' }
+            ],
+            'turns': [],
+            'cities': [
+                { 'id': 5, 'x': 40, 'y': 41, 'r': 8, 'color': 'red', 'neighbours': [41, 48], 'owned': false, 'army': -1, 'image': null },
+                { 'id': 6, 'x': 80, 'y': 81, 'r': 10, 'color': 'green', 'neighbours': [5, 48], 'owned': true, 'army': 15, 'image': 'gray' }
+            ]
+        });
+    </script>
+</body>
+
+</html>

@@ -43,6 +43,24 @@ var Utils = {
             }
         }
     },
+    'roundStatus': {
+        'new': function (roundNumber) {
+            document.getElementById('round').innerHTML =
+                '<i class="fa fa-circle-o-notch" title="Začíná kolo"></i> Kolo ' + roundNumber;
+        },
+        'running': function (roundNumber) {
+            document.getElementById('round').innerHTML =
+                '<i class="fa fa-play" title="Kolo běží"></i> kolo ' + roundNumber;
+        },
+        'paused': function (roundNumber) {
+            document.getElementById('round').innerHTML =
+                '<i class="fa fa-pause" title="Kolo je pozastavené"></i> Kolo ' + roundNumber;
+        },
+        'ended': function (roundNumber) {
+            document.getElementById('round').innerHTML =
+                '<i class="fa fa-flag-checkered" title="Kolo skončilo"></i> Kolo ' + roundNumber;
+        }
+    },
     'marching': {
         'data': new Audio('/audio/soldiers-marching.mp3'),
         'play': function () {
@@ -51,15 +69,35 @@ var Utils = {
     },
     'modal': {
         'show': function () {
-            $('#sendArmy').parent().css('display', 'block').css('display', 'flex');
+            var shadow = document.getElementById('modal_shadow');
+            shadow.style.display = 'block';
+            shadow.style.display = 'flex';
+        },
+        'showSpinner': function () {
+            document.getElementById('sendArmy').style.display = 'none';
+            document.getElementById('modal_spinner').style.display = 'inline';
         },
         'hide': function () {
-            $('.shadow .fa-spinner').css('display', 'none');
-            $('#sendArmy').css('display', '');
-            $('.shadow').css('display', 'none');
-            Events.selected.source.attr('filter', '');
+            document.getElementById('modal_spinner').style.display = 'none';
+            document.getElementById('sendArmy').style.display = '';
+            document.getElementById('modal_shadow').style.display = 'none';
+
+            Events.selected.source.setAttribute('filter', '');
             Events.selected.source = null;
             Events.selected.target = null;
+        },
+        'setValues': function (current, max) {
+            var slider = document.getElementById('armySize');
+
+            slider.setAttribute('max', max);
+
+            slider.value = (current == null || current === undefined)
+                ? max
+                : current;
+
+            // move slider
+            var setSlider = new Event('change');
+            slider.dispatchEvent(setSlider);
         }
     }
 }
@@ -73,7 +111,7 @@ $(document).ready(function () {
         });
     }
 
-    Utils.notification('success', 'Jste přihlášeni jako ' + $('body').attr('data-player-name'));
+    Utils.notification('success', 'Jste přihlášeni jako ' + document.getElementById('body').getAttribute('data-player-name'));
 
     // round is running
     var timerEnd = $('#timerEndsAt');

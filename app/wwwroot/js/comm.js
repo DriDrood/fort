@@ -53,7 +53,98 @@ var Comm = {
     },
     'onMessage': function (method, data) {
         switch (method) {
+            // Notification
+            case 'notification':
+                Utils.notification(data['type'], data['message']);
+                break;
+            // Round handling
+            case "StartRound":
+            case "Resume":
+                Utils.countDown.start(Date.parse(data['endsAt']));
+                Utils.roundStatus.running(data['roundNumber'])
+                break;
+            case "Pause":
+                Utils.countDown.stop();
+                Utils.roundStatus.paused(data['roundNumber'])
+                break;
+            case "EndRound":
+                Utils.countDown.stop();
+                Utils.roundStatus.ended(data['roundNumber'])
+                Utils.countDown.start(Date.parse(data['endsAt']));
+                break;
+            case "InitRound":
+                Utils.countDown.stop();
+                Utils.roundStatus.new(data['roundNumber'])
+                Utils.countDown.start(Date.parse(data['endsAt']));
+                break;
+            case "Restart":
+                Utils.countDown.stop();
+                Utils.countDown.setTime(0);
 
+                Builder.clean();
+                Builder.INIT(data['map']);
+                break;
+
+            // turn response
+            case "turnOk":
+                var sourceCity = Events.selected.source;
+                var targetCity = Events.selected.target;
+                var sourceId = sourceCity.getAttribute('data-city-id');
+                var targetId = targetCity.getAttribute('data-city-id');
+
+                // update army send
+                var newArmy = document.getElementById('armySize').value;
+                var originalArmy = Events.selected.source.getAttribute('data-army-sent-' + targetId);
+                if (originalArmy === undefined || originalArmy == null)
+                    originalArmy = 0;
+
+                sourceCity.setAttribute('data-army-sent-' + targetId, newArmy);
+                sourceCity.setAttribute('data-army', sourceCity.getAttribute('data-army') - (-originalArmy) - newArmy);
+
+                // show turn
+                Builder.turn.createUpdate(data['pathId'], data['reversDirection'], newArmy);
+
+                // finalize
+                Utils.modal.hide();
+                Utils.notification('success', data['message']);
+                break;
+            case "turnError":
+                Utils.modal.hide();
+                Utils.notification('error', data['message']);
+                break;
+
+            // round results
+            case 'roundResults':
+                // TODO
+
+                Utils.marching.play();
+                break;
+
+            // statistics
+            // case "playerConnected":
+            //     if ($('.statistics').length > 0) {
+            //         $('[data-playerId="' + data['param']['playerId'] + '"] .fa-chain-broken').removeClass('fa-chain-broken').addClass('fa-globe');
+            //     }
+            //     break;
+            // case "playerDisconnected":
+            //     if ($('.statistics').length > 0) {
+            //         $('[data-playerId="' + data['param']['playerId'] + '"] .fa-globe').removeClass('fa-globe').addClass('fa-chain-broken');
+            //     }
+            //     break;
+            // case "playerReady":
+            //     if ($('.statistics').length > 0) {
+            //         if (data["param"]["ready"]) {
+            //             $('[data-playerId="' + data['param']['playerId'] + '"]').append('<i class="fa fa-check"></i>');
+            //         }
+            //         else {
+            //             $('[data-playerId="' + data['param']['playerId'] + '"] .fa-check').remove();
+            //         }
+            //     }
+            //     break;
+            // case "statistics":
+            //     $('.statistics').remove();
+            //     $('body').append(data["param"]);
+            //     break;
         }
     }
 }
