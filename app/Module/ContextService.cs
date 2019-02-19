@@ -15,6 +15,25 @@ namespace Fort.Module
 
         private static Player systemPlayer;
 
+        public Army.ArmyService GetArmyService()
+        {
+            if (CurrentPlayer == null)
+                return null;
+
+            if (CurrentPlayer is User)
+            {
+                if ((CurrentPlayer as User).IsAdmin)
+                    return new Army.ArmyAdminService(this);
+
+                return new Army.ArmyUserService(this);
+            }
+
+            if (CurrentPlayer is Team)
+                return new Army.ArmyTeamService(this);
+
+            throw new InvalidOperationException($"Invalid player type: {CurrentPlayer.GetType().FullName}");
+        }
+
         public void Dispose()
         {
             Database.Dispose();

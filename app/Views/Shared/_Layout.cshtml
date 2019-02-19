@@ -18,15 +18,19 @@
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
 </head>
-<body class="@ViewData["page"] @ViewData["type"]" data-player-name="@ViewData["playerName"]">
+<body id="body" class="@ViewData["page"] @ViewData["type"]" data-player-name="@ViewData["playerName"]">
     @RenderBody()
 
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
-        <!-- <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script> -->
-        <script src="~/lib/slider/slider.js"></script>
-        <script src="~/js/site.js" asp-append-version="true"></script>
+        
+        <script src="~/js/builder.js" asp-append-version="true"></script>
+        <script src="~/js/comm.js" asp-append-version="true"></script>
+        <script src="~/js/events.js" asp-append-version="true"></script>
+        <script src="~/js/utils.js" asp-append-version="true"></script>
+
         <script src="~/js/mapCreator.js" asp-append-version="true"></script>
+        <script src="~/lib/slider/slider.js" asp-append-version="true"></script>
     </environment>
     <environment exclude="Development">
         <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.3.1.min.js"
@@ -35,13 +39,13 @@
                 crossorigin="anonymous"
                 integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT">
         </script>
-        <!-- <script src="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.7/bootstrap.min.js"
-                asp-fallback-src="~/lib/bootstrap/dist/js/bootstrap.min.js"
-                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
-                crossorigin="anonymous"
-                integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
-        </script> -->
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
+    @if (ViewData.ContainsKey("initData"))
+    {
+        <script>
+            Builder.INIT(@ViewData.ContainsKey("initData").ToString());
+        </script>
+    }
 </body>
 </html>

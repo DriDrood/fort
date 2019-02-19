@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Fort.Database;
 using Fort.Database.Entities;
 using Fort.Module;
+using Fort.Module.Army;
 using Fort.Module.Comm;
 using Fort.Utils.Channels;
 using Fort.Utils.Logger;
@@ -13,13 +14,15 @@ namespace Fort.Controllers
 {
     public class PlayController : Controller
     {
-        public PlayController(ContextService context, CommService commService)
+        public PlayController(ContextService context, CommService commService, ArmyService armyService)
         {
             _context = context;
             _commService = commService;
+            _armyService = armyService;
         }
         private ContextService _context;
         private CommService _commService;
+        private ArmyService _armyService;
 
         public IActionResult Login()
         {
@@ -58,6 +61,7 @@ namespace Fort.Controllers
 
         public IActionResult Map(string code)
         {
+            ViewData["initData"] = _armyService.GetInit();
             return View();
         }
 

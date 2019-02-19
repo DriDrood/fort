@@ -45,7 +45,7 @@ var Events = {
     }
 }
 
-$('body').on('click', function (event) {
+document.getElementById('body').onclick = function (event) {
     var target = event.target;
     //// alias
     if (target.hasAttribute('data-for-id')) {
@@ -108,7 +108,7 @@ $('body').on('click', function (event) {
     else if (target.id == 'modal_shadow' || target.value == 'cancel') {
         Utils.modal.hide();
     }
-});
+};
 
 // Login page
 // spinner

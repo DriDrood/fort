@@ -6,15 +6,15 @@ var Comm = {
         'active': 'disconnected',
         'connected': function () {
             Comm.status.active = 'connected';
-            $('#actions .connection').html('<i class="fa fa-globe" title="Připojen k serveru"></i>');
+            document.getElementById('connection').innerHTML = '<i class="fa fa-globe" title="Připojen k serveru"></i>';
         },
         'disconnected': function () {
             Comm.status.active = 'disconnected';
-            $('#actions .connection').html('<i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i>');
+            document.getElementById('connection').innerHTML = '<i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i>';
         },
         'connecting': function () {
             Comm.status.active = 'connecting';
-            $('#actions .connection').html('<i class="fa fa-spinner fa-spin fa-fw" title="Navazuji spojení..."></i>');
+            document.getElementById('connection').innerHTML = '<i class="fa fa-spinner fa-spin fa-fw" title="Navazuji spojení..."></i>';
         }
     },
     'createConnection': function () {
@@ -149,8 +149,8 @@ var Comm = {
     }
 }
 
-$(document).ready(function () {
-    if ($('body.map').length > 0) {
+window.onload = function () {
+    if (document.getElementById('body').classList.contains('map')) {
         Comm.createConnection();
     }
-});
+};

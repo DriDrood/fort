@@ -9,7 +9,10 @@
     {
       "outputFileName": "wwwroot/js/site.min.js",
       "inputFiles": [
-        "wwwroot/js/site.js",
+        "wwwroot/js/builder.js",
+        "wwwroot/js/comm.js",
+        "wwwroot/js/events.js",
+        "wwwroot/js/utils.js",
         "wwwroot/js/mapCreator.js",
         "wwwroot/lib/slider/slider.js"
       ],

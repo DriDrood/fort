@@ -3,13 +3,14 @@ var Utils = {
         return (x2 - x1) / 2 + x1;
     },
     'notification': function (type, message) {
-        $('#notification')
-            .css('display', 'block')
-            .addClass(type)
-            .html(message);
+        var element = document.getElementById('notification');
+        element.style.display = 'block';
+        element.className = type;
+        element.innerHTML = message;
+
         setTimeout(function () {
-            document.getElementById('notification').className = '';
-            $('#notification').css('display', 'none');
+            element.className = '';
+            element.style.display = 'none';
         }, 3000);
     },
     'countDown': {
@@ -33,7 +34,7 @@ var Utils = {
             var hours = Math.floor(total_seconds / (60 * 60));
             var minutes = Math.floor(total_seconds / 60) % 60;
             var seconds = total_seconds % 60;
-            $('#actions .time').html(hours + ':' + pad100(minutes) + ':' + pad100(seconds));
+            document.getElementById('time').innerHTML = hours + ':' + pad100(minutes) + ':' + pad100(seconds);
 
             function pad100(value) {
                 if (value < 10)
@@ -102,20 +103,13 @@ var Utils = {
     }
 }
 
-$(document).ready(function () {
-    window.onerror = function (errorMsg, url, lineNumber) {
-        Comm.send("jsError", {
-            message: errorMsg,
-            url: url,
-            line: lineNumber
-        });
-    }
-
+window.onerror = function (errorMsg, url, lineNumber) {
+    Comm.send("jsError", {
+        message: errorMsg,
+        url: url,
+        line: lineNumber
+    });
+}
+window.onload = function () {
     Utils.notification('success', 'Jste přihlášeni jako ' + document.getElementById('body').getAttribute('data-player-name'));
-
-    // round is running
-    var timerEnd = $('#timerEndsAt');
-    if (timerEnd.length > 0) {
-        Utils.countDown.start(timerEnd.val());
-    }
-});
+};

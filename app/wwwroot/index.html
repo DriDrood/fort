@@ -16,17 +16,16 @@
     <div id="actions">
         <i class="fa fa-check float-left" id="ready" title="Připraven na další kolo"></i>
         <span id="round" class="float-left"></span>
-        <span class="connection float-right"><i class="fa fa-chain-broken"
+        <span id="connection" class="float-right"><i class="fa fa-chain-broken"
                 title="Spojení se servererm přerušeno"></i></span>
-        <span class="time float-right"></span>
+        <span id="time" class="float-right"></span>
     </div>
 
     <div id="map_holder">
         <svg id="map">
             <defs>
                 <filter id="shadow" filterUnits="userSpaceOnUse">
-                    <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="rgb(0, 173, 204)"
-                        flood-opacity="1" />
+                    <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="rgb(0, 173, 204)" flood-opacity="1" />
                 </filter>
             </defs>
             <g id="paths"></g>
@@ -55,27 +54,33 @@
     <div id="notification">
     </div>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Builder.INIT({
+                'paths': [
+                    { 'id': 1, 'x1': 20, 'y1': 21, 'x2': 40, 'y2': 41, 'color1': 'green', 'color2': 'red' },
+                    { 'id': 2, 'x1': 20, 'y1': 61, 'x2': 40, 'y2': 41, 'color1': 'blue', 'color2': 'red' },
+                    { 'id': 3, 'x1': 80, 'y1': 81, 'x2': 200, 'y2': 81, 'color1': 'blue', 'color2': 'red' }
+                ],
+                'turns': [
+                    { 'sourceCityId': 6, 'targetCityId': 7, 'amount': 10, 'color': 'blue' }
+                ],
+                'cities': [
+                    { 'id': 5, 'x': 40, 'y': 41, 'r': 8, 'color': 'red', 'neighbours': [41, 48], 'owned': false, 'army': -1, 'image': null },
+                    { 'id': 6, 'x': 80, 'y': 81, 'r': 10, 'color': 'green', 'neighbours': [5, 7, 48], 'owned': true, 'army': 15, 'image': 'gray' },
+                    { 'id': 7, 'x': 200, 'y': 81, 'r': 10, 'color': 'green', 'neighbours': [5, 6, 48], 'owned': true, 'army': 15, 'image': 'gray' }
+                ]
+            });
+            Utils.countDown.start(Date.parse('2019-02-18T20:00:00'));
+        }, false);
+    </script>
+
     <script src="/lib/jquery/dist/jquery.js"></script>
-    <!-- <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script> -->
     <script src="/lib/slider/slider.js"></script>
     <script src="/js/utils.js"></script>
     <script src="/js/comm.js"></script>
     <script src="/js/events.js"></script>
     <script src="/js/builder.js"></script>
-
-    <script>
-        Builder.INIT({
-            'paths': [
-                { 'id': 1, 'x1': 20, 'y1': 21, 'x2': 40, 'y2': 41, 'color1': 'green', 'color2': 'red' },
-                { 'id': 2, 'x1': 20, 'y1': 61, 'x2': 40, 'y2': 41, 'color1': 'blue', 'color2': 'red' }
-            ],
-            'turns': [],
-            'cities': [
-                { 'id': 5, 'x': 40, 'y': 41, 'r': 8, 'color': 'red', 'neighbours': [41, 48], 'owned': false, 'army': -1, 'image': null },
-                { 'id': 6, 'x': 80, 'y': 81, 'r': 10, 'color': 'green', 'neighbours': [5, 48], 'owned': true, 'army': 15, 'image': 'gray' }
-            ]
-        });
-    </script>
 </body>
 
 </html>

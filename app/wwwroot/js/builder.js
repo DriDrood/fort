@@ -6,17 +6,17 @@ var Builder = {
     },
     'INIT': function (data) {
         // path
-        $.each(data.paths, function (index, path) {
+        data.paths.forEach(function (path) {
             Builder.path.create(path.id, path.x1, path.y1, path.x2, path.y2, path.color1, path.color2);
         });
 
         // turns
-        $.each(data.turns, function (index, turn) {
-            Builder.turn.createUpdate(turn.pathId, turn.reverseDirection, turn.amount);
+        data.turns.forEach(function (turn) {
+            Builder.turn.createUpdate(turn.sourceCityId, turn.targetCityId, turn.amount, turn.color);
         })
 
         // city
-        $.each(data.cities, function (index, city) {
+        data.cities.forEach(function (city) {
             Builder.city.create(city.id, city.x, city.y, city.r, city.color, city.neighbours, city.owned, city.army, city.image);
         });
     },
@@ -107,7 +107,7 @@ var Builder = {
                 return;
 
             // remove turn circle
-            $.each(turn, function (index, item) {
+            turn.forEach(function (item) {
                 item.remove();
             });
 
@@ -152,8 +152,8 @@ var Builder = {
             if (htmlId != null)
                 circle.id = htmlId;
 
-            $.each(otherAttribute, function (name, value) {
-                circle.setAttribute('data-' + name, value);
+            Object.keys(otherAttribute).forEach(function (name) {
+                circle.setAttribute('data-' + name, otherAttribute[name]);
             });
 
             // add
@@ -165,8 +165,8 @@ var Builder = {
             textObj.setAttribute('y', cy + (r / 2));
             textObj.setAttribute('r', r);
             textObj.setAttribute('text-anchor', 'middle');
-            $.each(otherAttribute, function (name, value) {
-                textObj.setAttribute('data-' + name, value);
+            Object.keys(otherAttribute).forEach(function (name) {
+                textObj.setAttribute('data-' + name, otherAttribute[name]);
             });
             if (htmlId != null)
                 textObj.id = htmlId;
@@ -181,8 +181,8 @@ var Builder = {
             line.setAttribute('x2', x2);
             line.setAttribute('y2', y2);
             line.setAttribute('style', style);
-            $.each(otherAttribute, function (name, value) {
-                line.setAttribute('data-' + name, value);
+            Object.keys(otherAttribute).forEach(function (name) {
+                line.setAttribute('data-' + name, otherAttribute[name]);
             });
             if (htmlId != null)
                 line.id = htmlId;

@@ -1,6 +1,7 @@
 using System;
 using Fort;
 using Fort.Database.Entities;
+using Fort.Module.Army;
 
 namespace Fort.Module
 {

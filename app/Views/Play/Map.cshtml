@@ -1,7 +1,9 @@
 @using Fort.Module
-@model Fort.Services.MapBaseService
+@using Fort.Module.Army
 @{
     ContextService context = Program.GetService<ContextService>();
+    RoundService roundService = Program.GetService<RoundService>();
+    ArmyService armyService = context.GetArmyService();
     ViewData["Title"] = "Mapa";
     ViewData["page"] = "map";
     ViewData["type"] = context.CurrentPlayer.GetType().Name;
@@ -20,9 +22,9 @@
     {
         <i class="fa fa-check float-left" id="ready" title="Připraven na další kolo"></i>
     }
-    <span class="round float-left"></span>
-    <span class="connection float-right"><i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i></span>
-    <span class="time float-right"></span>
+    <span id="roud" class="float-left"></span>
+    <span id="connection" class="float-right"><i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i></span>
+    <span id="time" class="float-right"></span>
 </div>
 
 <div id="map_holder">
@@ -50,3 +52,10 @@
 
 <div id="notification">
 </div>
+
+<script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Builder.INIT(@armyService.GetInit().ToString());
+            Utils.countDown.start(Date.parse(@roundService.CurrentRound.EndsAt.ToString()));
+        }, false);
+</script>
