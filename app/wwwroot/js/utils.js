@@ -1,6 +1,6 @@
 var Utils = {
     'middle': function (x1, x2) {
-        return (x2 - x1) / 2 + x1;
+        return (x2 - x1) / 2 - (-x1);
     },
     'notification': function (type, message) {
         var element = document.getElementById('notification');
@@ -19,7 +19,7 @@ var Utils = {
             countDownTask = setInterval(function () {
                 var now = Date.now()
                 if (endAt <= now) {
-                    stopCountDown();
+                    Utils.countDown.stop();
                     Utils.countDown.setTime(0);
                     return;
                 }

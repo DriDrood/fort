@@ -34,7 +34,7 @@ namespace Fort.Module.Army
                 .Include(p => p.Target)
                 .Select(p => new
                 {
-                    id = p.Id,
+                    id = p.SourceId > p.TargetId ? $"{p.TargetId}-{p.SourceId}" : $"{p.SourceId}-{p.TargetId}",
                     x1 = p.Source.X,
                     y1 = p.Source.Y,
                     color1 = GetCityColor(p.Source),

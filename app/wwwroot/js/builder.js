@@ -67,7 +67,7 @@ var Builder = {
             var middleY = Utils.middle(y1, y2);
 
             Builder._base_.createLine('paths', x1, y1, middleX, middleY, 'stroke:' + color1 + ';stroke-width:5', 'path-a-' + id, { 'path-id': id, 'direction': 1 });
-            Builder._base_.createLine('paths', x2, y2, middleX, middleY, 'stroke:' + color2 + ';stroke-width:5', 'path-b-' + id, { 'path-id': id, 'dicertion': 2 });
+            Builder._base_.createLine('paths', x2, y2, middleX, middleY, 'stroke:' + color2 + ';stroke-width:5', 'path-b-' + id, { 'path-id': id, 'direction': 2 });
         },
         'get': function (pathId) {
             var first = document.getElementById('path-a-' + pathId);
@@ -75,10 +75,14 @@ var Builder = {
             return [first, second];
         },
         'highlightSet': function (pathId) {
-            Builder.path.get(pathId).setAttribute('filter', 'url(#shadow)');
+            var paths = Builder.path.get(pathId);
+            paths[0].setAttribute('filter', 'url(#shadow)');
+            paths[1].setAttribute('filter', 'url(#shadow)');
         },
         'highlightUnset': function (pathId) {
-            Builder.path.get(pathId).removeAttribute('filter');
+            var paths = Builder.path.get(pathId);
+            paths[0].removeAttribute('filter');
+            paths[1].removeAttribute('filter');
         }
     },
     'turn': {
@@ -92,11 +96,14 @@ var Builder = {
                 color = document.getElementById('body').getAttribute('data-player-color');
 
             var pathId = Builder.turn.toPathId(sourceCityId, targetCityId);
-            var path = Builder.path.get(pathId)[pathId.startsWith(sourceCityId) ? 0 : 1]; // get path closer to sourceCity
+            var path = Builder.path.get(pathId)[sourceCityId < targetCityId ? 0 : 1]; // get path closer to sourceCity
             var middleX = Utils.middle(path.getAttribute('x1'), path.getAttribute('x2'));
             var middleY = Utils.middle(path.getAttribute('y1'), path.getAttribute('y2'));
 
             Builder.path.highlightSet(pathId);
+            console.log(middleX);
+            console.log(middleY);
+            console.log(color);
             Builder._base_.createCircle('turns', middleX, middleY, 12, color, null, 'turn-' + sourceCityId + '-' + targetCityId);
             Builder._base_.createCircleText('turns', middleX, middleY, 12, color, amount, 'turn-text-' + sourceCityId + '-' + targetCityId);
         },
@@ -134,7 +141,7 @@ var Builder = {
         }
     },
     'animation': function (sourceCityId, targetCityId, radiusStart, radiusEnd, color) {
-        
+
     },
 
     '_base_': {
@@ -152,9 +159,11 @@ var Builder = {
             if (htmlId != null)
                 circle.id = htmlId;
 
-            Object.keys(otherAttribute).forEach(function (name) {
-                circle.setAttribute('data-' + name, otherAttribute[name]);
-            });
+            if (otherAttribute != null) {
+                Object.keys(otherAttribute).forEach(function (name) {
+                    circle.setAttribute('data-' + name, otherAttribute[name]);
+                });
+            }
 
             // add
             Builder.root[rootSection].appendChild(circle);
@@ -165,9 +174,11 @@ var Builder = {
             textObj.setAttribute('y', cy + (r / 2));
             textObj.setAttribute('r', r);
             textObj.setAttribute('text-anchor', 'middle');
-            Object.keys(otherAttribute).forEach(function (name) {
-                textObj.setAttribute('data-' + name, otherAttribute[name]);
-            });
+            if (otherAttribute != null) {
+                Object.keys(otherAttribute).forEach(function (name) {
+                    textObj.setAttribute('data-' + name, otherAttribute[name]);
+                });
+            }
             if (htmlId != null)
                 textObj.id = htmlId;
             textObj.appendChild(document.createTextNode(text));
@@ -181,9 +192,11 @@ var Builder = {
             line.setAttribute('x2', x2);
             line.setAttribute('y2', y2);
             line.setAttribute('style', style);
-            Object.keys(otherAttribute).forEach(function (name) {
-                line.setAttribute('data-' + name, otherAttribute[name]);
-            });
+            if (otherAttribute != null) {
+                Object.keys(otherAttribute).forEach(function (name) {
+                    line.setAttribute('data-' + name, otherAttribute[name]);
+                });
+            }
             if (htmlId != null)
                 line.id = htmlId;
 
