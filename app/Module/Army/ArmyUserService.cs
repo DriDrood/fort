@@ -1,42 +1,51 @@
 using System.Collections.Generic;
+using System.Linq;
 using Fort.Database.Entities;
 
 namespace Fort.Module.Army
 {
     public class ArmyUserService : ArmyService
     {
-        public ArmyUserService(ContextService context) : base(context)
+        public ArmyUserService(ContextService context, RoundService roundService) : base(context, roundService)
         {
         }
 
         protected override int GetArmy(City city)
         {
-            throw new System.NotImplementedException();
+            if (city.Owner == _context.CurrentPlayer
+                || city.Owner.Team == _context.CurrentPlayer.GetTeam())
+                return city.Army;
+
+            return -1;
         }
 
         protected override string GetCityColor(City city)
         {
-            throw new System.NotImplementedException();
+            if (city.OwnerId == _context.CurrentPlayer.Id)
+                return "cyan";
+
+            return city.Owner.Team.Color;
         }
 
-        protected override int GetImage(City city)
+        protected override string GetImage(City city)
         {
-            throw new System.NotImplementedException();
-        }
+            // user or team
+            if (city.Owner == _context.CurrentPlayer
+                || city.Owner.Team == _context.CurrentPlayer.GetTeam())
+                return city.Owner.ImageUrl;
 
-        protected override string GetTurnColor(Turn turn)
-        {
-            throw new System.NotImplementedException();
+            // near enemy
+            if (city.SourceToPaths.Any(p => p.Target.Owner.TeamId == _context.CurrentPlayer.GetTeam().Id)
+                || city.TargetToPaths.Any(p => p.Source.Owner.TeamId == _context.CurrentPlayer.GetTeam().Id))
+                return city.Owner.ImageUrl;
+
+            // other
+            return null;
         }
 
         protected override IEnumerable<Turn> GetVisibleTurn()
         {
-            throw new System.NotImplementedException();
-        }
-
-        protected override bool IsOwned(City city)
-        {
-            throw new System.NotImplementedException();
+            return _context.Database.Turns.Where(t => t.UserId == _context.CurrentPlayer.Id && t.RoundId == _roundService.CurrentRound.Id);
         }
     }
 }

@@ -1,42 +1,33 @@
 using System.Collections.Generic;
+using System.Linq;
 using Fort.Database.Entities;
 
 namespace Fort.Module.Army
 {
     public class ArmyAdminService : ArmyService
     {
-        public ArmyAdminService(ContextService context) : base(context)
+        public ArmyAdminService(ContextService context, RoundService roundService) : base(context, roundService)
         {
         }
 
         protected override int GetArmy(City city)
         {
-            throw new System.NotImplementedException();
+            return city.Army;
         }
 
         protected override string GetCityColor(City city)
         {
-            throw new System.NotImplementedException();
+            return city.Owner.Team.Color;
         }
 
-        protected override int GetImage(City city)
+        protected override string GetImage(City city)
         {
-            throw new System.NotImplementedException();
-        }
-
-        protected override string GetTurnColor(Turn turn)
-        {
-            throw new System.NotImplementedException();
+            return city.Owner.ImageUrl;
         }
 
         protected override IEnumerable<Turn> GetVisibleTurn()
         {
-            throw new System.NotImplementedException();
-        }
-
-        protected override bool IsOwned(City city)
-        {
-            throw new System.NotImplementedException();
+            return _context.Database.Turns.Where(t => t.RoundId == _roundService.CurrentRound.Id);
         }
     }
 }

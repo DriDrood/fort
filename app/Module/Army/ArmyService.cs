@@ -8,12 +8,13 @@ namespace Fort.Module.Army
 {
     public abstract class ArmyService
     {
-        public ArmyService(ContextService context)
+        public ArmyService(ContextService context, RoundService roundService)
         {
             _context = context;
         }
 
-        private ContextService _context;
+        protected ContextService _context;
+        protected RoundService _roundService;
 
         public JToken GetInit()
         {
@@ -75,6 +76,8 @@ namespace Fort.Module.Army
         }
 
         private int GetRadius(int army) => (int)(System.Math.Log10(army + 1) * 10) + 2;
+        protected bool IsOwned(City city) => _context.CurrentPlayer.IsUser() && city.Owner == _context.CurrentPlayer;
+        protected string GetTurnColor(Turn turn) => GetCityColor(turn.SourceCity); // include turn.city.owner.team
         private IEnumerable<int> GetNeighbours(City city)
         {
             foreach (var path in city.SourceToPaths)
@@ -84,11 +87,9 @@ namespace Fort.Module.Army
                 yield return path.SourceId;
         }
 
-        protected abstract bool IsOwned(City city);
-        protected abstract string GetCityColor(City city);
-        protected abstract string GetTurnColor(Turn turn);
-        protected abstract int GetArmy(City city);
-        protected abstract int GetImage(City city);
+        protected abstract string GetCityColor(City city); // include city.owner.team
+        protected abstract int GetArmy(City city); // -1 for unknown
+        protected abstract string GetImage(City city); // include city.owner
         protected abstract IEnumerable<Turn> GetVisibleTurn();
     }
 }

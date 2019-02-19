@@ -12,9 +12,11 @@ namespace Fort.Database.Entities
 
         public double ArmyStrengthCoef { get; set; }
         public int? PopulationGrowth { get; set; }
+        public string Color { get; set; }
 
         public virtual ICollection<User> Members { get; set; }
 
         public override bool IsUser() => false;
+        public override Team GetTeam() => this;
     }
 }
