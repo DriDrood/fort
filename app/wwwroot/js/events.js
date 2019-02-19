@@ -112,6 +112,8 @@ document.getElementById('body').onclick = function (event) {
 
 // Login page
 // spinner
-$('body.login form').on('submit', function () {
-    $('#loginBtn').html('<i class="fa fa-spinner fa-spin fa-fw"></i>');
+document.addEventListener('DOMContentLoaded', function () {
+    document.getElementById('loginForm').onsubmit = function () {
+        document.getElementById('loginBtn').innerHTML = '<i class="fa fa-spinner fa-spin fa-fw"></i>';
+    };
 });

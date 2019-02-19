@@ -4,7 +4,7 @@
     ViewData["page"] = "login";
 }
 
-<form method="POST">
+<form method="POST" id="loginForm">
     <input type="text" name="code" placeholder="Tvůj kód" maxlength="5" />
     <button id="loginBtn">Jdu na to!</button>
     @if (ViewData["errorMessage"] != null)
