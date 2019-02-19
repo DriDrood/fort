@@ -8,9 +8,10 @@ namespace Fort.Module.Army
 {
     public abstract class ArmyService
     {
-        public ArmyService(ContextService context, RoundService roundService)
+        public ArmyService(ContextService context)
         {
             _context = context;
+            _roundService = Program.GetService<RoundService>();
         }
 
         protected ContextService _context;

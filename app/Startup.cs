@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Fort.Database;
-using Fort.Services;
+using Fort.Module;
+using Fort.Module.Comm;
 using Fort.Utils;
 using Fort.Utils.Logger;
 using Fort.Utils.WS;
@@ -35,10 +36,7 @@ namespace Fort
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddScoped<MapUserService>();
-            services.AddScoped<MapTeamService>();
-            services.AddScoped<MapAdminService>();
-            services.AddScoped<CurrentPlayerService>();
+            services.AddScoped<ContextService>();
             services.AddSingleton<RoundService>();
             services.AddSingleton<ActionService>();
             services.AddSingleton<CommService>();
@@ -87,8 +85,17 @@ namespace Fort
                     defaults: new { controller = "Play", action = "Login" });
             });
 
-            Logger.Configure(configuration.GetSection("Logger"));
-            app.ApplicationServices.GetService<RoundService>().Setup(configuration.GetSection("StartingPositions"));
+
+            using (var serviceScope = app.ApplicationServices
+                .GetRequiredService<IServiceScopeFactory>()
+                .CreateScope())
+            {
+                using (var context = serviceScope.ServiceProvider.GetService<ContextService>())
+                {
+                    Logger.Configure(configuration.GetSection("Logger"));
+                    app.ApplicationServices.GetService<RoundService>().Init(context, configuration.GetSection("Round"));
+                }
+            }
         }
 
         private static void MigrateDatabase(IApplicationBuilder app)
@@ -97,9 +104,9 @@ namespace Fort
                 .GetRequiredService<IServiceScopeFactory>()
                 .CreateScope())
             {
-                using (var context = serviceScope.ServiceProvider.GetService<FortDbContext>())
+                using (var context = serviceScope.ServiceProvider.GetService<ContextService>())
                 {
-                    context.Database.Migrate();
+                    context.Database.Database.Migrate();
                 }
             }
         }

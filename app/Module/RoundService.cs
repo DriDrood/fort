@@ -14,9 +14,10 @@ namespace Fort.Module
 {
     public class RoundService
     {
-        public RoundService(Config config)
+        public RoundService()
         {
-            _config = config;
+            _config = new Config();
+            _timer = new Timer();
             State = Status.None;
         }
         public Status State { get; private set; }
@@ -27,15 +28,14 @@ namespace Fort.Module
         public void Init(ContextService context, IConfigurationSection config)
         {
             // load config
-            StartMode startMode = StartMode.NewGame; // TODO
-            _timer = new Timer();
+            config.Bind(_config);
 
             // create game
-            if (startMode == StartMode.NewGame)
+            if (_config.StartMode == StartMode.NewGame)
                 ResetGame(context);
 
             // init round
-            if (startMode == StartMode.NewGame || startMode == StartMode.NewRound)
+            if (_config.StartMode == StartMode.NewGame || _config.StartMode == StartMode.NewRound)
                 InitRound(context);
             else
                 CurrentRound = context.Database.Rounds.OrderByDescending(r => r.Id).First();
@@ -151,7 +151,7 @@ namespace Fort.Module
 
             // set round duration
             State = Status.Running;
-            await _timer.NewStart(CurrentRound.EndsAt - DateTime.UtcNow);
+            await _timer.NewStart(CurrentRound.EndsAt.Value - DateTime.UtcNow);
         }
         private async Task EndRound()
         {
@@ -357,6 +357,7 @@ namespace Fort.Module
 
         public class Config
         {
+            public StartMode StartMode { get; set; }
             public int DefaultPopulationStart { get; set; }
             public int DefaultPopulationGrowth { get; set; }
             public int Neutral_MinArmy { get; set; }

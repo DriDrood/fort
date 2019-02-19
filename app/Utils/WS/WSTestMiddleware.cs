@@ -17,7 +17,7 @@ namespace Fort.Utils.WS
 
         private RequestDelegate _next;
 
-        public async Task Invoke(HttpContext context, CommService commService, CurrentPlayerService currentPlayer)
+        public async Task Invoke(HttpContext context)
         {
             if (context.Request.Path == "/ws-test")
             {

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Fort.Database;
 using Fort.Database.Entities;
-using Fort.Services;
+using Fort.Module;
 using Microsoft.AspNetCore.Http;
 
 namespace Fort.Utils.Logger
@@ -17,7 +17,7 @@ namespace Fort.Utils.Logger
 
         private RequestDelegate _next;
 
-        public async Task Invoke(HttpContext context, CurrentPlayerService currentPlayer)
+        public async Task Invoke(HttpContext context, ContextService contextService)
         {
             try
             {
@@ -25,11 +25,11 @@ namespace Fort.Utils.Logger
             }
             catch (FortException ex)
             {
-                Logger.Log(ex.LogLevel, currentPlayer.Player.Id, ex.Message, ex.StackTrace);
+                Logger.Log(ex.LogLevel, contextService.CurrentPlayer?.Id, ex.Message, ex.StackTrace);
             }
             catch (Exception ex)
             {
-                Logger.Log(ELogLevel.UnknownException, currentPlayer.Player.Id, ex.Message, ex.StackTrace);
+                Logger.Log(ELogLevel.UnknownException, contextService.CurrentPlayer?.Id, ex.Message, ex.StackTrace);
             }
         }
     }

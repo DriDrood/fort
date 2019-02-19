@@ -9,14 +9,14 @@ namespace Fort.Models
         {
             Id = round.Id;
             RoundNumber = round.RoundNumber;
-            StartsAt = round.StartsAt.Value;
-            EndsAt = round.EndsAt.Value;
+            StartsAt = round.StartsAt;
+            EndsAt = round.EndsAt;
         }
 
         public int Id { get; set; }
         public int RoundNumber { get; set; }
-        public DateTime StartsAt { get; set; }
-        public DateTime EndsAt { get; set; }
+        public DateTime? StartsAt { get; set; }
+        public DateTime? EndsAt { get; set; }
 
         public static explicit operator Round(CurrentRound round)
         {

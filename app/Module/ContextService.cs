@@ -1,6 +1,7 @@
 using System;
 using Fort.Database;
 using Fort.Database.Entities;
+using Fort.Module.Army;
 
 namespace Fort.Module
 {
@@ -10,7 +11,7 @@ namespace Fort.Module
         {
             Database = new FortDbContext();
         }
-        public FortDbContext Database { get; set; }
+        public FortDbContext Database { get; private set; }
         public Player CurrentPlayer { get; set; }
 
         private static Player systemPlayer;
@@ -23,13 +24,13 @@ namespace Fort.Module
             if (CurrentPlayer is User)
             {
                 if ((CurrentPlayer as User).IsAdmin)
-                    return new Army.ArmyAdminService(this);
+                    return new ArmyAdminService(this);
 
-                return new Army.ArmyUserService(this);
+                return new ArmyUserService(this);
             }
 
             if (CurrentPlayer is Team)
-                return new Army.ArmyTeamService(this);
+                return new ArmyTeamService(this);
 
             throw new InvalidOperationException($"Invalid player type: {CurrentPlayer.GetType().FullName}");
         }

@@ -6,7 +6,7 @@ namespace Fort.Module.Army
 {
     public class ArmyAdminService : ArmyService
     {
-        public ArmyAdminService(ContextService context, RoundService roundService) : base(context, roundService)
+        public ArmyAdminService(ContextService context) : base(context)
         {
         }
 
