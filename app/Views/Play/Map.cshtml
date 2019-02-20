@@ -56,7 +56,7 @@
 
 <script>
         document.addEventListener('DOMContentLoaded', function () {
-            Builder.INIT(@armyService.GetInit().ToString());
+            Builder.INIT(@Html.Raw(armyService.GetInit().ToString()));
             Utils.countDown.start(Date.parse(@roundService.CurrentRound.EndsAt.ToString()));
         }, false);
 </script>

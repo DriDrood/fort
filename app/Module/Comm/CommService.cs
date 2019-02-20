@@ -41,6 +41,7 @@ namespace Fort.Module.Comm
         }
         public void OnDisconnect(string playerId, string reason)
         {
+            _activeChannels.Remove(playerId);
             Logger.Log(ELogLevel.Warning, playerId, reason);
         }
 
