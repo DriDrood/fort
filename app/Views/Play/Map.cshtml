@@ -1,7 +1,8 @@
 @using Fort.Module
 @using Fort.Module.Army
+@model ContextService
 @{
-    ContextService context = Program.GetService<ContextService>();
+    ContextService context = Model;
     RoundService roundService = Program.GetService<RoundService>();
     ArmyService armyService = context.GetArmyService();
     ViewData["Title"] = "Mapa";

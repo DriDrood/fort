@@ -12,7 +12,7 @@ namespace Fort.Module.Army
 
         protected override int GetArmy(City city)
         {
-            if (city.Owner.TeamId == _context.CurrentPlayer.Id)
+            if (city.Owner?.TeamId == _context.CurrentPlayer.Id)
                 return city.Army;
                 
             return -1;
@@ -20,18 +20,18 @@ namespace Fort.Module.Army
 
         protected override string GetCityColor(City city)
         {
-            return city.Owner.Team.Color;
+            return city.Owner?.Team?.Color ?? "gray";
         }
 
         protected override string GetImage(City city)
         {
             // team
-            if (city.Owner.TeamId == _context.CurrentPlayer.Id)
+            if (city.Owner?.TeamId == _context.CurrentPlayer.Id)
                 return city.Owner.ImageUrl;
 
             // near enemy
-            if (city.SourceToPaths.Any(p => p.Target.Owner.TeamId == _context.CurrentPlayer.Id)
-                || city.TargetToPaths.Any(p => p.Source.Owner.TeamId == _context.CurrentPlayer.Id))
+            if (city.SourceToPaths.Any(p => p.Target.Owner?.TeamId == _context.CurrentPlayer.Id)
+                || city.TargetToPaths.Any(p => p.Source.Owner?.TeamId == _context.CurrentPlayer.Id))
                 return city.Owner.ImageUrl;
                 
             return null;

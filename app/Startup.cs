@@ -93,6 +93,7 @@ namespace Fort
                 using (var context = serviceScope.ServiceProvider.GetService<ContextService>())
                 {
                     Logger.Configure(configuration.GetSection("Logger"));
+                    app.ApplicationServices.GetService<CommService>().Init(context);
                     app.ApplicationServices.GetService<RoundService>().Init(context, configuration.GetSection("Round"));
                 }
             }

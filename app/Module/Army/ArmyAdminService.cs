@@ -17,12 +17,12 @@ namespace Fort.Module.Army
 
         protected override string GetCityColor(City city)
         {
-            return city.Owner.Team.Color;
+            return city.Owner?.Team?.Color ?? "gray";
         }
 
         protected override string GetImage(City city)
         {
-            return city.Owner.ImageUrl;
+            return city.Owner?.ImageUrl ?? null;
         }
 
         protected override IEnumerable<Turn> GetVisibleTurn()

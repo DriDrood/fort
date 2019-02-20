@@ -14,11 +14,11 @@ namespace Fort.Controllers
 {
     public class PlayController : Controller
     {
-        public PlayController(ContextService context, CommService commService, ArmyService armyService)
+        public PlayController(ContextService context, CommService commService)
         {
             _context = context;
             _commService = commService;
-            _armyService = armyService;
+            _armyService = context.GetArmyService();
         }
         private ContextService _context;
         private CommService _commService;
@@ -62,7 +62,7 @@ namespace Fort.Controllers
         public IActionResult Map(string code)
         {
             ViewData["initData"] = _armyService.GetInit();
-            return View();
+            return View(_context);
         }
 
         // #region HttpChannel

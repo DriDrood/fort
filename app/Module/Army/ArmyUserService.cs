@@ -13,7 +13,7 @@ namespace Fort.Module.Army
         protected override int GetArmy(City city)
         {
             if (city.Owner == _context.CurrentPlayer
-                || city.Owner.Team == _context.CurrentPlayer.GetTeam())
+                || city.Owner?.Team == _context.CurrentPlayer.GetTeam())
                 return city.Army;
 
             return -1;
@@ -24,19 +24,19 @@ namespace Fort.Module.Army
             if (city.OwnerId == _context.CurrentPlayer.Id)
                 return "cyan";
 
-            return city.Owner.Team.Color;
+            return city.Owner?.Team?.Color ?? "gray";
         }
 
         protected override string GetImage(City city)
         {
             // user or team
-            if (city.Owner == _context.CurrentPlayer
-                || city.Owner.Team == _context.CurrentPlayer.GetTeam())
+            if (city.OwnerId == _context.CurrentPlayer.Id
+                || city.Owner?.TeamId == _context.CurrentPlayer.GetTeam().Id)
                 return city.Owner.ImageUrl;
 
             // near enemy
-            if (city.SourceToPaths.Any(p => p.Target.Owner.TeamId == _context.CurrentPlayer.GetTeam().Id)
-                || city.TargetToPaths.Any(p => p.Source.Owner.TeamId == _context.CurrentPlayer.GetTeam().Id))
+            if (city.SourceToPaths.Any(p => p.Target.Owner?.TeamId == _context.CurrentPlayer.GetTeam().Id)
+                || city.TargetToPaths.Any(p => p.Source.Owner?.TeamId == _context.CurrentPlayer.GetTeam().Id))
                 return city.Owner.ImageUrl;
 
             // other

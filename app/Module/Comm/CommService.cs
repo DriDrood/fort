@@ -11,21 +11,23 @@ namespace Fort.Module.Comm
 {
     public class CommService
     {
-        public CommService(ContextService context)
+        public CommService()
         {
             _activeChannels = new Dictionary<string, IChannel>();
             _queues = new Dictionary<string, Queue>();
+        }
 
+        private Dictionary<string, IChannel> _activeChannels;
+        private Dictionary<string, Queue> _queues;
+
+        public void Init(ContextService context)
+        {
             // create Q for each player
             foreach (var user in context.Database.Users)
                 _queues.Add(user.Id, new Queue(this));
             foreach (var team in context.Database.Teams)
                 _queues.Add(team.Id, new Queue(this));
         }
-
-        private Dictionary<string, IChannel> _activeChannels;
-        private Dictionary<string, Queue> _queues;
-
         public void CreateConnection(Player player, IChannel channel)
         {
             channel.Comm = this;
