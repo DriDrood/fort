@@ -17,5 +17,17 @@ services:
       MYSQL_PASSWORD: "heblebletunato68"
     ports:
       - "3306:3306"
+  redis:
+    image: "redis:3.2"
+    command: redis-server --requirepass Seheque32naTo --appendonly yes
+    volumes:
+      - "redisdata:/data"
+    restart: always
+    environment:
+      - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - "6379:6379"
 volumes:
     dbdata:
+    redisdata:
+    

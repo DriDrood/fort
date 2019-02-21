@@ -355,7 +355,7 @@ namespace Fort.Module
             ShowingResult
         }
 
-        public class Config
+        private class Config
         {
             public StartMode StartMode { get; set; }
             public int DefaultPopulationStart { get; set; }

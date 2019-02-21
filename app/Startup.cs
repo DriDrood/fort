@@ -40,6 +40,7 @@ namespace Fort
             services.AddSingleton<RoundService>();
             services.AddSingleton<ActionService>();
             services.AddSingleton<CommService>();
+            services.AddSingleton<RedisService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -95,6 +96,7 @@ namespace Fort
                     Logger.Configure(configuration.GetSection("Logger"));
                     app.ApplicationServices.GetService<CommService>().Init(context);
                     app.ApplicationServices.GetService<RoundService>().Init(context, configuration.GetSection("Round"));
+                    app.ApplicationServices.GetService<RedisService>().Init(configuration.GetSection("Redis"));
                 }
             }
         }
