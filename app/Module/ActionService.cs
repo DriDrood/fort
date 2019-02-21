@@ -1,7 +1,9 @@
 using System;
+using System.Threading.Tasks;
 using Fort;
 using Fort.Database.Entities;
 using Fort.Module.Army;
+using Fort.Utils.Logger;
 
 namespace Fort.Module
 {
@@ -9,46 +11,48 @@ namespace Fort.Module
     {
         private RoundService _roundService = Program.GetService<RoundService>();
         private PlayerService _playerService = Program.GetService<PlayerService>();
-        private ArmyService _armyService = Program.GetService<ArmyService>();
 
-        public void PlayerTurn(ContextService context, string sourceCityId, string targetCityId, int amount)
+        public Task PlayerTurn(ContextService context, int sourceCityId, int targetCityId, int amount)
         {
-            _armyService.PlayerTurn();
+            if (context.Database.Cities.Find(sourceCityId).OwnerId != context.CurrentPlayer.Id)
+                throw new FortException(ELogLevel.Warning, "Toto město není vaše");
+
+            return context.GetArmyService().PlayerTurn((User)context.CurrentPlayer, sourceCityId, targetCityId, amount);
         }
-        public void PlayerReady()
+        public Task PlayerReady(ContextService context)
         {
-            _playerService.PlayerReady();
+            return _playerService.PlayerReady(context.CurrentPlayer.Id, _roundService.CurrentRound.Id);
         }
         public void StartOrResumeGame(ContextService context)
         {
             if (!context.CurrentPlayer.IsUser() || !(context.CurrentPlayer as User).IsAdmin)
-                throw new Exception("You are not admin");
+                throw new FortException(ELogLevel.Warning, "Nejste administrátor");
 
             if (_roundService.State == RoundService.Status.New)
                 _roundService.StartGame();
             else if (_roundService.State == RoundService.Status.Paused)
                 _roundService.Resume();
             else
-                throw new Exception($"You cannot start game in status '{_roundService.State}'");
+                throw new Exception($"Nemůžete spustit hru, která má status '{_roundService.State}'");
         }
         public void PauseGame(ContextService context)
         {
             if (!context.CurrentPlayer.IsUser() || !(context.CurrentPlayer as User).IsAdmin)
-                throw new Exception("You are not admin");
+                throw new Exception("Nejste administrátor");
 
             _roundService.Pause();
         }
         public void FinishTimer(ContextService context)
         {
             if (!context.CurrentPlayer.IsUser() || !(context.CurrentPlayer as User).IsAdmin)
-                throw new Exception("You are not admin");
+                throw new Exception("Nejste administrátor");
 
             _roundService.FinishTimer();
         }
         public void RestartGame(ContextService context)
         {
             if (!context.CurrentPlayer.IsUser() || !(context.CurrentPlayer as User).IsAdmin)
-                throw new Exception("You are not admin");
+                throw new Exception("Nejste administrátor");
 
             _roundService.ResetGame(context);
         }

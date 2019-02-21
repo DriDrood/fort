@@ -7,11 +7,10 @@ namespace Fort.Module.Comm
     {
         public QueueItem()
         {
-            Id = Guid.NewGuid();
+            CreatedAt = DateTime.UtcNow;
         }
-        
-        public Guid Id { get; set; }
         public string Data { get; set; }
         public Lifetime Lifetime { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

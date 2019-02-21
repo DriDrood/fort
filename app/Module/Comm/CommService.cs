@@ -24,15 +24,15 @@ namespace Fort.Module.Comm
         {
             // create Q for each player
             foreach (var user in context.Database.Users)
-                _queues.Add(user.Id, new Queue(this));
+                _queues.Add(user.Id, new Queue(user.Id, this));
             foreach (var team in context.Database.Teams)
-                _queues.Add(team.Id, new Queue(this));
+                _queues.Add(team.Id, new Queue(team.Id, this));
         }
-        public void CreateConnection(Player player, IChannel channel)
+        public Task CreateConnection(Player player, IChannel channel)
         {
             channel.Comm = this;
-            _queues[player.Id].Reset();
             _activeChannels.Add(player.Id, channel);
+            return _queues[player.Id].Reset();
         }
         public void Disconnect(string playerId, string reason)
         {
@@ -52,12 +52,11 @@ namespace Fort.Module.Comm
             if (_activeChannels.ContainsKey(userId) && _activeChannels[userId].ReadyToSend)
                 return _activeChannels[userId].SendMessage(method, data);
 
-            _queues[userId].AddItem(new QueueItem
+            return _queues[userId].AddItem(new QueueItem
             {
                 Data = dataString,
                 Lifetime = lifetimeInQ
             });
-            return Task.CompletedTask;
         }
         public async Task SendToAdmins(ContextService context, string method, object data, Lifetime lifetimeInQ)
         {
@@ -96,7 +95,7 @@ namespace Fort.Module.Comm
 
         public void OnMessage(string playerId, string method, JToken data)
         {
-
+#warning TODO
         }
     }
 }

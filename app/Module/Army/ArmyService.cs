@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Fort.Database.Entities;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
@@ -25,9 +27,36 @@ namespace Fort.Module.Army
                 { "cities", getCities() }
             };
         }
-        public void PlayerTurn() { }
-        public void GetRoundResult() { }
-        public void GetHistory() { }
+        public Task PlayerTurn(User user, int sourceCityId, int targetCityId, int amount)
+        {
+            var turn = _context.Database.Turns.FirstOrDefault(t => t.RoundId == _roundService.CurrentRound.Id && t.SourceCityId == sourceCityId && t.TargetCityId == targetCityId);
+
+            // create new
+            if (turn == null)
+            {
+                turn = new Turn
+                {
+                    User = user,
+                    SourceCityId = sourceCityId,
+                    TargetCityId = targetCityId,
+                    CreatedAt = DateTime.UtcNow,
+                    RoundId = _roundService.CurrentRound.Id
+                };
+                _context.Database.Turns.Add(turn);
+            }
+
+            //update
+            turn.Amount = amount;
+            return _context.Database.SaveChangesAsync();
+        }
+        public void GetRoundResult()
+        {
+
+        }
+        public void GetHistory()
+        {
+            // TODO
+        }
 
         private JToken getPaths()
         {
@@ -49,7 +78,8 @@ namespace Fort.Module.Army
         }
         private JToken getTurns()
         {
-            var turns = GetVisibleTurn().Select(t => new {
+            var turns = GetVisibleTurn().Select(t => new
+            {
                 sourceCityId = t.SourceCityId,
                 targetCityId = t.TargetCityId,
                 amount = t.Amount,

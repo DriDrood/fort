@@ -36,11 +36,12 @@ namespace Fort
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-            services.AddScoped<ContextService>();
-            services.AddSingleton<RoundService>();
-            services.AddSingleton<ActionService>();
-            services.AddSingleton<CommService>();
             services.AddSingleton<RedisService>();
+            services.AddSingleton<PlayerService>();
+            services.AddSingleton<ActionService>();
+            services.AddSingleton<RoundService>();
+            services.AddSingleton<CommService>();
+            services.AddScoped<ContextService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -42,23 +42,6 @@ namespace Fort.Controllers
             return View();
         }
 
-        public string GenerateGuid()
-        {
-            Random rand = new Random();
-            char[] guid = new char[5];
-            for (int i = 0; i < 5; i++)
-            {
-                var chI = rand.Next() % 36;
-                // char
-                if (chI < 26)
-                    guid[i] = (char)(chI + 97);
-                else
-                    guid[i] = (char)(chI - 26 + 48);
-            }
-
-            return new string(guid);
-        }
-
         public IActionResult Map(string code)
         {
             ViewData["initData"] = _armyService.GetInit();

@@ -35,29 +35,29 @@ namespace Fort.Utils
             return matchingKeys.Select(x => x.ToString().Substring(offset)).ToList();
         }
 
-        public async Task SetAsync(string key, string value, int expire = 0)
+        public Task SetAsync(string key, string value, int expire = 0)
         {
             if (expire > 0)
-                await _db.StringSetAsync(key, value, TimeSpan.FromSeconds(expire));
-            else
-                await _db.StringSetAsync(key, value);
+                return _db.StringSetAsync(key, value, TimeSpan.FromSeconds(expire));
+                
+            return _db.StringSetAsync(key, value);
         }
-        public async Task<string> GetAsync(string key)
+        public Task<RedisValue> GetAsync(string key)
         {
-            return await _db.StringGetAsync(key);
+            return _db.StringGetAsync(key);
         }
 
-        public async Task<bool> AddToSetAsync(string key, string value)
+        public Task<bool> AddToSetAsync(string key, string value)
         {
-            return await _db.SetAddAsync(key, value);
+            return _db.SetAddAsync(key, value);
         }
-        public async Task<bool> RemoveFromSetAsync(string key, string value)
+        public Task<bool> RemoveFromSetAsync(string key, string value)
         {
-            return await _db.SetRemoveAsync(key, value);
+            return _db.SetRemoveAsync(key, value);
         }
-        public async Task<bool> IsMemberSetAsync(string key, string value)
+        public Task<bool> IsMemberSetAsync(string key, string value)
         {
-            return await _db.SetContainsAsync(key, value);
+            return _db.SetContainsAsync(key, value);
         }
         public async Task<IEnumerable<string>> GetAllSetAsync(string key)
         {
