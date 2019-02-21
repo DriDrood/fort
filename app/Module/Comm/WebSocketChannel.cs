@@ -43,7 +43,7 @@ namespace Fort.Module.Comm
                 while (messageBytes.Length > 0)
                 {
                     byte[] buffer = messageBytes.Take(_bufferSize).ToArray();
-                    _webSocket.SendAsync(buffer, WebSocketMessageType.Text, messageBytes.Length < _bufferSize, CancellationToken.None).GetAwaiter().GetResult();
+                    await _webSocket.SendAsync(buffer, WebSocketMessageType.Text, messageBytes.Length < _bufferSize, CancellationToken.None);
 
                     messageBytes = messageBytes.Skip(_bufferSize).ToArray();
                 }

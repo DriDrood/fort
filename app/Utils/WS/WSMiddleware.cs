@@ -20,7 +20,7 @@ namespace Fort.Utils.WS
             if (context.WebSockets.IsWebSocketRequest)
             {
                 var channel = new WebSocketChannel(contextService.CurrentPlayer.Id, await context.WebSockets.AcceptWebSocketAsync());
-                commService.CreateConnection(contextService.CurrentPlayer, channel);
+                await commService.CreateConnection(contextService.CurrentPlayer, channel);
                 await channel.WaitingLoop;
             }
             else
