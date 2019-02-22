@@ -12,6 +12,6 @@ namespace Fort.Database.Entities
         public string Name { get; set; }
 
         public abstract bool IsUser();
-        public abstract Team GetTeam();
+        public abstract string GetTeamId();
     }
 }

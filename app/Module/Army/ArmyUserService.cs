@@ -13,7 +13,7 @@ namespace Fort.Module.Army
         protected override int GetArmy(City city)
         {
             if (city.Owner == _context.CurrentPlayer
-                || city.Owner?.Team == _context.CurrentPlayer.GetTeam())
+                || city.Owner?.TeamId == _context.CurrentPlayer.GetTeamId())
                 return city.Army;
 
             return -1;
@@ -31,13 +31,13 @@ namespace Fort.Module.Army
         {
             // user or team
             if (city.OwnerId == _context.CurrentPlayer.Id
-                || city.Owner?.TeamId == _context.CurrentPlayer.GetTeam().Id)
-                return city.Owner.ImageUrl;
+                || city.Owner?.TeamId == _context.CurrentPlayer.GetTeamId())
+                return city.Owner?.ImageUrl;
 
             // near enemy
-            if (city.SourceToPaths.Any(p => p.Target.Owner?.TeamId == _context.CurrentPlayer.GetTeam().Id)
-                || city.TargetToPaths.Any(p => p.Source.Owner?.TeamId == _context.CurrentPlayer.GetTeam().Id))
-                return city.Owner.ImageUrl;
+            if (city.SourceToPaths.Any(p => p.Target.Owner?.TeamId == _context.CurrentPlayer.GetTeamId())
+                || city.TargetToPaths.Any(p => p.Source.Owner?.TeamId == _context.CurrentPlayer.GetTeamId()))
+                return city.Owner?.ImageUrl;
 
             // other
             return null;

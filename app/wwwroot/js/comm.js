@@ -26,7 +26,7 @@ var Comm = {
             Comm.status.connected();
         };
         ws.onmessage = function (message) {
-            console.log('Recieved message: ' + message);
+            console.log('Recieved message: ', message);
             var messageJson = JSON.parse(message.data);
             Comm.onMessage(messageJson['method'], messageJson['param']);
         };
@@ -83,6 +83,10 @@ var Comm = {
 
                 Builder.clean();
                 Builder.INIT(data['map']);
+                break;
+
+            case 'playerReady_ok':
+                Utils.playerReady.setReady(data['ready']);
                 break;
 
             // turn response
@@ -149,8 +153,9 @@ var Comm = {
     }
 }
 
-window.onload = function () {
+document.addEventListener('DOMContentLoaded', function () {
     if (document.getElementById('body').classList.contains('map')) {
+        console.log('connecting');
         Comm.createConnection();
     }
-};
+});

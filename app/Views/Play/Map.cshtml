@@ -12,7 +12,7 @@
 }
 
 <div id="actions">
-    @if (context.CurrentPlayer.IsUser() && (context.CurrentPlayer as Fort.Database.Entities.User).IsAdmin == true)
+    @if (context.CurrentPlayer.IsUser() && (context.CurrentPlayer as Fort.Database.Entities.User).IsAdmin)
     {
         <i class="fa fa-play float-left" id="play" title="Spustit hru"></i>
         <i class="fa fa-pause float-left" id="pause" title="Pozastavit"></i>
@@ -25,18 +25,23 @@
     }
     <span id="roud" class="float-left"></span>
     <span id="connection" class="float-right"><i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i></span>
-    <span id="time" class="float-right"></span>
+    <span id="time" class="float-right">0:00:00</span>
 </div>
 
 <div id="map_holder">
     <svg id="map">
+        <defs>
+            <filter id="shadow"  filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="rgb(0, 173, 204)" flood-opacity="1" />
+            </filter>
+        </defs>
         <g id="paths"></g>
         <g id="turns"></g>
         <g id="cities"></g>
     </svg>
 </div>
 
-<div class="shadow">
+<div id="modal_shadow" style="display:none;">
     <div id="sendArmy" class="modal">
         <div class="modal_header">
             Poslat armádu
@@ -48,7 +53,7 @@
             <button value="cancel">Zrušit</button>
         </div>
     </div>
-    <i class="fa fa-spinner fa-spin fa-fw"></i>
+    <i id="modal_spinner" class="fa fa-spinner fa-spin fa-fw"></i>
 </div>
 
 <div id="notification">
@@ -57,6 +62,9 @@
 <script>
         document.addEventListener('DOMContentLoaded', function () {
             Builder.INIT(@Html.Raw(armyService.GetInit().ToString()));
-            Utils.countDown.start(Date.parse(@roundService.CurrentRound.EndsAt.ToString()));
+            @if (roundService.CurrentRound.EndsAt != null)
+            {
+                @:Utils.countDown.start(Date.parse(@roundService.CurrentRound.EndsAt?.ToString()));
+            }
         }, false);
 </script>

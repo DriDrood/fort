@@ -44,6 +44,27 @@ var Utils = {
             }
         }
     },
+    'buttons': {
+        'setSpinner': function (target) {
+            target.classList.add('fa-spin');
+            target.classList.add('fa-fw');
+        },
+        'removeSpinner': function (target) {
+            target.classList.remove('fa-spin');
+            target.classList.remove('fa-fw');
+        }
+    },
+    'playerReady': {
+        'setReady': function (ready) {
+            var target = document.getElementById('ready');
+
+            if (ready)
+                target.classList.add('active');
+            else
+                target.classList.remove('active');
+            Utils.buttons.removeSpinner(target);
+        }
+    },
     'roundStatus': {
         'new': function (roundNumber) {
             document.getElementById('round').innerHTML =
@@ -110,6 +131,6 @@ window.onerror = function (errorMsg, url, lineNumber) {
         line: lineNumber
     });
 }
-window.onload = function () {
+document.addEventListener('DOMContentLoaded', function () {
     Utils.notification('success', 'Jste přihlášeni jako ' + document.getElementById('body').getAttribute('data-player-name'));
-};
+});

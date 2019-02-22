@@ -79,12 +79,8 @@ document.getElementById('body').onclick = function (event) {
     }
     // player is ready
     else if (target.id == 'ready') {
+        Utils.buttons.setSpinner(target);
         var isActive = target.classList.contains('active');
-        if (isActive)
-            target.classList.remove('active');
-        else
-            target.classList.add('active');
-
         Comm.send("playerReady", { ready: !isActive });
     }
     //// reconnect
@@ -97,8 +93,8 @@ document.getElementById('body').onclick = function (event) {
     else if (target.value == 'sendArmy') {
         var armySize = document.getElementById('armySize').value;
         Comm.send("turn", {
-            SourceCityId: Events.selected.source.getAttribute('data-city-id'),
-            TargetCityId: Events.selected.target.getAttribute('data-city-id'),
+            sourceCityId: Events.selected.source.getAttribute('data-city-id'),
+            targetCityId: Events.selected.target.getAttribute('data-city-id'),
             amount: armySize
         });
 
@@ -113,7 +109,10 @@ document.getElementById('body').onclick = function (event) {
 // Login page
 // spinner
 document.addEventListener('DOMContentLoaded', function () {
-    document.getElementById('loginForm').onsubmit = function () {
-        document.getElementById('loginBtn').innerHTML = '<i class="fa fa-spinner fa-spin fa-fw"></i>';
-    };
+    var loginForm = document.getElementById('loginForm');
+    if (loginForm != null) {
+        loginForm.onsubmit = function () {
+            document.getElementById('loginBtn').innerHTML = '<i class="fa fa-spinner fa-spin fa-fw"></i>';
+        };
+    }
 });

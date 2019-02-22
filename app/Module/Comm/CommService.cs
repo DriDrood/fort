@@ -13,11 +13,15 @@ namespace Fort.Module.Comm
     {
         public CommService()
         {
+            _actionService = Program.GetService<ActionService>();
             _activeChannels = new Dictionary<string, IChannel>();
             _queues = new Dictionary<string, Queue>();
+            _activeContexts = new Dictionary<string, ContextService>();
         }
 
+        private ActionService _actionService;
         private Dictionary<string, IChannel> _activeChannels;
+        private Dictionary<string, ContextService> _activeContexts;
         private Dictionary<string, Queue> _queues;
 
         public void Init(ContextService context)
@@ -32,6 +36,7 @@ namespace Fort.Module.Comm
         {
             channel.Comm = this;
             _activeChannels.Add(player.Id, channel);
+            _activeContexts.Add(player.Id, new ContextService { CurrentPlayer = player });
             return _queues[player.Id].Reset();
         }
         public void Disconnect(string playerId, string reason)
@@ -41,6 +46,8 @@ namespace Fort.Module.Comm
         }
         public void OnDisconnect(string playerId, string reason)
         {
+            _activeContexts[playerId].Dispose();
+            _activeContexts.Remove(playerId);
             _activeChannels.Remove(playerId);
             Logger.Log(ELogLevel.Warning, playerId, reason);
         }
@@ -95,7 +102,50 @@ namespace Fort.Module.Comm
 
         public void OnMessage(string playerId, string method, JToken data)
         {
-#warning TODO
+            var context = _activeContexts[playerId];
+            try
+            {
+                switch (method)
+                {
+                    case "play":
+                        _actionService.StartOrResumeGame(context);
+                        break;
+                    case "pause":
+                        _actionService.PauseGame(context);
+                        break;
+                    case "end":
+                        _actionService.FinishTimer(context);
+                        break;
+                    case "restart":
+                        _actionService.RestartGame(context);
+                        break;
+                    case "playerReady":
+                        _actionService.PlayerReady(context, data["ready"].Value<bool>());
+                        break;
+                    case "turn":
+                        int source = data["sourceCityId"].Value<int>();
+                        int target = data["targetCityId"].Value<int>();
+                        int amount = data["amount"].Value<int>();
+
+                        _actionService.PlayerTurn(context, source, target, amount);
+                        break;
+                    case "jsError":
+                        Logger.Log(ELogLevel.JS, context.CurrentPlayer.Id, data["message"].Value<string>(), $"{data["url"]} - line: {data["line"].Value<int>()}");
+                        break;
+                    default:
+                        throw new FortException(ELogLevel.Warning, "Neznámá metoda");
+                }
+            }
+            catch (FortException ex)
+            {
+                Logger.Log(ex.LogLevel, playerId, ex.Message, ex.StackTrace);
+                SendOne(context, playerId, "notification", new { type = ex.LogLevel.ToString().ToLower(), message = ex.Message }, Lifetime.Notification);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(ELogLevel.UnknownException, playerId, ex.Message, ex.StackTrace);
+                SendOne(context, playerId, "notification", new { type = "unknownexception", message = "Programátor to rozbil" }, Lifetime.Notification);
+            }
         }
     }
 }

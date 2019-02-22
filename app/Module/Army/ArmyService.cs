@@ -90,7 +90,11 @@ namespace Fort.Module.Army
         }
         private JToken getCities()
         {
-            var cities = _context.Database.Cities.Select(c => new
+            var cities = _context.Database.Cities
+                .Include(c => c.Owner)
+                .Include(c => c.SourceToPaths).ThenInclude(s => s.Target).ThenInclude(t => t.Owner)
+                .Include(c => c.TargetToPaths).ThenInclude(t => t.Source).ThenInclude(s => s.Owner)
+                .Select(c => new
             {
                 id = c.Id,
                 x = c.X,

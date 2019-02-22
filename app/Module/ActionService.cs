@@ -17,11 +17,14 @@ namespace Fort.Module
             if (context.Database.Cities.Find(sourceCityId).OwnerId != context.CurrentPlayer.Id)
                 throw new FortException(ELogLevel.Warning, "Toto město není vaše");
 
+            if (_roundService.State != RoundService.Status.Running && _roundService.State != RoundService.Status.Paused)
+                throw new FortException(ELogLevel.Warning, "Kolo neběží");
+
             return context.GetArmyService().PlayerTurn((User)context.CurrentPlayer, sourceCityId, targetCityId, amount);
         }
-        public Task PlayerReady(ContextService context)
+        public Task PlayerReady(ContextService context, bool setReady)
         {
-            return _playerService.PlayerReady(context.CurrentPlayer.Id, _roundService.CurrentRound.Id);
+            return _playerService.PlayerReady(context, _roundService.CurrentRound.Id, setReady);
         }
         public void StartOrResumeGame(ContextService context)
         {

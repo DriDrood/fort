@@ -41,11 +41,5 @@
         </script>
         <script src="~/js/site.min.js" asp-append-version="true"></script>
     </environment>
-    @if (ViewData.ContainsKey("initData"))
-    {
-        <script>
-            Builder.INIT(@ViewData.ContainsKey("initData").ToString());
-        </script>
-    }
 </body>
 </html>

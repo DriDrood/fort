@@ -99,7 +99,7 @@ body.login form .error {
 #notification.error {
     background-color: #f33;
 }
-#notification.exception {
+#notification.unknownexception {
     background-color: #a00;
 }
 #notification.success {

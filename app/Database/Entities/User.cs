@@ -24,6 +24,6 @@ namespace Fort.Database.Entities
         public virtual ICollection<Turn> Turns { get; set; }
 
         public override bool IsUser() => true;
-        public override Team GetTeam() => Team;
+        public override string GetTeamId() => TeamId;
     }
 }

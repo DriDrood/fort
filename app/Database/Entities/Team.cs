@@ -17,6 +17,6 @@ namespace Fort.Database.Entities
         public virtual ICollection<User> Members { get; set; }
 
         public override bool IsUser() => false;
-        public override Team GetTeam() => this;
+        public override string GetTeamId() => Id;
     }
 }
