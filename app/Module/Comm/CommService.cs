@@ -34,6 +34,12 @@ namespace Fort.Module.Comm
         }
         public Task CreateConnection(Player player, IChannel channel)
         {
+            if (_activeChannels.ContainsKey(player.Id))
+            {
+                _activeChannels[player.Id].Disconnect("Připojen z jiného zařízení");
+                _activeChannels.Remove(player.Id);
+            }
+
             channel.Comm = this;
             _activeChannels.Add(player.Id, channel);
             _activeContexts.Add(player.Id, new ContextService { CurrentPlayer = player });

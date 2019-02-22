@@ -20,9 +20,9 @@ namespace Fort.Module.Army
             return city.Owner?.Team?.Color ?? "gray";
         }
 
-        protected override string GetImage(City city)
+        protected override User GetOwner(City city)
         {
-            return city.Owner?.ImageUrl ?? null;
+            return city.Owner;
         }
 
         protected override IEnumerable<Turn> GetVisibleTurn()

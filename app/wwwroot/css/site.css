@@ -133,6 +133,7 @@ body.login form .error {
 }
 #actions i {
     margin: 5px;
+    cursor: pointer;
 }
 #actions .time {
     margin-left: 10px;

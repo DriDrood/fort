@@ -94,18 +94,24 @@ namespace Fort.Module.Army
                 .Include(c => c.Owner)
                 .Include(c => c.SourceToPaths).ThenInclude(s => s.Target).ThenInclude(t => t.Owner)
                 .Include(c => c.TargetToPaths).ThenInclude(t => t.Source).ThenInclude(s => s.Owner)
-                .Select(c => new
-            {
-                id = c.Id,
-                x = c.X,
-                y = c.Y,
-                r = GetRadius(c.Army),
-                color = GetCityColor(c),
-                neighbours = GetNeighbours(c),
-                owned = IsOwned(c),
-                army = GetArmy(c),
-                image = GetImage(c)
-            });
+                .ToList()
+                .Select(c =>
+                {
+                    var owner = GetOwner(c);
+                    return new
+                    {
+                        id = c.Id,
+                        x = c.X,
+                        y = c.Y,
+                        r = GetRadius(c.Army),
+                        color = GetCityColor(c),
+                        neighbours = GetNeighbours(c),
+                        owned = IsOwned(c),
+                        army = GetArmy(c),
+                        ownerId = owner?.Id,
+                        image = owner?.ImageUrl
+                    };
+                });
 
             return JToken.FromObject(cities);
         }
@@ -122,9 +128,9 @@ namespace Fort.Module.Army
                 yield return path.SourceId;
         }
 
-        protected abstract string GetCityColor(City city); // include city.owner.team
+        protected abstract string GetCityColor(City city); // include city.owner
         protected abstract int GetArmy(City city); // -1 for unknown
-        protected abstract string GetImage(City city); // include city.owner
+        protected abstract User GetOwner(City city); // include city.owner
         protected abstract IEnumerable<Turn> GetVisibleTurn();
     }
 }

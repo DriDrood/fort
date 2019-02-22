@@ -17,7 +17,7 @@ var Builder = {
 
         // city
         data.cities.forEach(function (city) {
-            Builder.city.create(city.id, city.x, city.y, city.r, city.color, city.neighbours, city.owned, city.army, city.image);
+            Builder.city.create(city.id, city.x, city.y, city.r, city.color, city.neighbours, city.owned, city.army, city.ownerId, city.image);
         });
     },
     'clean': function () {
@@ -27,23 +27,26 @@ var Builder = {
     },
 
     'city': {
-        'create': function (id, x, y, r, color, neighbours, owned, army, image) {
+        'create': function (id, x, y, r, color, neighbours, owned, army, ownerId, image) {
             var fill = null;
             var style = null;
 
-            // ally
+            // ally or near enemy - knows owner
+            if (ownerId != null) {
+                var imageId = Builder._base_.createImage(ownerId, image, r);
+                fill = 'url(#' + imageId + ')';
+
+                style = 'stroke:' + color + ';stroke-width:2;';
+            // far enenmy - knows team
+            } else {
+                fill = color;
+            }
+
+            // ally - knows owner & army
             if (army >= 0) {
                 // army size
                 Builder._base_.createCircle('cities', x - r, y - r, 12, '#fff', 'stroke:#000;stroke-width:2;', null, { 'for-id': id });
                 Builder._base_.createCircleText('cities', x - r, y - r, 12, '#000', army, null, { 'for-id': id });
-
-                fill = image;
-                style = 'stroke:' + color + ';stroke-width:2;';
-            }
-
-            // enemy
-            else {
-                fill = color;
             }
 
             // city circle
@@ -201,6 +204,27 @@ var Builder = {
                 line.id = htmlId;
 
             Builder.root[rootSection].appendChild(line);
+        },
+        'createImage': function (userId, imageUrl, round) {
+            var id = "U_" + userId + "_" + round;
+
+            // already exists
+            if (document.getElementById(id) != null)
+                return id;
+
+            var imageElement = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+            imageElement.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', '/images/Users/' + imageUrl);
+            imageElement.setAttribute('x', 0);
+            imageElement.setAttribute('y', 0);
+            imageElement.setAttribute('width', round * 2);
+            imageElement.setAttribute('height', round * 2);
+            var patternElement = document.createElementNS("http://www.w3.org/2000/svg", 'pattern');
+            patternElement.id = id;
+            patternElement.setAttribute('width', 1);
+            patternElement.setAttribute('height', 1);
+            patternElement.appendChild(imageElement);
+            document.getElementById("map").firstElementChild.appendChild(patternElement);;
+            return id;
         }
     }
 }

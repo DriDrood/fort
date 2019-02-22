@@ -27,17 +27,17 @@ namespace Fort.Module.Army
             return city.Owner?.Team?.Color ?? "gray";
         }
 
-        protected override string GetImage(City city)
+        protected override User GetOwner(City city)
         {
             // user or team
             if (city.OwnerId == _context.CurrentPlayer.Id
                 || city.Owner?.TeamId == _context.CurrentPlayer.GetTeamId())
-                return city.Owner?.ImageUrl;
+                return city.Owner;
 
             // near enemy
             if (city.SourceToPaths.Any(p => p.Target.Owner?.TeamId == _context.CurrentPlayer.GetTeamId())
                 || city.TargetToPaths.Any(p => p.Source.Owner?.TeamId == _context.CurrentPlayer.GetTeamId()))
-                return city.Owner?.ImageUrl;
+                return city.Owner;
 
             // other
             return null;
