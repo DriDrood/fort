@@ -61,8 +61,9 @@ namespace Fort.Module.Army
         private JToken getPaths()
         {
             var paths = _context.Database.Paths
-                .Include(p => p.Source)
-                .Include(p => p.Target)
+                .Include(p => p.Source).ThenInclude(s => s.Owner).ThenInclude(o => o.Team)
+                .Include(p => p.Target).ThenInclude(t => t.Owner).ThenInclude(o => o.Team)
+                .ToList()
                 .Select(p => new
                 {
                     id = p.SourceId > p.TargetId ? $"{p.TargetId}-{p.SourceId}" : $"{p.SourceId}-{p.TargetId}",
