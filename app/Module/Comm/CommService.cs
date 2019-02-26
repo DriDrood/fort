@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Fort.Database.Entities;
+using Fort.Utils;
 using Fort.Utils.Logger;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -13,26 +14,24 @@ namespace Fort.Module.Comm
     {
         public CommService()
         {
-            _actionService = Program.GetService<ActionService>();
             _activeChannels = new Dictionary<string, IChannel>();
             _queues = new Dictionary<string, Queue>();
             _activeContexts = new Dictionary<string, ContextService>();
         }
 
-        private ActionService _actionService;
         private Dictionary<string, IChannel> _activeChannels;
         private Dictionary<string, ContextService> _activeContexts;
         private Dictionary<string, Queue> _queues;
 
-        public void Init(ContextService context)
+        public void Init(ContextService context, RedisService redis)
         {
             // create Q for each player
             foreach (var user in context.Database.Users)
-                _queues.Add(user.Id, new Queue(user.Id, this));
+                _queues.Add(user.Id, new Queue(user.Id, this, redis));
             foreach (var team in context.Database.Teams)
-                _queues.Add(team.Id, new Queue(team.Id, this));
+                _queues.Add(team.Id, new Queue(team.Id, this, redis));
         }
-        public Task CreateConnection(Player player, IChannel channel)
+        public Task CreateConnection(Player player, IChannel channel, RoundService roundService)
         {
             if (_activeChannels.ContainsKey(player.Id))
             {
@@ -108,52 +107,11 @@ namespace Fort.Module.Comm
             await Task.WhenAll(tasks);
         }
 
-        public async Task OnMessage(string playerId, string method, JToken data)
+        public void OnMessage(string playerId, string method, JToken data)
         {
             var context = _activeContexts[playerId];
-            try
-            {
-                switch (method)
-                {
-                    case "play":
-                        await _actionService.StartOrResumeGame(context);
-                        break;
-                    case "pause":
-                        await _actionService.PauseGame(context);
-                        break;
-                    case "end":
-                        await _actionService.FinishTimer(context);
-                        break;
-                    case "restart":
-                        await _actionService.RestartGame(context);
-                        break;
-                    case "playerReady":
-                        await _actionService.PlayerReady(context, data["ready"].Value<bool>());
-                        break;
-                    case "turn":
-                        int source = data["sourceCityId"].Value<int>();
-                        int target = data["targetCityId"].Value<int>();
-                        int amount = data["amount"].Value<int>();
-
-                        await _actionService.PlayerTurn(context, source, target, amount);
-                        break;
-                    case "jsError":
-                        Logger.Log(ELogLevel.JS, context.CurrentPlayer.Id, data["message"].Value<string>(), $"{data["url"]} - line: {data["line"].Value<int>()}");
-                        break;
-                    default:
-                        throw new FortException(ELogLevel.Warning, "Neznámá metoda");
-                }
-            }
-            catch (FortException ex)
-            {
-                Logger.Log(ex.LogLevel, playerId, ex.Message, ex.StackTrace);
-                await SendOne(context, playerId, "notification", new { type = ex.LogLevel.ToString().ToLower(), message = ex.Message }, Lifetime.Notification);
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(ELogLevel.UnknownException, playerId, ex.Message, ex.StackTrace);
-                await SendOne(context, playerId, "notification", new { type = "unknownexception", message = "Programátor to rozbil" }, Lifetime.Notification);
-            }
+            OnMessageEvent.Invoke(context, method, data);
         }
+        public event Action<ContextService, string, JToken> OnMessageEvent;
     }
 }

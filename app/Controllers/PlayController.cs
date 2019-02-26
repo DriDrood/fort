@@ -14,15 +14,17 @@ namespace Fort.Controllers
 {
     public class PlayController : Controller
     {
-        public PlayController(ContextService context, CommService commService)
+        public PlayController(ContextService context, CommService commService, RoundService roundService)
         {
             _context = context;
             _commService = commService;
-            _armyService = context.GetArmyService();
+            _armyService = context.ArmyService;
+            _roundService = roundService;
         }
         private ContextService _context;
         private CommService _commService;
         private ArmyService _armyService;
+        private RoundService _roundService;
 
         public IActionResult Login()
         {
@@ -44,7 +46,7 @@ namespace Fort.Controllers
 
         public IActionResult Map(string code)
         {
-            ViewData["initData"] = _armyService.GetInit();
+            ViewData["initData"] = _armyService.GetInit(_roundService.CurrentRound.Id);
             return View(_context);
         }
 

@@ -70,7 +70,7 @@ namespace Fort.Module.Comm
 
         private Task receiveLoop()
         {
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
                 try
                 {
@@ -93,7 +93,7 @@ namespace Fort.Module.Comm
                         if (!result.CloseStatus.HasValue)
                         {
                             JToken messageJ = JToken.Parse(message.ToString());
-                            await Comm.OnMessage(PlayerId, messageJ["method"].Value<string>(), messageJ["param"]);
+                            Comm.OnMessage(PlayerId, messageJ["method"].Value<string>(), messageJ["param"]);
                         }
                     }
                     while (!result.CloseStatus.HasValue);

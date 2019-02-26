@@ -8,10 +8,10 @@ namespace Fort.Module.Comm
 {
     public class Queue
     {
-        public Queue(string playerId, CommService comm)
+        public Queue(string playerId, CommService comm, RedisService redis)
         {
             _comm = comm;
-            _redis = Program.GetService<RedisService>();
+            _redis = redis;
             _playerId = playerId;
         }
 

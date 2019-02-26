@@ -5,14 +5,70 @@ using Fort.Database.Entities;
 using Fort.Module.Army;
 using Fort.Module.Comm;
 using Fort.Utils.Logger;
+using Newtonsoft.Json.Linq;
 
 namespace Fort.Module
 {
     public class ActionService
     {
-        private RoundService _roundService = Program.GetService<RoundService>();
-        private PlayerService _playerService = Program.GetService<PlayerService>();
-        private CommService _commService => Program.GetService<CommService>();
+        public ActionService(CommService commService, RoundService roundService, PlayerService playerService)
+        {
+            _roundService = roundService;
+            _playerService = playerService;
+            _commService = commService;
+            _commService.OnMessageEvent += HandleMessage;
+        }
+        private RoundService _roundService;
+        private PlayerService _playerService;
+        private CommService _commService;
+
+        private async void HandleMessage(ContextService context, string method, JToken data)
+        {
+            string playerId = context.CurrentPlayer.Id;
+            try
+            {
+                switch (method)
+                {
+                    case "play":
+                        await StartOrResumeGame(context);
+                        break;
+                    case "pause":
+                        await PauseGame(context);
+                        break;
+                    case "end":
+                        await FinishTimer(context);
+                        break;
+                    case "restart":
+                        await RestartGame(context);
+                        break;
+                    case "playerReady":
+                        await PlayerReady(context, data["ready"].Value<bool>());
+                        break;
+                    case "turn":
+                        int source = data["sourceCityId"].Value<int>();
+                        int target = data["targetCityId"].Value<int>();
+                        int amount = data["amount"].Value<int>();
+
+                        await PlayerTurn(context, source, target, amount);
+                        break;
+                    case "jsError":
+                        Logger.Log(ELogLevel.JS, context.CurrentPlayer.Id, data["message"].Value<string>(), $"{data["url"]} - line: {data["line"].Value<int>()}");
+                        break;
+                    default:
+                        throw new FortException(ELogLevel.Warning, "Neznámá metoda");
+                }
+            }
+            catch (FortException ex)
+            {
+                Logger.Log(ex.LogLevel, playerId, ex.Message, ex.StackTrace);
+                await _commService.SendOne(context, playerId, "notification", new { type = ex.LogLevel.ToString().ToLower(), message = ex.Message }, Lifetime.Notification);
+            }
+            catch (Exception ex)
+            {
+                Logger.Log(ELogLevel.UnknownException, playerId, ex.Message, ex.StackTrace);
+                await _commService.SendOne(context, playerId, "notification", new { type = "unknownexception", message = "Programátor to rozbil" }, Lifetime.Notification);
+            }
+        }
 
         public async Task PlayerTurn(ContextService context, int sourceCityId, int targetCityId, int amount)
         {
@@ -22,7 +78,7 @@ namespace Fort.Module
             if (_roundService.State != RoundService.Status.Running && _roundService.State != RoundService.Status.Paused)
                 throw new FortException(ELogLevel.Warning, "Kolo neběží");
 
-            await context.GetArmyService().PlayerTurn((User)context.CurrentPlayer, sourceCityId, targetCityId, amount);
+            await context.ArmyService.PlayerTurn((User)context.CurrentPlayer, sourceCityId, targetCityId, amount, _roundService.CurrentRound?.Id ?? -1);
             await _commService.SendOne(context, context.CurrentPlayer.Id, "turn", new { sourceCityId, targetCityId, amount }, Lifetime.DataModification);
             await _commService.SendToAdmins(context, "turn", new { sourceCityId, targetCityId, amount }, Lifetime.DataModification);
         }
@@ -76,7 +132,7 @@ namespace Fort.Module
                 throw new Exception("Nejste administrátor");
 
             _roundService.ResetGame(context);
-            return _commService.SendEach(context, "Restart", (cont) => new { map = cont.GetArmyService().GetInit() }, Lifetime.Notification);
+            return _commService.SendEach(context, "Restart", (cont) => new { map = cont.ArmyService.GetInit(_roundService.CurrentRound.Id) }, Lifetime.Notification);
         }
         public void HistoryBack() { }
         public void HistoryForward() { }

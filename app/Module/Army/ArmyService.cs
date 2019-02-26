@@ -13,23 +13,21 @@ namespace Fort.Module.Army
         public ArmyService(ContextService context)
         {
             _context = context;
-            _roundService = Program.GetService<RoundService>();
         }
 
         protected ContextService _context;
-        protected RoundService _roundService;
 
-        public JToken GetInit()
+        public JToken GetInit(int roundId)
         {
             return new JObject{
                 { "paths", getPaths() },
-                { "turns", getTurns() },
+                { "turns", getTurns(roundId) },
                 { "cities", getCities() }
             };
         }
-        public Task PlayerTurn(User user, int sourceCityId, int targetCityId, int amount)
+        public Task PlayerTurn(User user, int sourceCityId, int targetCityId, int amount, int roundId)
         {
-            var turn = _context.Database.Turns.FirstOrDefault(t => t.RoundId == _roundService.CurrentRound.Id && t.SourceCityId == sourceCityId && t.TargetCityId == targetCityId);
+            var turn = _context.Database.Turns.FirstOrDefault(t => t.RoundId == roundId && t.SourceCityId == sourceCityId && t.TargetCityId == targetCityId);
 
             // create new
             if (turn == null)
@@ -40,7 +38,7 @@ namespace Fort.Module.Army
                     SourceCityId = sourceCityId,
                     TargetCityId = targetCityId,
                     CreatedAt = DateTime.UtcNow,
-                    RoundId = _roundService.CurrentRound.Id
+                    RoundId = roundId
                 };
                 _context.Database.Turns.Add(turn);
             }
@@ -77,9 +75,9 @@ namespace Fort.Module.Army
 
             return JToken.FromObject(paths);
         }
-        private JToken getTurns()
+        private JToken getTurns(int roundId)
         {
-            var turns = GetVisibleTurn().Select(t => new
+            var turns = GetVisibleTurn().Where(t => t.RoundId == roundId).Select(t => new
             {
                 sourceCityId = t.SourceCityId,
                 targetCityId = t.TargetCityId,

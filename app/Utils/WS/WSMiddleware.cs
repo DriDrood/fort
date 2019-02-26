@@ -15,12 +15,12 @@ namespace Fort.Utils.WS
 
         private RequestDelegate _next;
 
-        public async Task Invoke(HttpContext context, CommService commService, ContextService contextService)
+        public async Task Invoke(HttpContext context, CommService commService, ContextService contextService, RoundService roundService)
         {
             if (context.WebSockets.IsWebSocketRequest)
             {
                 var channel = new WebSocketChannel(contextService.CurrentPlayer.Id, await context.WebSockets.AcceptWebSocketAsync());
-                await commService.CreateConnection(contextService.CurrentPlayer, channel);
+                await commService.CreateConnection(contextService.CurrentPlayer, channel, roundService);
                 await channel.WaitingLoop;
             }
             else

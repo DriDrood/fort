@@ -1,11 +1,11 @@
 @using Fort.Module
 @using Fort.Module.Army
 @model ContextService
+@inject RoundService roundService
+@inject PlayerService playerService
 @{
     ContextService context = Model;
-    RoundService roundService = Program.GetService<RoundService>();
-    ArmyService armyService = context.GetArmyService();
-    PlayerService playerService = Program.GetService<PlayerService>();
+    ArmyService armyService = context.ArmyService;
     ViewData["Title"] = "Mapa";
     ViewData["page"] = "map";
     ViewData["type"] = context.CurrentPlayer.GetType().Name;
@@ -62,7 +62,7 @@
 
 <script>
         document.addEventListener('DOMContentLoaded', function () {
-            Builder.INIT(@Html.Raw(armyService.GetInit().ToString()));
+            Builder.INIT(@Html.Raw(armyService.GetInit(roundService.CurrentRound?.Id ?? -1).ToString()));
             Utils.roundStatus.@roundService.State.ToString().ToLower() (@roundService.CurrentRound.RoundNumber);
             @if (await playerService.IsPlayerReady(context.CurrentPlayer.Id, roundService.CurrentRound.Id))
             {

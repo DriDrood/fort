@@ -27,7 +27,7 @@ namespace Fort.Module.Army
 
         protected override IEnumerable<Turn> GetVisibleTurn()
         {
-            return _context.Database.Turns.Where(t => _roundService.CurrentRound != null && t.RoundId == _roundService.CurrentRound.Id);
+            return _context.Database.Turns;
         }
     }
 }
