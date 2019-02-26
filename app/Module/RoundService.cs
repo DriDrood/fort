@@ -18,10 +18,12 @@ namespace Fort.Module
         {
             _config = new Config();
             _timer = new Timer();
+            _cancelRound = new System.Threading.CancellationTokenSource();
             State = Status.None;
         }
         public Status State { get; private set; }
         public CurrentRound CurrentRound { get; private set; }
+        private System.Threading.CancellationTokenSource _cancelRound;
         private Task _gameTask;
         private Timer _timer;
         private Config _config;
@@ -35,13 +37,14 @@ namespace Fort.Module
                 ResetGame(context);
 
             // init round
-            if (_config.StartMode == StartMode.NewGame || _config.StartMode == StartMode.NewRound)
+            else if (_config.StartMode == StartMode.NewRound)
                 InitRound(context);
             else
                 CurrentRound = context.Database.Rounds.OrderByDescending(r => r.Id).First();
         }
         public async Task StartGame()
         {
+            _cancelRound = new System.Threading.CancellationTokenSource();
             await StartRound();
 
             _gameTask = Task.Run(async () =>
@@ -52,10 +55,16 @@ namespace Fort.Module
                     {
                         // round running
                         await _timer.NewStart(CurrentRound.EndsAt.Value - DateTime.UtcNow);
+                        if (_cancelRound.Token.IsCancellationRequested)
+                            return;
 
                         await EndRound();
+                        if (_cancelRound.Token.IsCancellationRequested)
+                            return;
 
                         await ShowResult();
+                        if (_cancelRound.Token.IsCancellationRequested)
+                            return;
 
                         using (var context = new ContextService())
                         {
@@ -79,6 +88,7 @@ namespace Fort.Module
         public void ResetGame(ContextService context)
         {
             // reset
+            _cancelRound.Cancel();
             _timer.End();
             _timer = new Timer();
             CurrentRound = null;
@@ -104,6 +114,8 @@ namespace Fort.Module
             context.Database.SaveChanges();
 
             // TODO: send to users
+
+            InitRound(context);
         }
         public void Pause()
         {

@@ -63,6 +63,7 @@
 <script>
         document.addEventListener('DOMContentLoaded', function () {
             Builder.INIT(@Html.Raw(armyService.GetInit().ToString()));
+            Utils.roundStatus.@roundService.State.ToString().ToLower() (@roundService.CurrentRound.RoundNumber);
             @if (await playerService.IsPlayerReady(context.CurrentPlayer.Id, roundService.CurrentRound.Id))
             {
                 @:Utils.playerReady.setReady(true);

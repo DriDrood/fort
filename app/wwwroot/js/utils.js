@@ -16,7 +16,7 @@ var Utils = {
     'countDown': {
         'task': null,
         'start': function (endAt) {
-            countDownTask = setInterval(function () {
+            Utils.countDown.task = setInterval(function () {
                 var now = Date.now()
                 if (endAt <= now) {
                     Utils.countDown.stop();

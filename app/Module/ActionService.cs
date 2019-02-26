@@ -28,6 +28,9 @@ namespace Fort.Module
         }
         public async Task PlayerReady(ContextService context, bool setReady)
         {
+            if (_roundService.CurrentRound == null)
+                throw new FortException(ELogLevel.Warning, "Kolo neběží");
+
             await _playerService.PlayerReady(context, _roundService.CurrentRound.Id, setReady);
 
             await _commService.SendOne(context, context.CurrentPlayer.Id, "playerReady_ok", new { ready = setReady }, Lifetime.Notification);

@@ -86,6 +86,7 @@ var Comm = {
 
                 Builder.clean();
                 Builder.INIT(data['map']);
+                Utils.roundStatus.new(1);
                 Utils.buttons.removeSpinner(document.getElementById('restart'));
                 break;
 

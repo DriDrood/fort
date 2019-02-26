@@ -52,7 +52,7 @@ namespace Fort.Module.Army
 
         protected override IEnumerable<Turn> GetVisibleTurn()
         {
-            return _context.Database.Turns.Where(t => t.UserId == _context.CurrentPlayer.Id && t.RoundId == _roundService.CurrentRound.Id);
+            return _context.Database.Turns.Where(t => t.UserId == _context.CurrentPlayer.Id && _roundService.CurrentRound != null && t.RoundId == _roundService.CurrentRound.Id);
         }
 
         private static int[] hexColorToInt(string color)
