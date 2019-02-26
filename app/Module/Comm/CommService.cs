@@ -91,14 +91,16 @@ namespace Fort.Module.Comm
 
             await Task.WhenAll(tasks);
         }
-        public async Task SendEach(ContextService context, string method, Func<User, object> getData, Lifetime lifetimeInQ)
+        public async Task SendEach(ContextService context, string method, Func<ContextService, object> getData, Lifetime lifetimeInQ)
         {
             var users = context.Database.Users.ToList();
             var tasks = new List<Task>();
 
             foreach (var user in users)
             {
-                var data = getData(user);
+                var data = getData(_activeContexts.ContainsKey(user.Id)
+                    ? _activeContexts[user.Id]
+                    : new ContextService { CurrentPlayer = user });
                 var task = SendOne(context, user.Id, method, data, lifetimeInQ);
                 tasks.Add(task);
             }
@@ -106,7 +108,7 @@ namespace Fort.Module.Comm
             await Task.WhenAll(tasks);
         }
 
-        public void OnMessage(string playerId, string method, JToken data)
+        public async Task OnMessage(string playerId, string method, JToken data)
         {
             var context = _activeContexts[playerId];
             try
@@ -114,26 +116,26 @@ namespace Fort.Module.Comm
                 switch (method)
                 {
                     case "play":
-                        _actionService.StartOrResumeGame(context);
+                        await _actionService.StartOrResumeGame(context);
                         break;
                     case "pause":
-                        _actionService.PauseGame(context);
+                        await _actionService.PauseGame(context);
                         break;
                     case "end":
-                        _actionService.FinishTimer(context);
+                        await _actionService.FinishTimer(context);
                         break;
                     case "restart":
-                        _actionService.RestartGame(context);
+                        await _actionService.RestartGame(context);
                         break;
                     case "playerReady":
-                        _actionService.PlayerReady(context, data["ready"].Value<bool>());
+                        await _actionService.PlayerReady(context, data["ready"].Value<bool>());
                         break;
                     case "turn":
                         int source = data["sourceCityId"].Value<int>();
                         int target = data["targetCityId"].Value<int>();
                         int amount = data["amount"].Value<int>();
 
-                        _actionService.PlayerTurn(context, source, target, amount);
+                        await _actionService.PlayerTurn(context, source, target, amount);
                         break;
                     case "jsError":
                         Logger.Log(ELogLevel.JS, context.CurrentPlayer.Id, data["message"].Value<string>(), $"{data["url"]} - line: {data["line"].Value<int>()}");
@@ -145,12 +147,12 @@ namespace Fort.Module.Comm
             catch (FortException ex)
             {
                 Logger.Log(ex.LogLevel, playerId, ex.Message, ex.StackTrace);
-                SendOne(context, playerId, "notification", new { type = ex.LogLevel.ToString().ToLower(), message = ex.Message }, Lifetime.Notification);
+                await SendOne(context, playerId, "notification", new { type = ex.LogLevel.ToString().ToLower(), message = ex.Message }, Lifetime.Notification);
             }
             catch (Exception ex)
             {
                 Logger.Log(ELogLevel.UnknownException, playerId, ex.Message, ex.StackTrace);
-                SendOne(context, playerId, "notification", new { type = "unknownexception", message = "Programátor to rozbil" }, Lifetime.Notification);
+                await SendOne(context, playerId, "notification", new { type = "unknownexception", message = "Programátor to rozbil" }, Lifetime.Notification);
             }
         }
     }

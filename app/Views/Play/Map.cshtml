@@ -5,6 +5,7 @@
     ContextService context = Model;
     RoundService roundService = Program.GetService<RoundService>();
     ArmyService armyService = context.GetArmyService();
+    PlayerService playerService = Program.GetService<PlayerService>();
     ViewData["Title"] = "Mapa";
     ViewData["page"] = "map";
     ViewData["type"] = context.CurrentPlayer.GetType().Name;
@@ -23,7 +24,7 @@
     {
         <i class="fa fa-check float-left" id="ready" title="Připraven na další kolo"></i>
     }
-    <span id="roud" class="float-left"></span>
+    <span id="round" class="float-left"></span>
     <span id="connection" class="float-right"><i class="fa fa-chain-broken" title="Spojení se servererm přerušeno"></i></span>
     <span id="time" class="float-right">0:00:00</span>
 </div>
@@ -62,9 +63,13 @@
 <script>
         document.addEventListener('DOMContentLoaded', function () {
             Builder.INIT(@Html.Raw(armyService.GetInit().ToString()));
+            @if (await playerService.IsPlayerReady(context.CurrentPlayer.Id, roundService.CurrentRound.Id))
+            {
+                @:Utils.playerReady.setReady(true);
+            }
             @if (roundService.CurrentRound.EndsAt != null)
             {
-                @:Utils.countDown.start(Date.parse(@roundService.CurrentRound.EndsAt?.ToString()));
+                @:Utils.countDown.start(Date.parse('@roundService.CurrentRound.EndsAt?.ToString()'));
             }
         }, false);
 </script>

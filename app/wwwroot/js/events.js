@@ -62,20 +62,26 @@ document.getElementById('body').onclick = function (event) {
     //// buttons
     // play
     else if (target.id == 'play') {
+        Utils.buttons.setSpinner(target);
         Comm.send("play");
     }
     // pause
     else if (target.id == 'pause') {
+        Utils.buttons.setSpinner(target);
         Comm.send("pause");
     }
     // end timer
     else if (target.id == 'end') {
+        Utils.buttons.setSpinner(target);
         Comm.send("end");
     }
     // restart game
     else if (target.id == 'restart') {
         if (confirm("Opravdu chcete restartovat celou hru?"))
+        {
+            Utils.buttons.setSpinner(target);
             Comm.send("restart");
+        }
     }
     // player is ready
     else if (target.id == 'ready') {

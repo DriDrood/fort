@@ -62,15 +62,18 @@ var Comm = {
             case "Resume":
                 Utils.countDown.start(Date.parse(data['endsAt']));
                 Utils.roundStatus.running(data['roundNumber'])
+                Utils.buttons.removeSpinner(document.getElementById('play'));
                 break;
             case "Pause":
                 Utils.countDown.stop();
                 Utils.roundStatus.paused(data['roundNumber'])
+                Utils.buttons.removeSpinner(document.getElementById('pause'));
                 break;
             case "EndRound":
                 Utils.countDown.stop();
                 Utils.roundStatus.ended(data['roundNumber'])
                 Utils.countDown.start(Date.parse(data['endsAt']));
+                Utils.buttons.removeSpinner(document.getElementById('end'));
                 break;
             case "InitRound":
                 Utils.countDown.stop();
@@ -83,10 +86,14 @@ var Comm = {
 
                 Builder.clean();
                 Builder.INIT(data['map']);
+                Utils.buttons.removeSpinner(document.getElementById('restart'));
                 break;
 
             case 'playerReady_ok':
                 Utils.playerReady.setReady(data['ready']);
+                break;
+            case 'end_ok':
+                Utils.buttons.removeSpinner(document.getElementById('end'));
                 break;
 
             // turn response

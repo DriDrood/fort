@@ -40,15 +40,18 @@ namespace Fort.Module
             else
                 CurrentRound = context.Database.Rounds.OrderByDescending(r => r.Id).First();
         }
-        public void StartGame()
+        public async Task StartGame()
         {
+            await StartRound();
+
             _gameTask = Task.Run(async () =>
             {
                 try
                 {
                     while (true)
                     {
-                        await StartRound();
+                        // round running
+                        await _timer.NewStart(CurrentRound.EndsAt.Value - DateTime.UtcNow);
 
                         await EndRound();
 
@@ -62,6 +65,8 @@ namespace Fort.Module
 
                             InitRound(context);
                         }
+
+                        await StartRound();
                     }
                     EndGame();
                 }
@@ -104,13 +109,11 @@ namespace Fort.Module
         {
             _timer.Pause();
             State = Status.Paused;
-            // TODO: Send to users
         }
         public void Resume()
         {
             _timer.Resume();
             State = Status.Running;
-            // TODO: Send to users
         }
         public void FinishTimer()
         {
@@ -151,7 +154,6 @@ namespace Fort.Module
 
             // set round duration
             State = Status.Running;
-            await _timer.NewStart(CurrentRound.EndsAt.Value - DateTime.UtcNow);
         }
         private async Task EndRound()
         {
@@ -168,7 +170,6 @@ namespace Fort.Module
             State = Status.Ended;
             // TODO
             // _commService.SendToAll("EndRound", new { duration = (int)_timer.Remains.Value.TotalSeconds, roundNumber = CurrentRound.RoundNumber });
-
 
             await _timer.NewStart(_config.BreateOutBreakTime); // breathe out
         }

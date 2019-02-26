@@ -1,7 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using Fort.Database.Entities;
-using Fort.Module.Comm;
 using Fort.Utils;
 
 namespace Fort.Module
@@ -14,7 +13,6 @@ namespace Fort.Module
         }
 
         private RedisService _redis;
-        private CommService _commService => Program.GetService<CommService>();
 
         public void Login()
         {
@@ -27,9 +25,6 @@ namespace Fort.Module
                 await _redis.AddToSetAsync($"fort:playerReady:{roundId}", playerId);
             else
                 await _redis.RemoveFromSetAsync($"fort:playerReady:{roundId}", playerId);
-
-            await _commService.SendOne(context, playerId, "playerReady_ok", new { ready = setReady}, Lifetime.Notification);
-            await _commService.SendToAdmins(context, "playerReady", new { ready = setReady, playerId }, Lifetime.DataModification);
         }
         public Task<bool> IsPlayerReady(string playerId, int roundId)
         {
