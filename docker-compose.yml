@@ -10,7 +10,7 @@ services:
     image: "mariadb:10.3"
     volumes:
       - dbdata:/var/lib/mysql
-    restart: always
+    restart: on-failure
     environment:
       MYSQL_ROOT_PASSWORD: "makamakatoto68"
       MYSQL_USER: "fort"
@@ -22,7 +22,7 @@ services:
     command: redis-server --requirepass Seheque32naTo --appendonly yes
     volumes:
       - "redisdata:/data"
-    restart: always
+    restart: on-failure
     environment:
       - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
     ports:
