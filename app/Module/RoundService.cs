@@ -384,7 +384,7 @@ namespace Fort.Module
             {
                 var result = DateTime.UtcNow.Date + RoundEnd;
                 if (result < DateTime.UtcNow)
-                    result.AddDays(1);
+                    result = result.AddDays(1);
 
                 return result;
             }

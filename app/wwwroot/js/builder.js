@@ -1,8 +1,8 @@
 var Builder = {
     'root': {
         'paths': document.getElementById('paths'),
-        'turns': document.getElementById('turns'),
-        'cities': document.getElementById('cities')
+        'cities': document.getElementById('cities'),
+        'turns': document.getElementById('turns')
     },
     'INIT': function (data) {
         // path
@@ -91,22 +91,23 @@ var Builder = {
     'turn': {
         'createUpdate': function (sourceCityId, targetCityId, amount, color) {
             // remove old
-            Builder.turn.remove(sourceCityId, targetCityId);
             if (amount <= 0)
                 return;
 
             if (color == null || color === undefined)
-                color = document.getElementById('body').getAttribute('data-player-color');
+                color = document.getElementById('map').getAttribute('data-player-color');
+                
+            // update army
+            var sourceCity = document.getElementById('city-' + sourceCityId);
+            sourceCity.setAttribute('data-army', sourceCity.getAttribute('data-army') - amount);
 
+            // update view
             var pathId = Builder.turn.toPathId(sourceCityId, targetCityId);
             var path = Builder.path.get(pathId)[sourceCityId < targetCityId ? 0 : 1]; // get path closer to sourceCity
             var middleX = Utils.middle(path.getAttribute('x1'), path.getAttribute('x2'));
             var middleY = Utils.middle(path.getAttribute('y1'), path.getAttribute('y2'));
 
             Builder.path.highlightSet(pathId);
-            console.log(middleX);
-            console.log(middleY);
-            console.log(color);
             Builder._base_.createCircle('turns', middleX, middleY, 12, color, null, 'turn-' + sourceCityId + '-' + targetCityId);
             Builder._base_.createCircleText('turns', middleX, middleY, 12, color, amount, 'turn-text-' + sourceCityId + '-' + targetCityId);
         },
@@ -115,6 +116,11 @@ var Builder = {
             var turn = Builder.turn.get(sourceCityId, targetCityId);
             if (!turn)
                 return;
+
+            // update city army
+            var army = turn[1].innerHTML;
+            var sourceCity = document.getElementById('city-' + sourceCityId);
+            sourceCity.setAttribute('data-army', sourceCity.getAttribute('data-army') - (-army));
 
             // remove turn circle
             turn.forEach(function (item) {

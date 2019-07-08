@@ -104,7 +104,7 @@ document.getElementById('body').onclick = function (event) {
             amount: armySize
         });
 
-        Utils.modal.hide();
+        Utils.modal.showSpinner();
     }
     // close modal
     else if (target.id == 'modal_shadow' || target.value == 'cancel') {

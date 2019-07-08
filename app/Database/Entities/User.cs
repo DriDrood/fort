@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Fort.Utils;
 
 namespace Fort.Database.Entities
 {
@@ -25,5 +26,12 @@ namespace Fort.Database.Entities
 
         public override bool IsUser() => true;
         public override string GetTeamId() => TeamId;
+        public override string GetColor()
+        {
+            var teamColor = Colors.HexColorToInt(Team.Color);
+            var myColor = Colors.Lighter(teamColor, 1.8);
+            return $"rgb({myColor[0]}, {myColor[1]}, {myColor[2]})";
+        }
+
     }
 }

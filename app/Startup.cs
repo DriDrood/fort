@@ -98,6 +98,7 @@ namespace Fort
                     app.ApplicationServices.GetService<RedisService>().Init(configuration.GetSection("Redis"));
                     app.ApplicationServices.GetService<CommService>().Init(context, app.ApplicationServices.GetService<RedisService>());
                     app.ApplicationServices.GetService<RoundService>().Init(context, configuration.GetSection("Round"));
+                    app.ApplicationServices.GetService<ActionService>().Init();
                 }
             }
         }

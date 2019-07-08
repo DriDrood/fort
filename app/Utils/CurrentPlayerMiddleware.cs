@@ -6,6 +6,7 @@ using Fort.Database.Entities;
 using Fort.Module;
 using Fort.Utils.Logger;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 
 namespace Fort.Utils
 {
@@ -25,7 +26,7 @@ namespace Fort.Utils
 
             if (paths.Count > 0 && paths[0].Length <= 5)
             {
-                contextService.CurrentPlayer = (Player)contextService.Database.Users.Find(paths[0])
+                contextService.CurrentPlayer = (Player)contextService.Database.Users.Include(u => u.Team).SingleOrDefault(u => u.Id == paths[0])
                     ?? contextService.Database.Teams.Find(paths[0]);
 
                 if (contextService.CurrentPlayer == null)

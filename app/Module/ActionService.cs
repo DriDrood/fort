@@ -16,8 +16,12 @@ namespace Fort.Module
             _roundService = roundService;
             _playerService = playerService;
             _commService = commService;
+        }
+        public void Init()
+        {
             _commService.OnMessageEvent += HandleMessage;
         }
+
         private RoundService _roundService;
         private PlayerService _playerService;
         private CommService _commService;
@@ -79,7 +83,7 @@ namespace Fort.Module
                 throw new FortException(ELogLevel.Warning, "Kolo neběží");
 
             await context.ArmyService.PlayerTurn((User)context.CurrentPlayer, sourceCityId, targetCityId, amount, _roundService.CurrentRound?.Id ?? -1);
-            await _commService.SendOne(context, context.CurrentPlayer.Id, "turn", new { sourceCityId, targetCityId, amount }, Lifetime.DataModification);
+            await _commService.SendOne(context, context.CurrentPlayer.Id, "turnOk", new { sourceCityId, targetCityId, amount }, Lifetime.DataModification);
             await _commService.SendToAdmins(context, "turn", new { sourceCityId, targetCityId, amount }, Lifetime.DataModification);
         }
         public async Task PlayerReady(ContextService context, bool setReady)

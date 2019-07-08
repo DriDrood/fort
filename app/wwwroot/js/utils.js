@@ -17,7 +17,7 @@ var Utils = {
         'task': null,
         'start': function (endAt) {
             Utils.countDown.task = setInterval(function () {
-                var now = Date.now()
+                var now = Date.now() + ((new Date()).getTimezoneOffset() * 60 * 1000);
                 if (endAt <= now) {
                     Utils.countDown.stop();
                     Utils.countDown.setTime(0);
@@ -132,5 +132,5 @@ window.onerror = function (errorMsg, url, lineNumber) {
     });
 }
 document.addEventListener('DOMContentLoaded', function () {
-    Utils.notification('success', 'Jste přihlášeni jako ' + document.getElementById('body').getAttribute('data-player-name'));
+    Utils.notification('success', 'Jste přihlášeni jako ' + document.getElementById('map').getAttribute('data-player-name'));
 });

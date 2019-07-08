@@ -34,7 +34,7 @@ namespace Fort.Module.Army
             {
                 turn = new Turn
                 {
-                    User = user,
+                    UserId = user.Id,
                     SourceCityId = sourceCityId,
                     TargetCityId = targetCityId,
                     CreatedAt = DateTime.UtcNow,
@@ -62,15 +62,20 @@ namespace Fort.Module.Army
                 .Include(p => p.Source).ThenInclude(s => s.Owner).ThenInclude(o => o.Team)
                 .Include(p => p.Target).ThenInclude(t => t.Owner).ThenInclude(o => o.Team)
                 .ToList()
-                .Select(p => new
+                .Select(p =>
                 {
-                    id = p.SourceId > p.TargetId ? $"{p.TargetId}-{p.SourceId}" : $"{p.SourceId}-{p.TargetId}",
-                    x1 = p.Source.X,
-                    y1 = p.Source.Y,
-                    color1 = GetCityColor(p.Source),
-                    x2 = p.Target.X,
-                    y2 = p.Target.Y,
-                    color2 = GetCityColor(p.Target)
+                    var city1 = p.SourceId < p.TargetId ? p.Source : p.Target;
+                    var city2 = p.SourceId < p.TargetId ? p.Target : p.Source;
+                    return new
+                    {
+                        id = $"{city1.Id}-{city2.Id}",
+                        x1 = city1.X,
+                        y1 = city1.Y,
+                        color1 = GetCityColor(city1),
+                        x2 = city2.X,
+                        y2 = city2.Y,
+                        color2 = GetCityColor(city2)
+                    };
                 });
 
             return JToken.FromObject(paths);

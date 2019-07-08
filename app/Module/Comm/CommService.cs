@@ -36,7 +36,6 @@ namespace Fort.Module.Comm
             if (_activeChannels.ContainsKey(player.Id))
             {
                 _activeChannels[player.Id].Disconnect("Připojen z jiného zařízení");
-                _activeChannels.Remove(player.Id);
             }
 
             channel.Comm = this;
@@ -51,9 +50,13 @@ namespace Fort.Module.Comm
         }
         public void OnDisconnect(string playerId, string reason)
         {
-            _activeContexts[playerId].Dispose();
-            _activeContexts.Remove(playerId);
-            _activeChannels.Remove(playerId);
+            if (_activeContexts.ContainsKey(playerId))
+            {
+                _activeContexts[playerId].Dispose();
+                _activeContexts.Remove(playerId);
+                _activeChannels.Remove(playerId);
+            }
+
             Logger.Log(ELogLevel.Warning, playerId, reason);
         }
 

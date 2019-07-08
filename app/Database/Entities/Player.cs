@@ -13,5 +13,6 @@ namespace Fort.Database.Entities
 
         public abstract bool IsUser();
         public abstract string GetTeamId();
+        public abstract string GetColor();
     }
 }

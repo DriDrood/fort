@@ -18,5 +18,6 @@ namespace Fort.Database.Entities
 
         public override bool IsUser() => false;
         public override string GetTeamId() => Id;
+        public override string GetColor() => Color;
     }
 }

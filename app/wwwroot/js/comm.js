@@ -103,18 +103,9 @@ var Comm = {
                 var targetCity = Events.selected.target;
                 var sourceId = sourceCity.getAttribute('data-city-id');
                 var targetId = targetCity.getAttribute('data-city-id');
-
-                // update army send
                 var newArmy = document.getElementById('armySize').value;
-                var originalArmy = Events.selected.source.getAttribute('data-army-sent-' + targetId);
-                if (originalArmy === undefined || originalArmy == null)
-                    originalArmy = 0;
 
-                sourceCity.setAttribute('data-army-sent-' + targetId, newArmy);
-                sourceCity.setAttribute('data-army', sourceCity.getAttribute('data-army') - (-originalArmy) - newArmy);
-
-                // show turn
-                Builder.turn.createUpdate(data['pathId'], data['reversDirection'], newArmy);
+                Builder.turn.createUpdate(sourceId, targetId, newArmy, null);
 
                 // finalize
                 Utils.modal.hide();

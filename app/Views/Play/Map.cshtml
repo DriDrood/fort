@@ -9,7 +9,6 @@
     ViewData["Title"] = "Mapa";
     ViewData["page"] = "map";
     ViewData["type"] = context.CurrentPlayer.GetType().Name;
-    ViewData["playerName"] = context.CurrentPlayer.Name;
 }
 
 <div id="actions">
@@ -30,7 +29,7 @@
 </div>
 
 <div id="map_holder">
-    <svg id="map" xmlns="http://www.w3.org/2000/svg">
+    <svg id="map" xmlns="http://www.w3.org/2000/svg" data-player-name="@context.CurrentPlayer.Name" data-player-color="@context.CurrentPlayer.GetColor()">
         <defs>
             <filter id="shadow"  filterUnits="userSpaceOnUse">
                 <feDropShadow dx="0" dy="0" stdDeviation="5" flood-color="rgb(0, 173, 204)" flood-opacity="1" />
@@ -70,7 +69,7 @@
             }
             @if (roundService.CurrentRound.EndsAt != null)
             {
-                @:Utils.countDown.start(Date.parse('@roundService.CurrentRound.EndsAt?.ToString()'));
+                @:Utils.countDown.start(Date.parse('@roundService.CurrentRound.EndsAt.ToString()'));
             }
         }, false);
 </script>
