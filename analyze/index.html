@@ -27,6 +27,8 @@
 
         body {
             position: relative;
+
+            color: #241f16;
         }
 
         nav {
@@ -50,7 +52,7 @@
             grid-area: avatar;
             height: 140%;
             margin: -20% 0;
-            border: 5px solid #000;
+            border: 5px solid #241f16;
             border-radius: 50%;
         }
 
@@ -68,6 +70,7 @@
 
         nav .time {
             grid-area: time;
+            font-weight: bold;
         }
 
         .content {
@@ -112,36 +115,22 @@
             min-height: 10rem;
 
             border-radius: 2rem;
-            background: #507080;
+            background: linear-gradient(160deg, #6f99acff 0%, #6f99ac60 100%);
             color: #fff;
 
+            grid-template-areas: "label count""slider slider""ok ok";
             grid-row-gap: 10px;
             align-content: center;
             justify-items: center;
         }
+
         .modalContainer .armySelect h2 {
+            grid-area: label;
             font-size: 1.5rem;
         }
 
-        .modalContainer .armySelect .selectRange {
-            position: relative;
-            width: 80%;
-            height: 4px;
-            margin: 20px 0;
-            background: #bfc7cb;
-        }
-        .modalContainer .armySelect .selectRange .selectSlider {
-            position: absolute;
-            top: -8px;
-            left: 22%;
-            width: 10px;
-            height: 20px;
-
-            border-radius: 1rem;
-            background: #bfc7cb;
-        }
-
         .modalContainer .armySelect .count {
+            grid-area: count;
             display: grid;
 
             grid-template-areas: "amount incr""amount decr";
@@ -158,8 +147,61 @@
         .modalContainer .armySelect .count .incr {
             grid-area: incr;
         }
+
         .modalContainer .armySelect .count .decr {
             grid-area: decr;
+        }
+
+        .modalContainer .armySelect .selectRange {
+            grid-area: slider;
+            position: relative;
+            width: 80%;
+            height: 4px;
+            margin: 20px 0;
+            background: linear-gradient(90deg, #ffffff 0%, #959da1 100%);
+        }
+
+        .modalContainer .armySelect .selectRange .selectSlider {
+            position: absolute;
+            top: -8px;
+            left: 22%;
+            width: 10px;
+            height: 20px;
+
+            border-radius: 1rem;
+            background: #bfc7cb;
+        }
+
+        .modalContainer .armySelect .ok {
+            grid-area: ok;
+        }
+
+        .path {
+            stroke: #ccc;
+            stroke-width: 5px;
+        }
+
+        .city .army {
+            fill: #fff;
+        }
+
+        .city .fort {
+            fill: #757575;
+            stroke: url(#city-default);
+            stroke-width: 5px;
+        }
+
+        .city .fort.selected {
+            stroke: url(#city-selected);
+        }
+
+        .city .fort.available {
+            stroke: url(#city-available);
+        }
+
+        #darkness {
+            fill: #000;
+            fill-opacity: 0.8;
         }
     </style>
 </head>
@@ -189,37 +231,54 @@
                         <stop style="stop-color:#98b6c4" offset="1" />
                     </linearGradient>
                 </defs>
-                <line id="path-1-2" x1="400" y1="600" x2="500" y2="500" style="stroke:#ccc;stroke-width:5px;" />
-                <line id="path-2-3" x1="300" y1="400" x2="400" y2="370" style="stroke:#ccc;stroke-width:5px;" />
-                <line id="path-3-4" x1="300" y1="400" x2="500" y2="500" style="stroke:#ccc;stroke-width:5px;" />
-                <circle id="city-1" cx="400" cy="600" r="20"
-                    style="fill:#757575;stroke:url(#city-default);stroke-width:5px" />
-                <circle id="city-2" cx="500" cy="500" r="20"
-                    style="fill:#757575;stroke:url(#city-available);stroke-width:5px" />
-                <circle id="city-3" cx="300" cy="400" r="20"
-                    style="fill:#757575;stroke:url(#city-selected);stroke-width:5px" />
-                <circle id="city-4" cx="400" cy="370" r="20"
-                    style="fill:#757575;stroke:url(#city-available);stroke-width:5px" />
-                <rect id="darkness" x="0" y="0" width="1920" height="1024" style="fill:#000;fill-opacity: 0.8;" />
+                <line class="path" id="path-1-2" x1="400" y1="600" x2="500" y2="500" />
+                <line class="path" id="path-2-3" x1="300" y1="400" x2="400" y2="370" />
+                <line class="path" id="path-3-4" x1="300" y1="400" x2="500" y2="500" />
+                <g id="city-1" class="city">
+                    <circle class="army" cx="380" cy="580" r="12" />
+                    <text x="380" y="585" text-anchor="middle">11</text>
+                    <circle class="fort" cx="400" cy="600" r="20" />
+                </g>
+
+                <g id="city-2" class="city">
+                    <circle class="army" cx="480" cy="480" r="12" />
+                    <text x="480" y="485" text-anchor="middle">12</text>
+                    <circle class="fort available" cx="500" cy="500" r="20" />
+                </g>
+
+                <g id="city-3" class="city">
+                    <circle class="army" cx="280" cy="380" r="12" />
+                    <text x="280" y="385" text-anchor="middle">13</text>
+                    <circle class="fort selected" cx="300" cy="400" r="20" />
+                </g>
+
+                <g id="city-4" class="city">
+                    <circle class="army" cx="380" cy="350" r="12" />
+                    <text x="380" y="355" text-anchor="middle">23</text>
+                    <circle class="fort available" cx="400" cy="370" r="20" />
+                </g>
+
+                <!-- <rect id="darkness" x="0" y="0" width="1920" height="1024" />
                 <use xlink:href="#path-3-4" />
                 <use xlink:href="#path-2-3" />
                 <use xlink:href="#city-2" />
                 <use xlink:href="#city-3" />
-                <use xlink:href="#city-4" />
+                <use xlink:href="#city-4" /> -->
             </svg>
         </div>
     </div>
     <div class="modalContainer" style="display: none;">
         <div class="armySelect">
             <h2>Armáda</h2>
-            <div class="selectRange">
-                <div class="selectSlider"></div>
-            </div>
             <div class="count">
                 <div class="amount">12</div>
                 <button class="incr"><i class="fa fa-caret-up"></i></button>
                 <button class="decr"><i class="fa fa-caret-down"></i></button>
             </div>
+            <div class="selectRange">
+                <div class="selectSlider"></div>
+            </div>
+            <button class="ok">OK</button>
         </div>
     </div>
 </body>
