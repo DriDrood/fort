@@ -1,6 +1,9 @@
 <template>
-  <div class="modalContainer">
+  <div class="modalContainer" @click="depClose">
     <div class="armySelect">
+      <button class="close" @click="close">
+        <i class="fa fa-times"></i>
+      </button>
       <h2>Armáda</h2>
       <div class="count">
         <div class="amount">12</div>
@@ -22,9 +25,25 @@
 <script>
 export default {
   name: "selectArmy",
+  props: {
+    sourceId: {},
+    targetId: {}
+  },
   methods: {
     accept() {
-      this.$emit('close');
+      this.$store.commit('order', {
+        sourceId: this.sourceId,
+        targetId: this.targetId,
+        amount: 12
+      });
+      this.$emit("close");
+    },
+    close() {
+      this.$emit("close");
+    },
+    depClose(e) {
+      if (!e.target.classList.contains('modalContainer')) return;
+      this.close();
     }
   }
 };
@@ -51,16 +70,21 @@ export default {
     height: 30%
     min-width: 20rem
     min-height: 10rem
+    padding: 2rem
 
     border-radius: 2rem
     background: linear-gradient(160deg, #6f99acff 0%, #6f99ac60 100%)
     color: #fff
 
-    grid-template-areas: "label count""slider slider""ok ok"
+    grid-template-areas: ". close" "label count" "slider slider" "ok ok"
     grid-row-gap: 10px
-    align-content: center
+    align-items: center
     justify-items: center
 
+    .close
+      grid-area: close
+      justify-self: end
+      align-self: start
     h2
       grid-area: label
       font-size: 1.5rem
@@ -82,7 +106,7 @@ export default {
     .selectRange
       grid-area: slider
       position: relative
-      width: 80%
+      width: 100%
       height: 4px
       margin: 20px 0
       background: linear-gradient(90deg, #ffffff 0%, #959da1 100%)

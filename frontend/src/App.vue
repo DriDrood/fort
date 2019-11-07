@@ -3,8 +3,7 @@
     <login v-if="!login" />
     <template v-else>
       <topPanel />
-      <worldMap @send="send"/>
-      <selectArmy v-if="sending" @close="closeModal" />
+      <worldMap />
     </template>
   </div>
 </template>
@@ -13,7 +12,6 @@
 import login from "./components/login";
 import topPanel from "./components/top-panel";
 import worldMap from "./components/map";
-import selectArmy from "./components/select-army";
 import { mapState } from 'vuex';
 
 export default {
@@ -21,23 +19,10 @@ export default {
   components: {
     login,
     topPanel,
-    worldMap,
-    selectArmy
+    worldMap
   },
-  data: () => ({
-    sending: false
-  }),
   computed: {
     ...mapState(['login'])
-  },
-  methods: {
-    send() {
-      this.sending = true;
-    },
-    closeModal() {
-      
-      this.sending = false;
-    }
   }
 };
 </script>

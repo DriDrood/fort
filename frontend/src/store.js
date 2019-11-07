@@ -6,6 +6,7 @@ Vue.use(Vuex)
 export default new Vuex.Store({
   state: {
     login: {
+      id: '5',
       name: 'hello'
     },
     cities: {
@@ -13,24 +14,28 @@ export default new Vuex.Store({
         id: 1,
         x: 500,
         y: 500,
+        owner: '5',
         army: 11
       },
       2: {
         id: 2,
         x: 400,
         y: 600,
+        owner: '5',
         army: 12
       },
       3: {
         id: 3,
         x: 300,
         y: 400,
+        owner: '5',
         army: 13
       },
       4: {
         id: 4,
         x: 400,
         y: 370,
+        owner: '4',
         army: 14
       }
     },
@@ -39,6 +44,9 @@ export default new Vuex.Store({
       2: [ 1 ],
       3: [ 1, 4 ],
       4: [ 3 ]
+    },
+    orders: {
+      '1-2': 10
     }
   },
   getters: {
@@ -53,6 +61,16 @@ export default new Vuex.Store({
         })
       });
       return result;
+    }
+  },
+  mutations: {
+    order(state, payload) { // sourceId, targetId, amount
+      const source = state.cities[payload.sourceId];
+      if (source.owner != state.login.id) return;
+      if (source.army < payload.amount) return;
+
+      Vue.set(state.orders, `${payload.sourceId}-${payload.targetId}`, payload.amount);
+      source.army -= payload.amount;
     }
   }
 });
