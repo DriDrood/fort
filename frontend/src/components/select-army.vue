@@ -34,7 +34,7 @@ export default {
       this.$store.commit('order', {
         sourceId: this.sourceId,
         targetId: this.targetId,
-        amount: 12
+        amount: 8
       });
       this.$emit("close");
     },

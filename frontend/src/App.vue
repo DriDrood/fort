@@ -23,6 +23,9 @@ export default {
   },
   computed: {
     ...mapState(['login'])
+  },
+  mounted() {
+    this.$store.commit('countDown');
   }
 };
 </script>
@@ -41,7 +44,7 @@ export default {
 
   text-decoration: none
   font-family: 'Nunito', sans-serif
-  font-weight: 300
+  font-weight: inherit
   font-size: inherit
   line-height: 1
 input::placeholder
@@ -64,6 +67,7 @@ body
 
   color: #241f16
   background-color: #000
+  font-weight: 300
 #app
   width: 100%
   height: 100%
