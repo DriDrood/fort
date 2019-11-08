@@ -81,7 +81,7 @@ export default new Vuex.Store({
     }
   },
   getters: {
-    currentTurnId: (state) => state.turns.length,
+    currentTurnId: (state) => state.turns.length - 1,
     distinctRoads: (state) => {
       let result = [];
       Object.keys(state.roads).forEach(id => {
