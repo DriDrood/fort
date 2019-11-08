@@ -4,6 +4,7 @@
     <text :x="city.x - size" :y="city.y - size + 5" text-anchor="middle">{{ city.army }}</text>
     <circle
       class="fort"
+      :style="{fill: color}"
       :class="{selected: isSelected, available: isAvailable}"
       :cx="city.x"
       :cy="city.y"
@@ -29,6 +30,9 @@ export default {
     },
     isAvailable() {
       return this.$store.state.roads[this.city.id].includes(this.selected);
+    },
+    color() {
+      return this.$store.state.teams[this.$store.state.players[this.city.owner].teamId].color;
     }
   },
   methods: {
@@ -44,7 +48,7 @@ svg .city
   .army
     fill: #fff
   .fort
-    fill: #757575
+    // fill: #757575
     stroke: url(#city-default)
     stroke-width: 5px
     &.selected

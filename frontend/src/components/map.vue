@@ -84,7 +84,7 @@ export default {
       return this.$store.state.roads[this.selected].concat(this.selected);
     },
     orders() {
-      return this.$store.state.prevTurns[this.$store.state.turn.activeId];
+      return this.$store.state.turns[this.$store.state.turn.activeId];
     }
   },
   methods: {

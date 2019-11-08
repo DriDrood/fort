@@ -51,7 +51,7 @@ export default new Vuex.Store({
       3: [1, 4],
       4: [3]
     },
-    prevTurns: [
+    turns: [
       {
         '4-3': {
           amount: 10,
@@ -74,10 +74,14 @@ export default new Vuex.Store({
         name: 'hello',
         teamId: 1
       }
+    },
+    teams: {
+      1: { color: 'red' },
+      2: { color: 'yellow' }
     }
   },
   getters: {
-    currentTurnId: (state) => state.prevTurns.length,
+    currentTurnId: (state) => state.turns.length,
     distinctRoads: (state) => {
       let result = [];
       Object.keys(state.roads).forEach(id => {
@@ -99,7 +103,7 @@ export default new Vuex.Store({
       // decrease active
       state.turn.activeId -= 1;
       // army move
-      const turn = state.prevTurns[state.turn.activeId];
+      const turn = state.turns[state.turn.activeId];
       let met = meetings(state, turn);
       entranceCities(state, turn, met, true);
       leaveCities(state, turn, true);
@@ -108,7 +112,7 @@ export default new Vuex.Store({
       // invalid command
       if (state.turn.activeId >= state.turn.last) return;
       // army move
-      const turn = state.prevTurns[state.turn.activeId];
+      const turn = state.turns[state.turn.activeId];
       let met = meetings(state, turn);
       leaveCities(state, turn, false);
       entranceCities(state, turn, met, false);
@@ -120,7 +124,7 @@ export default new Vuex.Store({
       if (source.owner != state.login.id) return;
       if (source.army < payload.amount) return;
 
-      Vue.set(state.prevTurns[state.turn.currentTurnId], `${payload.sourceId}-${payload.targetId}`, payload.amount);
+      Vue.set(state.turns[state.turn.currentTurnId], `${payload.sourceId}-${payload.targetId}`, payload.amount);
       source.army -= payload.amount;
     },
     countDown: (state) => {
