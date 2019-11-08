@@ -17,7 +17,7 @@
           </linearGradient>
         </defs>
         <road v-for="(road, index) in distinctRoads" :key="index" :road="road" />
-        <order v-for="(amount, order) in orders" :key="order" :order="order" :amount="amount" />
+        <order v-for="(order, orderId) in orders" :key="orderId" :order="order" :orderId="orderId" />
         <city
           v-for="city in cities"
           :key="`city-${city.id}`"
@@ -71,7 +71,7 @@ export default {
     showModal: false
   }),
   computed: {
-    ...mapState(["cities", "orders"]),
+    ...mapState(["cities"]),
     ...mapGetters(["distinctRoads"]),
     availableRoads() {
       if (!this.selected) return [];
@@ -82,6 +82,9 @@ export default {
     availableCities() {
       if (!this.selected) return [];
       return this.$store.state.roads[this.selected].concat(this.selected);
+    },
+    orders() {
+      return this.$store.state.prevTurns[this.$store.state.turn.activeId];
     }
   },
   methods: {

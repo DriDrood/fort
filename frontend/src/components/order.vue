@@ -1,7 +1,7 @@
 <template>
   <g class="order">
     <circle :cx="coords.x" :cy="coords.y" r="12" />
-    <text :x="coords.x" :y="coords.y + 5" text-anchor="middle">{{ amount }}</text>
+    <text :x="coords.x" :y="coords.y + 5" text-anchor="middle">{{ order.amount }}</text>
   </g>
 </template>
 
@@ -9,12 +9,12 @@
 export default {
   name: "order",
   props: {
-    order: {},
-    amount: {}
+    orderId: {},
+    order: {}
   },
   computed: {
     coords() {
-      const [sourceId, targetId] = this.order.split("-");
+      const [sourceId, targetId] = this.orderId.split("-");
       const source = this.$store.state.cities[sourceId];
       const target = this.$store.state.cities[targetId];
 

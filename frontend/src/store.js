@@ -51,14 +51,17 @@ export default new Vuex.Store({
       3: [1, 4],
       4: [3]
     },
-    orders: {
-      '1-2': 10
-    },
     prevTurns: [
       {
         '4-3': {
           amount: 10,
           playerId: '4'
+        }
+      },
+      {
+        '1-2': {
+          amount: 10,
+          playerId: '5'
         }
       }
     ],
@@ -117,7 +120,7 @@ export default new Vuex.Store({
       if (source.owner != state.login.id) return;
       if (source.army < payload.amount) return;
 
-      Vue.set(state.orders, `${payload.sourceId}-${payload.targetId}`, payload.amount);
+      Vue.set(state.prevTurns[state.turn.currentTurnId], `${payload.sourceId}-${payload.targetId}`, payload.amount);
       source.army -= payload.amount;
     },
     countDown: (state) => {
