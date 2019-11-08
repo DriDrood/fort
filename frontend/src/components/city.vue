@@ -1,6 +1,6 @@
 <template>
   <g :id="`city-${city.id}`" class="city">
-    <circle class="army" :cx="city.x - size" :cy="city.y - size" r="12" />
+    <circle class="cityArmy" :cx="city.x - size" :cy="city.y - size" r="12" />
     <text :x="city.x - size" :y="city.y - size + 5" text-anchor="middle">{{ city.army }}</text>
     <circle
       class="fort"
@@ -45,7 +45,7 @@ export default {
 
 <style lang="sass">
 svg .city
-  .army
+  .cityArmy
     fill: #fff
   .fort
     fill: #757575

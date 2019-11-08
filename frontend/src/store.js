@@ -83,6 +83,11 @@ export default new Vuex.Store({
       1: { color: '#83824b', light: '#c4c498' },
       2: { color: '#52834b', light: '#9dc498' },
       3: { color: '#4b7183', light: '#98b6c4' }
+    },
+    move: {
+      armies: [],
+      armiesPosition: 0,
+      duration: 0.5
     }
   },
   getters: {
@@ -102,7 +107,7 @@ export default new Vuex.Store({
   },
   mutations: {
     toggleDone: (state) => state.done = !state.done,
-    prevTurn: (state) => {
+    prevTurn: async (state) => {
       // invalid command
       if (state.turn.activeId <= 0) return;
       // decrease active
@@ -111,18 +116,34 @@ export default new Vuex.Store({
       const turn = state.turns[state.turn.activeId];
       let met = meetings(state, turn);
       entranceCities(state, turn, met, true);
+      createMove(state, turn, met, true);
+      await sleep(10);
+      state.move.armiesPosition = 1;
+      await sleep(state.move.duration * 1000);
+      state.move.armiesPosition = 2;
+      await sleep(state.move.duration * 1000);
       leaveCities(state, turn, true);
+      Vue.set(state.move, 'armies', []);
+      state.move.armiesPosition = 0;
     },
-    nextTurn: (state) => {
+    nextTurn: async (state) => {
       // invalid command
       if (state.turn.activeId >= state.turn.last) return;
-      // army move
-      const turn = state.turns[state.turn.activeId];
-      let met = meetings(state, turn);
-      leaveCities(state, turn, false);
-      entranceCities(state, turn, met, false);
       // increase active
       state.turn.activeId += 1;
+      // army move
+      const turn = state.turns[state.turn.activeId - 1];
+      let met = meetings(state, turn);
+      leaveCities(state, turn, false);
+      createMove(state, turn, met, false);
+      await sleep(10);
+      state.move.armiesPosition = 1;
+      await sleep(state.move.duration * 1000);
+      state.move.armiesPosition = 2;
+      await sleep(state.move.duration * 1000);
+      entranceCities(state, turn, met, false);
+      Vue.set(state.move, 'armies', []);
+      state.move.armiesPosition = 0;
     },
     order(state, payload) { // sourceId, targetId, amount, sourceCityRemains
       const source = state.cities[payload.sourceId];
@@ -224,4 +245,27 @@ function entranceCities(state, turn, met, reverse) {
       }
     }
   });
+}
+function createMove(state, turn, met, reverse) {
+  // create
+  Object.keys(turn).forEach(orderId => {
+    const order = turn[orderId];
+    const [sourceId, targetId] = orderId.split('-');
+    const start = state.cities[reverse ? targetId : sourceId];
+    const end = state.cities[reverse ? sourceId : targetId];
+    const size1 = reverse ? met[orderId] || order.amount : order.amount;
+    const size2 = reverse ? order.amount : met[orderId] || order.amount;
+
+    state.move.armies.push({
+      startX: start.x,
+      startY: start.y,
+      endX: end.x,
+      endY: end.y,
+      size1: size1,
+      size2: size2
+    });
+  });
+}
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

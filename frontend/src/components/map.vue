@@ -21,6 +21,7 @@
           :selected="selected"
           @select="select(city.id)"
         />
+        <army v-for="(army, index) in move.armies" :key="`army-${index}`" :army="army" />
         <rect
           v-if="selected"
           class="darkness"
@@ -51,6 +52,7 @@ import { mapState, mapGetters } from "vuex";
 import city from "./city";
 import road from "./road";
 import order from "./order";
+import army from "./army";
 import selectArmy from "./select-army";
 
 export default {
@@ -59,6 +61,7 @@ export default {
     city,
     road,
     order,
+    army,
     selectArmy
   },
   data: () => ({
@@ -67,7 +70,7 @@ export default {
     showModal: false
   }),
   computed: {
-    ...mapState(["cities", "teams"]),
+    ...mapState(["cities", "teams", "move"]),
     ...mapGetters(["distinctRoads", "isTurnCurrent"]),
     availableRoads() {
       if (!this.selected) return [];
