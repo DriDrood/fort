@@ -3,17 +3,13 @@
     <div class="map">
       <svg viewBox="0 0 1920 1024" preserveAspectRatio="none">
         <defs>
-          <linearGradient id="city-selected">
-            <stop style="stop-color:#83824b" offset="0" />
-            <stop style="stop-color:#c4c498" offset="1" />
-          </linearGradient>
-          <linearGradient id="city-available">
-            <stop style="stop-color:#52834b" offset="0" />
-            <stop style="stop-color:#9dc498" offset="1" />
-          </linearGradient>
-          <linearGradient id="city-default">
-            <stop style="stop-color:#4b7183" offset="0" />
-            <stop style="stop-color:#98b6c4" offset="1" />
+          <linearGradient
+            v-for="(team, teamId) in teams"
+            :key="`team-${teamId}`"
+            :id="`team-${teamId}`"
+          >
+            <stop :style="{ 'stop-color': team.color }" offset="0" />
+            <stop :style="{ 'stop-color': team.light }" offset="1" />
           </linearGradient>
         </defs>
         <road v-for="(road, index) in distinctRoads" :key="index" :road="road" />
@@ -71,7 +67,7 @@ export default {
     showModal: false
   }),
   computed: {
-    ...mapState(["cities"]),
+    ...mapState(["cities", "teams"]),
     ...mapGetters(["distinctRoads", "isTurnCurrent"]),
     availableRoads() {
       if (!this.selected) return [];

@@ -27,7 +27,7 @@ export default new Vuex.Store({
         id: 2,
         x: 400,
         y: 600,
-        owner: '5',
+        owner: '3',
         army: 12
       },
       3: {
@@ -66,6 +66,10 @@ export default new Vuex.Store({
       }
     ],
     players: {
+      '3': {
+        name: 'uuu',
+        teamId: 3
+      },
       '4': {
         name: 'enemy',
         teamId: 2
@@ -76,8 +80,9 @@ export default new Vuex.Store({
       }
     },
     teams: {
-      1: { color: 'red' },
-      2: { color: 'yellow' }
+      1: { color: '#83824b', light: '#c4c498' },
+      2: { color: '#52834b', light: '#9dc498' },
+      3: { color: '#4b7183', light: '#98b6c4' }
     }
   },
   getters: {
