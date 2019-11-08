@@ -124,13 +124,13 @@ export default new Vuex.Store({
       // increase active
       state.turn.activeId += 1;
     },
-    order(state, payload) { // sourceId, targetId, amount
+    order(state, payload) { // sourceId, targetId, amount, sourceCityRemains
       const source = state.cities[payload.sourceId];
       if (source.owner != state.login.id) return;
-      if (source.army < payload.amount) return;
+      if (payload.max < payload.amount) return;
 
-      Vue.set(state.turns[state.turn.currentTurnId], `${payload.sourceId}-${payload.targetId}`, payload.amount);
-      source.army -= payload.amount;
+      Vue.set(state.turns[state.turn.activeId], `${payload.sourceId}-${payload.targetId}`, { amount: payload.amount, playerId: state.login.id });
+      source.army = payload.max - payload.amount;
     },
     countDown: (state) => {
       setTimeout(() =>

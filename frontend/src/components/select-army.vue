@@ -6,16 +6,16 @@
       </button>
       <h2>Armáda</h2>
       <div class="count">
-        <div class="amount">12</div>
-        <button class="incr">
+        <input class="amount" v-model="value" />
+        <button class="incr" @click="incr">
           <i class="fa fa-caret-up"></i>
         </button>
-        <button class="decr">
+        <button class="decr" @click="decr">
           <i class="fa fa-caret-down"></i>
         </button>
       </div>
-      <div class="selectRange">
-        <div class="selectSlider"></div>
+      <div class="selectRange" @click="set">
+        <div class="selectSlider" :style="{left: `${ratio}%`}"></div>
       </div>
       <button class="ok" @click="accept">OK</button>
     </div>
@@ -29,12 +29,41 @@ export default {
     sourceId: {},
     targetId: {}
   },
+  data: () => ({
+    value: null
+  }),
+  computed: {
+    max() {
+      return this.$store.state.cities[this.sourceId].army + (this.prevOrderArmy || 0);
+    },
+    ratio() {
+      return Math.floor((this.value / this.max) * 100);
+    },
+    prevOrderArmy() {
+      const prevOrder = this.$store.state.turns[this.$store.state.turn.activeId][`${this.sourceId}-${this.targetId}`]
+      return (prevOrder && prevOrder.amount) || 0;
+    }
+  },
   methods: {
+    incr() {
+      if (this.value >= this.max) return;
+
+      this.value -= -1;
+    },
+    decr() {
+      if (this.value <= 0) return;
+
+      this.value -= 1;
+    },
+    set(e) {
+      this.value = Math.round((e.offsetX / e.target.offsetWidth) * this.max);
+    },
     accept() {
       this.$store.commit('order', {
         sourceId: this.sourceId,
         targetId: this.targetId,
-        amount: 8
+        amount: this.value,
+        max: this.max
       });
       this.$emit("close");
     },
@@ -45,6 +74,12 @@ export default {
       if (!e.target.classList.contains('modalContainer')) return;
       this.close();
     }
+  },
+  mounted() {
+    if (this.prevOrderArmy)
+      this.value = this.prevOrderArmy;
+    else
+      this.value = this.max;
   }
 };
 </script>
@@ -113,7 +148,7 @@ export default {
       .selectSlider
         position: absolute
         top: -8px
-        left: 22%
+        // left: 22%
         width: 10px
         height: 20px
 
