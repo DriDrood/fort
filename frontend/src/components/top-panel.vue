@@ -5,7 +5,7 @@
       <i class="fa fa-step-backward"></i>
     </button>
     <div class="turn">{{ turn.activeId + 1 }}</div>
-    <button v-if="turn.activeId < currentTurnId" class="next" title="Vpřed o kolo" @click="nextTurn">
+    <button v-if="!isTurnCurrent" class="next" title="Vpřed o kolo" @click="nextTurn">
       <i class="fa fa-step-forward"></i>
     </button>
     <button class="done" :class="{active: done}" title="Hotovo" @click="toggleDone">
@@ -22,7 +22,7 @@ export default {
   name: "topPanel",
   computed: {
     ...mapState(["done", "turn"]),
-    ...mapGetters(["currentTurnId"])
+    ...mapGetters(["isTurnCurrent"])
   },
   methods: {
     toggleDone() {

@@ -72,7 +72,7 @@ export default {
   }),
   computed: {
     ...mapState(["cities"]),
-    ...mapGetters(["distinctRoads"]),
+    ...mapGetters(["distinctRoads", "isTurnCurrent"]),
     availableRoads() {
       if (!this.selected) return [];
       return this.$store.state.roads[this.selected].map(r =>
@@ -89,6 +89,7 @@ export default {
   },
   methods: {
     select(cityId) {
+      if (!this.isTurnCurrent) return;
       // selected again same city
       if (!cityId || cityId == this.selected) this.selected = null;
       // selected 2nd available city
