@@ -262,7 +262,8 @@ function createMove(state, turn, met, reverse) {
       endX: end.x,
       endY: end.y,
       size1: size1,
-      size2: size2
+      size2: size2,
+      playerId: order.playerId
     });
   });
 }

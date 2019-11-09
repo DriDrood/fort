@@ -1,7 +1,7 @@
 <template>
   <circle
     class="army"
-    :style="{ cx: x, cy: y, r: size, transition: `cx ${move.duration}s linear, cy ${move.duration}s linear` }"
+    :style="{ cx: x, cy: y, r: size, fill: `url(#team-${teamId})` , transition: `cx ${move.duration}s linear, cy ${move.duration}s linear` }"
   />
 </template>
 
@@ -33,6 +33,9 @@ export default {
     },
     size() {
       return this.animation.size[this.move.armiesPosition];
+    },
+    teamId() {
+      return this.$store.state.players[this.army.playerId].teamId;
     }
   }
 };
