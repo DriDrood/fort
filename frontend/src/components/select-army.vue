@@ -43,7 +43,7 @@ export default {
       return Math.floor((this.value / this.max) * 100);
     },
     prevOrderArmy() {
-      const prevOrder = this.currentTurn.orders[`${this.sourceId}-${this.targetId}`]
+      const prevOrder = this.currentTurn.orders[`${this.sourceId}>>${this.targetId}`]
       return (prevOrder && prevOrder.amount) || 0;
     }
   },

@@ -193,7 +193,7 @@ export default new Vuex.Store({
       if (source.playerId != state.login.id) return;
       if (payload.max < payload.amount) return;
 
-      Vue.set(state.turns[state.currentTurn.activeId].orders, `${payload.sourceId}-${payload.targetId}`, { playerId: state.login.id, amount: payload.amount, size: getSize(payload.amount) });
+      Vue.set(state.turns[state.currentTurn.activeId].orders, `${payload.sourceId}>>${payload.targetId}`, { playerId: state.login.id, amount: payload.amount, size: getSize(payload.amount) });
       source.availableArmy = payload.max - payload.amount;
     },
     countDown: (state) => {
@@ -219,7 +219,7 @@ function meetings(state, orders) {
     if (met[orderId]) return;
 
     const [sourceId, targetId] = orderId.split('>>');
-    const reverseOrderId = `${targetId}-${sourceId}`;
+    const reverseOrderId = `${targetId}>>${sourceId}`;
 
     const order = orders[orderId];
     const reverseOrder = orders[reverseOrderId];
@@ -280,14 +280,14 @@ function createMove(state, orders, met, reverse) {
 }
 function meetingSize(biggerArmySize, smallerArmySize)
 {
-  return Math.sqrt(Math.pow(biggerArmySize - 10, 2) - Math.pow(smallerArmySize - 10, 2)) + 10;
+  return Math.floor(Math.sqrt(Math.pow(biggerArmySize - 10, 2) - Math.pow(smallerArmySize - 10, 2))) + 10;
 }
 function getSize(army)
 {
   if (!army)
     return null;
 
-  return Math.sqrt(army) + 10;
+  return Math.floor(Math.sqrt(army)) + 10;
 }
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
