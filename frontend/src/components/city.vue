@@ -1,14 +1,16 @@
 <template>
   <g :id="`city-${city.id}`" class="city">
-    <circle class="cityArmy" :cx="city.x - size" :cy="city.y - size" r="12" />
-    <text :x="city.x - size" :y="city.y - size + 5" text-anchor="middle">{{ city.army }}</text>
+    <template v-if="occupation.army != null">
+      <circle class="cityArmy" :cx="city.x - occupation.size" :cy="city.y - occupation.size" r="12" />
+      <text :x="city.x - occupation.size" :y="city.y - occupation.size + 5" text-anchor="middle">{{ occupation.army }}</text>
+    </template>
     <circle
       class="fort"
       :style="{stroke: `url(#team-${teamId})`}"
       :class="{selected: isSelected, available: isAvailable}"
       :cx="city.x"
       :cy="city.y"
-      :r="size"
+      :r="occupation.size"
       @click="select"
     />
   </g>
@@ -22,17 +24,17 @@ export default {
     selected: { default: null }
   },
   computed: {
-    size() {
-      return this.city.army;
+    occupation() {
+      return this.$store.state.turns[this.$store.state.currentTurn.activeId].cityOccupation[this.city.id];
     },
     isSelected() {
       return this.selected == this.city.id;
     },
     isAvailable() {
-      return this.$store.state.roads[this.city.id].includes(this.selected);
+      return this.$store.state.staticData.roads[this.city.id].includes(this.selected);
     },
     teamId() {
-      return this.$store.state.players[this.city.owner].teamId;
+      return this.$store.state.staticData.players[this.occupation.playerId].teamId;
     }
   },
   methods: {

@@ -9,254 +9,265 @@ export default new Vuex.Store({
       id: '5',
       name: 'hello'
     },
-    done: false,
-    turn: {
-      activeId: 0,
-      endsAt: new Date(2020, 1, 1),
-      remains: '-:--'
-    },
-    cities: {
-      1: {
-        id: 1,
-        x: 500,
-        y: 500,
-        owner: '5',
-        army: 11
-      },
-      2: {
-        id: 2,
-        x: 400,
-        y: 600,
-        owner: '3',
-        army: 12
-      },
-      3: {
-        id: 3,
-        x: 300,
-        y: 400,
-        owner: '5',
-        army: 3
-      },
-      4: {
-        id: 4,
-        x: 400,
-        y: 370,
-        owner: '4',
-        army: 24
-      }
-    },
-    roads: {
-      1: [2, 3],
-      2: [1],
-      3: [1, 4],
-      4: [3]
+    currentTurn: {
+      activeId: 1,
+      endsAt: new Date(2021, 1, 1),
+      remains: '-:--',
+      done: false
     },
     turns: [
       {
-        '4-3': {
-          amount: 10,
-          playerId: '4'
+        cityOccupation: {
+          '1': {
+            playerId: '4',
+            size: 50
+          },
+          '2': {
+            playerId: '4',
+            size: 15
+          },
+          '3': {
+            playerId: '4',
+            size: 12
+          },
+          '4': {
+            playerId: '4',
+            size: 12
+          }
+        },
+        orders: {
+          '4>>3': {
+            playerId: '4',
+            amount: 10,
+            size: 5
+          }
         }
       },
       {
-        '1-2': {
-          amount: 10,
-          playerId: '5'
-        }
+        cityOccupation: {
+          '1': {
+            playerId: '3',
+            size: 15
+          },
+          '2': {
+            playerId: '4',
+            size: 15
+          },
+          '3': {
+            playerId: '5',
+            size: 12,
+            army: 20
+          },
+          '4': {
+            playerId: '4',
+            size: 24
+          }
+        },
+        orders: {}
       }
     ],
-    players: {
-      '3': {
-        name: 'uuu',
-        teamId: 3
+
+    staticData: {
+      cities: {
+        '1': {
+          id: '1',
+          x: 500,
+          y: 500
+        },
+        '2': {
+          id: '2',
+          x: 400,
+          y: 600
+        },
+        '3': {
+          id: '3',
+          x: 300,
+          y: 400
+        },
+        '4': {
+          id: '4',
+          x: 400,
+          y: 370
+        }
       },
-      '4': {
-        name: 'enemy',
-        teamId: 2
+      roads: {
+        '1': ['2', '3'],
+        '2': ['1'],
+        '3': ['1', '4'],
+        '4': ['3']
       },
-      '5': {
-        name: 'hello',
-        teamId: 1
+      players: {
+        '3': {
+          name: 'uuu',
+          teamId: '3'
+        },
+        '4': {
+          name: 'enemy',
+          teamId: '2'
+        },
+        '5': {
+          name: 'hello',
+          teamId: '1'
+        }
+      },
+      teams: {
+        '1': { color: '#83824b', light: '#c4c498' },
+        '2': { color: '#52834b', light: '#9dc498' },
+        '3': { color: '#4b7183', light: '#98b6c4' }
+      },
+      config: {
+        armyRunDuration: 200
       }
     },
-    teams: {
-      1: { color: '#83824b', light: '#c4c498' },
-      2: { color: '#52834b', light: '#9dc498' },
-      3: { color: '#4b7183', light: '#98b6c4' }
-    },
-    move: {
+    moveRun: {
       armies: [],
-      armiesPosition: 0,
-      duration: 0.5
+      armiesPosition: 0
     }
   },
   getters: {
-    isTurnCurrent: (state) => state.turn.activeId == state.turns.length - 1,
+    isTurnCurrent: (state) => state.currentTurn.activeId == state.turns.length - 1,
+    currentTurn: (state) => state.turns[state.currentTurn.activeId],
     distinctRoads: (state) => {
       let result = [];
-      Object.keys(state.roads).forEach(id => {
+      Object.keys(state.staticData.roads).forEach(id => {
         const sourceId = parseInt(id);
-        const targetIds = state.roads[sourceId];
+        const targetIds = state.staticData.roads[sourceId];
         targetIds.forEach(targetId => {
           if (sourceId < targetId)
-            result.push({ source: state.cities[sourceId], target: state.cities[targetId] });
-        })
+            result.push({ source: state.staticData.cities[sourceId], target: state.staticData.cities[targetId] });
+        });
       });
       return result;
     }
   },
   mutations: {
-    toggleDone: (state) => state.done = !state.done,
+    toggleDone: (state) => state.currentTurn.done = !state.currentTurn.done,
     prevTurn: async (state) => {
       // invalid command
-      if (state.turn.activeId <= 0) return;
+      if (state.currentTurn.activeId <= 0) return;
+
       // decrease active
-      state.turn.activeId -= 1;
-      // army move
-      const turn = state.turns[state.turn.activeId];
-      let met = meetings(state, turn);
-      entranceCities(state, turn, met, true);
-      createMove(state, turn, met, true);
+      state.currentTurn.activeId -= 1;
+
+      // init
+      const orders = state.turns[state.currentTurn.activeId].orders;
+      var met = meetings(state, orders);
+      createMove(state, orders, met, true);
+
+      // move
       await sleep(10);
-      state.move.armiesPosition = 1;
-      await sleep(state.move.duration * 1000);
-      state.move.armiesPosition = 2;
-      await sleep(state.move.duration * 1000);
-      leaveCities(state, turn, true);
-      Vue.set(state.move, 'armies', []);
-      state.move.armiesPosition = 0;
+      state.moveRun.armiesPosition = 1;
+      await sleep(state.staticData.config.armyRunDuration);
+      state.moveRun.armiesPosition = 2;
+      await sleep(state.staticData.config.armyRunDuration);
+
+      // clean
+      Vue.set(state.moveRun, 'armies', []);
+      state.moveRun.armiesPosition = 0;
     },
     nextTurn: async (state) => {
       // invalid command
-      if (state.turn.activeId >= state.turn.last) return;
+      if (state.currentTurn.activeId >= state.turns.last) return;
+
       // increase active
-      state.turn.activeId += 1;
-      // army move
-      const turn = state.turns[state.turn.activeId - 1];
-      let met = meetings(state, turn);
-      leaveCities(state, turn, false);
-      createMove(state, turn, met, false);
+      state.currentTurn.activeId += 1;
+
+      // init
+      const orders = state.turns[state.currentTurn.activeId - 1].orders;
+      let met = meetings(state, orders);
+      createMove(state, orders, met, false);
+      
+      // move
       await sleep(10);
-      state.move.armiesPosition = 1;
-      await sleep(state.move.duration * 1000);
-      state.move.armiesPosition = 2;
-      await sleep(state.move.duration * 1000);
-      entranceCities(state, turn, met, false);
-      Vue.set(state.move, 'armies', []);
-      state.move.armiesPosition = 0;
+      state.moveRun.armiesPosition = 1;
+      await sleep(state.staticData.config.armyRunDuration);
+      state.moveRun.armiesPosition = 2;
+      await sleep(state.staticData.config.armyRunDuration);
+
+      // clean
+      Vue.set(state.moveRun, 'armies', []);
+      state.moveRun.armiesPosition = 0;
     },
     order(state, payload) { // sourceId, targetId, amount, sourceCityRemains
-      const source = state.cities[payload.sourceId];
-      if (source.owner != state.login.id) return;
+      const source = state.turns[state.currentTurn.activeId].cityOccupation[payload.sourceId];
+      if (source.playerId != state.login.id) return;
       if (payload.max < payload.amount) return;
 
-      Vue.set(state.turns[state.turn.activeId], `${payload.sourceId}-${payload.targetId}`, { amount: payload.amount, playerId: state.login.id });
-      source.army = payload.max - payload.amount;
+      Vue.set(state.turns[state.currentTurn.activeId].orders, `${payload.sourceId}-${payload.targetId}`, { playerId: state.login.id, amount: payload.amount, size: getSize(payload.amount) });
+      source.availableArmy = payload.max - payload.amount;
     },
     countDown: (state) => {
       setTimeout(() =>
         setInterval(() => {
-          if (state.turn.endsAt) {
-            const remainsDate = new Date(state.turn.endsAt - new Date());
-            state.turn.remains = `${remainsDate.getMinutes()}:${remainsDate.getSeconds().toString().padStart(2, '0')}`;
+          if (state.currentTurn.endsAt) {
+            const remainsDate = new Date(state.currentTurn.endsAt - new Date());
+            state.currentTurn.remains = `${remainsDate.getMinutes()}:${remainsDate.getSeconds().toString().padStart(2, '0')}`;
           }
           else {
             state.turn.remains = '-:--';
           }
-        }, 1000), new Date(state.turn.endsAt - new Date()).getMilliseconds());
+        }, 1000), new Date(state.currentTurn.endsAt - new Date()).getMilliseconds());
     }
   }
 });
 
-function meetings(state, turn) {
+function meetings(state, orders) {
   let met = {};
   // meeting
-  Object.keys(turn).forEach(orderId => {
+  Object.keys(orders).forEach(orderId => {
     // already met
     if (met[orderId]) return;
 
-    const [sourceId, targetId] = orderId.split('-');
+    const [sourceId, targetId] = orderId.split('>>');
     const reverseOrderId = `${targetId}-${sourceId}`;
 
-    const order = turn[orderId];
-    const reverseOrder = turn[reverseOrderId];
+    const order = orders[orderId];
+    const reverseOrder = orders[reverseOrderId];
     // no enemy reverse turn
-    if (!reverseOrder || state.players[order.playerId].teamId == state.players[reverseOrder.playerId].teamId) return;
+    if (!reverseOrder || state.staticData.players[order.playerId].teamId == state.staticData.players[reverseOrder.playerId].teamId) return;
 
     // meeting ;-)
-    met[orderId] = Math.max(order.amount - reverseOrder.amount, 0);
-    met[reverseOrderId] = Math.max(reverseOrderId - order.amount, 0);
+    // first win
+    if (order.size > reverseOrder.size)
+    {
+      met[orderId] = meetingSize(order.size, reverseOrder.size);
+      met[reverseOrderId] = 0;
+    }
+    // second win
+    else if (order.size < reverseOrder.size)
+    {
+      met[orderId] = 0; 
+      met[reverseOrderId] = meetingSize(reverseOrder.size, order.size);
+    }
+    // same size
+    else
+    {
+      met[orderId] = 5; 
+      met[reverseOrderId] = 5;
+    }
   });
 
   return met;
 }
-function leaveCities(state, turn, reverse) {
-  Object.keys(turn).forEach(orderId => {
-    const { amount } = turn[orderId];
-    const source = state.cities[orderId.split('-')[0]];
-
-    if (!reverse)
-      source.army -= amount;
-    else
-      source.army += amount;
-  });
-}
-function entranceCities(state, turn, met, reverse) {
-  let keys = Object.keys(turn);
-  if (reverse) keys = keys.reverse();
-  keys.forEach(orderId => {
-    const target = state.cities[orderId.split('-')[1]];
-    const order = turn[orderId];
-
-    let amount = order.amount;
-    if (met[orderId]) amount = met[orderId];
-    if (amount == 0) return;
-
-    if (!reverse) {
-      // support
-      if (order.playerId == target.owner || state.players[order.playerId].teamId == state.players[target.owner].teamId) {
-        target.army += amount;
-      }
-      // attack holded
-      else if (target.amount > amount) {
-        target.army -= amount;
-      }
-      // conquered
-      else {
-        target.army = amount - target.army;
-
-        if (!order.originOwnerId) order.originOwnerId = target.owner;
-        target.owner = order.playerId;
-      }
-    }
-    else {
-      // conquered
-      if (order.originOwnerId) {
-        target.army = amount - target.army;
-        target.owner = order.originOwnerId;
-      }
-      // support
-      else if (order.playerId == target.owner || state.players[order.playerId].teamId == state.players[target.owner].teamId) {
-        target.army -= amount;
-      }
-      // attack holded
-      else {
-        target.army += amount;
-      }
-    }
-  });
-}
-function createMove(state, turn, met, reverse) {
+function createMove(state, orders, met, reverse) {
   // create
-  Object.keys(turn).forEach(orderId => {
-    const order = turn[orderId];
-    const [sourceId, targetId] = orderId.split('-');
-    const start = state.cities[reverse ? targetId : sourceId];
-    const end = state.cities[reverse ? sourceId : targetId];
-    const size1 = reverse ? met[orderId] || order.amount : order.amount;
-    const size2 = reverse ? order.amount : met[orderId] || order.amount;
+  Object.keys(orders).forEach(orderId => {
+    // init
+    const order = orders[orderId];
+    const [sourceId, targetId] = orderId.split('>>');
+    // get positions
+    const start = state.staticData.cities[reverse ? targetId : sourceId];
+    const end = state.staticData.cities[reverse ? sourceId : targetId];
+    // get sizes
+    const size1 = reverse
+      ? met[orderId] || order.size
+      : order.size;
+    const size2 = reverse
+      ? order.size
+      : met[orderId] || order.size;
 
-    state.move.armies.push({
+    // return
+    state.moveRun.armies.push({
       startX: start.x,
       startY: start.y,
       endX: end.x,
@@ -266,6 +277,17 @@ function createMove(state, turn, met, reverse) {
       playerId: order.playerId
     });
   });
+}
+function meetingSize(biggerArmySize, smallerArmySize)
+{
+  return Math.sqrt(Math.pow(biggerArmySize - 10, 2) - Math.pow(smallerArmySize - 10, 2)) + 10;
+}
+function getSize(army)
+{
+  if (!army)
+    return null;
+
+  return Math.sqrt(army) + 10;
 }
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));

@@ -14,9 +14,9 @@ export default {
   },
   computed: {
     coords() {
-      const [sourceId, targetId] = this.orderId.split("-");
-      const source = this.$store.state.cities[sourceId];
-      const target = this.$store.state.cities[targetId];
+      const [sourceId, targetId] = this.orderId.split(">>");
+      const source = this.$store.state.staticData.cities[sourceId];
+      const target = this.$store.state.staticData.cities[targetId];
 
       const x = source.x + (target.x - source.x) / 4;
       const y = source.y + (target.y - source.y) / 4;

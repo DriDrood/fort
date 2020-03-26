@@ -4,7 +4,7 @@
       <svg viewBox="0 0 1920 1024" preserveAspectRatio="none">
         <defs>
           <linearGradient
-            v-for="(team, teamId) in teams"
+            v-for="(team, teamId) in staticData.teams"
             :key="`team-${teamId}`"
             :id="`team-${teamId}`"
           >
@@ -15,13 +15,13 @@
         <road v-for="(road, index) in distinctRoads" :key="index" :road="road" />
         <order v-for="(order, orderId) in orders" :key="orderId" :order="order" :orderId="orderId" />
         <city
-          v-for="city in cities"
+          v-for="city in staticData.cities"
           :key="`city-${city.id}`"
           :city="city"
           :selected="selected"
           @select="select(city.id)"
         />
-        <army v-for="(army, index) in move.armies" :key="`army-${index}`" :army="army" />
+        <army v-for="(army, index) in moveRun.armies" :key="`army-${index}`" :army="army" />
         <rect
           v-if="selected"
           class="darkness"
@@ -70,37 +70,41 @@ export default {
     showModal: false
   }),
   computed: {
-    ...mapState(["cities", "teams", "move"]),
-    ...mapGetters(["distinctRoads", "isTurnCurrent"]),
+    ...mapState(["staticData", "moveRun"]),
+    ...mapGetters(["distinctRoads", "isTurnCurrent", "currentTurn"]),
     availableRoads() {
       if (!this.selected) return [];
-      return this.$store.state.roads[this.selected].map(r =>
+      return this.staticData.roads[this.selected].map(r =>
         r < this.selected ? `${r}-${this.selected}` : `${this.selected}-${r}`
       );
     },
     availableCities() {
       if (!this.selected) return [];
-      return this.$store.state.roads[this.selected].concat(this.selected);
+      return this.staticData.roads[this.selected].concat(this.selected);
     },
     orders() {
-      return this.$store.state.turns[this.$store.state.turn.activeId];
+      return this.currentTurn.orders;
     }
   },
   methods: {
     select(cityId) {
+      // I'm in history
       if (!this.isTurnCurrent) return;
+
       // selected again same city
       if (!cityId || cityId == this.selected) this.selected = null;
+
       // selected 2nd available city
       else if (
         this.selected &&
-        this.$store.state.roads[this.selected].includes(cityId)
+        this.staticData.roads[this.selected].includes(cityId)
       ) {
         this.targetId = cityId;
         this.showModal = true;
       }
+
       // select 1st
-      else if (this.cities[cityId].owner == this.$store.state.login.id)
+      else if (this.currentTurn.cityOccupation[cityId].playerId == this.$store.state.login.id)
         this.selected = cityId;
     },
     closeModal() {
