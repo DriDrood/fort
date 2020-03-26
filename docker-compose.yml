@@ -17,5 +17,6 @@ services:
       MYSQL_PASSWORD: "heblebletunato68"
     ports:
       - "3306:3306"
+    command: ['--character-set-server=utf8mb4', '--collation-server=utf8mb4_czech_ci']
 volumes:
     dbdata:
