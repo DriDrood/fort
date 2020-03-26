@@ -149,7 +149,7 @@ export default new Vuex.Store({
     toggleDone: (state) => state.currentTurn.done = !state.currentTurn.done,
     prevTurn: async (state) => {
       // invalid command
-      if (state.currentTurn.activeId <= 0) return;
+      if (state.currentTurn.activeId <= 0 || state.moveRun.armiesPosition != 0) return;
 
       // init
       const orders = state.turns[state.currentTurn.activeId - 1].orders;
@@ -157,7 +157,6 @@ export default new Vuex.Store({
       createMove(state, orders, met, true);
 
       // move
-      await sleep(10);
       state.moveRun.armiesPosition = 1;
       await sleep(state.staticData.config.armyRunDuration * 1000);
       state.moveRun.armiesPosition = 2;
@@ -172,7 +171,7 @@ export default new Vuex.Store({
     },
     nextTurn: async (state) => {
       // invalid command
-      if (state.currentTurn.activeId >= state.turns.last) return;
+      if (state.currentTurn.activeId >= state.turns.last || state.moveRun.armiesPosition != 0) return;
 
       // init
       const orders = state.turns[state.currentTurn.activeId].orders;
@@ -180,7 +179,6 @@ export default new Vuex.Store({
       createMove(state, orders, met, false);
       
       // move
-      await sleep(10);
       state.moveRun.armiesPosition = 1;
       await sleep(state.staticData.config.armyRunDuration * 1000);
       state.moveRun.armiesPosition = 2;

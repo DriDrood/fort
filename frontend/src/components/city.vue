@@ -44,7 +44,6 @@ export default {
 
       // same team
       var currentPlayerTeamId = this.$store.state.staticData.players[this.$store.state.login.id].teamId;
-      console.log(currentPlayerTeamId);
       if (this.$store.state.staticData.players[this.occupation.playerId].teamId == currentPlayerTeamId)
         return true;
 
