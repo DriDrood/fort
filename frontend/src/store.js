@@ -194,11 +194,18 @@ export default new Vuex.Store({
       state.moveRun.armiesPosition = 0;
     },
     order(state, payload) { // sourceId, targetId, amount, sourceCityRemains
-      const source = state.turns[state.currentTurn.activeId].cityOccupation[payload.sourceId];
+      var currentTurn = state.turns[state.currentTurn.activeId];
+      const source = currentTurn.cityOccupation[payload.sourceId];
       if (source.playerId != state.login.id) return;
       if (payload.max < payload.amount) return;
 
-      Vue.set(state.turns[state.currentTurn.activeId].orders, `${payload.sourceId}>>${payload.targetId}`, { playerId: state.login.id, amount: payload.amount, size: getSize(payload.amount) });
+      const orderKey = `${payload.sourceId}>>${payload.targetId}`;
+      if (payload.amount > 0)
+        Vue.set(currentTurn.orders, orderKey, { playerId: state.login.id, amount: payload.amount, size: getSize(payload.amount) });
+      else if (currentTurn.orders[orderKey])
+        Vue.delete(currentTurn.orders, orderKey);
+      // else nothing
+
       source.availableArmy = payload.max - payload.amount;
     },
     countDown: (state) => {
