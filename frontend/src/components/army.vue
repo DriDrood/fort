@@ -1,7 +1,7 @@
 <template>
   <circle
     class="army"
-    :style="{ cx: x, cy: y, r: size, fill: `url(#team-${teamId})` , transition: `cx ${moveRun.duration}s linear, cy ${moveRun.duration}s linear` }"
+    :style="{ cx: x, cy: y, r: size, fill: `url(#team-${teamId})` , transition: `cx ${staticData.config.armyRunDuration}s linear, cy ${staticData.config.armyRunDuration}s linear` }"
   />
 </template>
 
@@ -14,7 +14,7 @@ export default {
     army: {}
   },
   computed: {
-    ...mapState(["moveRun"]),
+    ...mapState(["moveRun", "staticData"]),
     animation() {
       const middleX = (this.army.endX - this.army.startX) / 2 + this.army.startX;
       const middleY = (this.army.endY - this.army.startY) / 2 + this.army.startY;

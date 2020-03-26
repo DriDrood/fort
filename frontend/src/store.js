@@ -39,7 +39,12 @@ export default new Vuex.Store({
           '4>>3': {
             playerId: '4',
             amount: 10,
-            size: 5
+            size: 8
+          },
+          '3>>4': {
+            playerId: '5',
+            amount: 5,
+            size: 7
           }
         }
       },
@@ -116,7 +121,7 @@ export default new Vuex.Store({
         '3': { color: '#4b7183', light: '#98b6c4' }
       },
       config: {
-        armyRunDuration: 200
+        armyRunDuration: 0.4
       }
     },
     moveRun: {
@@ -146,20 +151,20 @@ export default new Vuex.Store({
       // invalid command
       if (state.currentTurn.activeId <= 0) return;
 
-      // decrease active
-      state.currentTurn.activeId -= 1;
-
       // init
-      const orders = state.turns[state.currentTurn.activeId].orders;
+      const orders = state.turns[state.currentTurn.activeId - 1].orders;
       var met = meetings(state, orders);
       createMove(state, orders, met, true);
 
       // move
       await sleep(10);
       state.moveRun.armiesPosition = 1;
-      await sleep(state.staticData.config.armyRunDuration);
+      await sleep(state.staticData.config.armyRunDuration * 1000);
       state.moveRun.armiesPosition = 2;
-      await sleep(state.staticData.config.armyRunDuration);
+      await sleep(state.staticData.config.armyRunDuration * 1000);
+
+      // decrease active
+      state.currentTurn.activeId -= 1;
 
       // clean
       Vue.set(state.moveRun, 'armies', []);
@@ -169,20 +174,20 @@ export default new Vuex.Store({
       // invalid command
       if (state.currentTurn.activeId >= state.turns.last) return;
 
-      // increase active
-      state.currentTurn.activeId += 1;
-
       // init
-      const orders = state.turns[state.currentTurn.activeId - 1].orders;
+      const orders = state.turns[state.currentTurn.activeId].orders;
       let met = meetings(state, orders);
       createMove(state, orders, met, false);
       
       // move
       await sleep(10);
       state.moveRun.armiesPosition = 1;
-      await sleep(state.staticData.config.armyRunDuration);
+      await sleep(state.staticData.config.armyRunDuration * 1000);
       state.moveRun.armiesPosition = 2;
-      await sleep(state.staticData.config.armyRunDuration);
+      await sleep(state.staticData.config.armyRunDuration * 1000);
+
+      // increase active
+      state.currentTurn.activeId += 1;
 
       // clean
       Vue.set(state.moveRun, 'armies', []);
@@ -216,7 +221,7 @@ function meetings(state, orders) {
   // meeting
   Object.keys(orders).forEach(orderId => {
     // already met
-    if (met[orderId]) return;
+    if (met[orderId] != null) return;
 
     const [sourceId, targetId] = orderId.split('>>');
     const reverseOrderId = `${targetId}>>${sourceId}`;
@@ -280,14 +285,14 @@ function createMove(state, orders, met, reverse) {
 }
 function meetingSize(biggerArmySize, smallerArmySize)
 {
-  return Math.floor(Math.sqrt(Math.pow(biggerArmySize - 10, 2) - Math.pow(smallerArmySize - 10, 2))) + 10;
+  return Math.floor(Math.sqrt(Math.pow(biggerArmySize - 5, 2) - Math.pow(smallerArmySize - 5, 2))) + 5;
 }
 function getSize(army)
 {
   if (!army)
     return null;
 
-  return Math.floor(Math.sqrt(army)) + 10;
+  return Math.floor(Math.sqrt(army)) + 5;
 }
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
