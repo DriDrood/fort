@@ -5,15 +5,13 @@
         <i class="fa fa-times"></i>
       </button>
       <h2>Armáda</h2>
-      <div class="count">
-        <input class="amount" v-model="value" />
-        <button class="incr" @click="incr">
-          <i class="fa fa-caret-up"></i>
-        </button>
-        <button class="decr" @click="decr">
-          <i class="fa fa-caret-down"></i>
-        </button>
-      </div>
+      <input class="amount" v-model="value" />
+      <button class="incr" @click="incr">
+        <i class="fa fa-caret-up"></i>
+      </button>
+      <button class="decr" @click="decr">
+        <i class="fa fa-caret-down"></i>
+      </button>
       <div class="selectRange" @click="set">
         <div class="selectSlider" :style="{left: `${ratio}%`}"></div>
       </div>
@@ -114,7 +112,8 @@ export default {
     background: linear-gradient(160deg, #6f99acff 0%, #6f99ac60 100%)
     color: #fff
 
-    grid-template-areas: ". close" "label count" "slider slider" "ok ok"
+    grid-template-areas: ". . close" "label amount incr" "label amount decr" "slider slider slider" "ok ok ok"
+    grid-column: 1fr 1fr 1fr
     grid-row-gap: 10px
     align-items: center
     justify-items: center
@@ -126,21 +125,16 @@ export default {
     h2
       grid-area: label
       font-size: 1.5rem
-    .count
-      grid-area: count
-      display: grid
-
-      grid-template-areas: "amount incr""amount decr"
-      justify-content: center
-      align-items: center
-      grid-column-gap: 5px
-      .amount
-        grid-area: amount
-        font-size: 1.2rem
-      .incr
-        grid-area: incr
-      .decr
-        grid-area: decr
+    .amount
+      grid-area: amount
+      font-size: 1.2rem
+      width: 4rem
+    .incr
+      grid-area: incr
+      font-size: 2rem
+    .decr
+      grid-area: decr
+      font-size: 2rem
     .selectRange
       grid-area: slider
       position: relative
