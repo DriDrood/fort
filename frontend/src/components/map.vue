@@ -11,6 +11,9 @@
             <stop :style="{ 'stop-color': team.color }" offset="0" />
             <stop :style="{ 'stop-color': team.light }" offset="1" />
           </linearGradient>
+          <pattern v-for="userSize in userAvatarSizes" :key="userSize.key" :id="userSize.key" width="1" height="1">
+            <image v-bind:[`xlink:href`]="`/users/${userSize.playerId}.jpg`" x="0" y="0" :width="userSize.size * 2" :height="userSize.size * 2" />
+          </pattern>
         </defs>
         <road v-for="(road, index) in distinctRoads" :key="index" :road="road" />
         <order v-for="(order, orderId) in orders" :key="orderId" :order="order" :orderId="orderId" />
@@ -48,6 +51,7 @@
 </template>
 
 <script>
+import Vue from 'vue';
 import { mapState, mapGetters } from "vuex";
 import city from "./city";
 import road from "./road";
@@ -84,6 +88,15 @@ export default {
     },
     orders() {
       return this.currentTurn.orders;
+    },
+    userAvatarSizes() {
+      let result = {};
+      Object.values(this.currentTurn.cityOccupation).forEach(c => {
+        const key = `U_${c.playerId}_${c.size}`;
+        if (result[key] === undefined)
+          Vue.set(result, key, { playerId: c.playerId, size: c.size, key: key });
+      });
+      return Object.values(result);
     }
   },
   methods: {

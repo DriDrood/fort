@@ -7,7 +7,7 @@ export default new Vuex.Store({
   state: {
     login: {
       id: '5',
-      name: 'hello'
+      name: 'Veverka'
     },
     currentTurn: {
       activeId: 1,

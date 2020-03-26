@@ -1,6 +1,6 @@
 <template>
   <nav class="top">
-    <img src="av.jpg" alt="avatar" title="Samuel" />
+    <img :src="`/users/${login.id}.jpg`" :alt="login.name" :title="login.name" />
     <button v-if="currentTurn.activeId > 0" class="prev" title="Vrátit o kolo" @click="prevTurn">
       <i class="fa fa-step-backward"></i>
     </button>
@@ -21,7 +21,7 @@ import { mapState, mapGetters } from "vuex";
 export default {
   name: "topPanel",
   computed: {
-    ...mapState(["currentTurn"]),
+    ...mapState(["currentTurn", "login"]),
     ...mapGetters(["isTurnCurrent"])
   },
   methods: {

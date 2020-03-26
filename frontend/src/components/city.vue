@@ -11,12 +11,15 @@
       :cx="city.x"
       :cy="city.y"
       :r="occupation.size"
+      :fill="isOwnerVisible ? `url(#U_${occupation.playerId}_${occupation.size}` : '#757575'"
       @click="select"
     />
   </g>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: "city",
   props: {
@@ -24,14 +27,34 @@ export default {
     selected: { default: null }
   },
   computed: {
+    ...mapGetters(["currentTurn"]),
     occupation() {
-      return this.$store.state.turns[this.$store.state.currentTurn.activeId].cityOccupation[this.city.id];
+      return this.currentTurn.cityOccupation[this.city.id];
     },
     isSelected() {
       return this.selected == this.city.id;
     },
     isAvailable() {
       return this.$store.state.staticData.roads[this.city.id].includes(this.selected);
+    },
+    isOwnerVisible() {
+      // same player
+      if (this.occupation.playerId == this.$store.state.login.id)
+        return true;
+
+      // same team
+      var currentPlayerTeamId = this.$store.state.staticData.players[this.$store.state.login.id].teamId;
+      console.log(currentPlayerTeamId);
+      if (this.$store.state.staticData.players[this.occupation.playerId].teamId == currentPlayerTeamId)
+        return true;
+
+      // next to my
+      if (this.$store.state.staticData.roads[this.city.id].some(neighbourId =>
+          this.$store.state.staticData.players[this.currentTurn.cityOccupation[neighbourId].playerId].teamId == currentPlayerTeamId))
+        return true;
+
+      // else
+      return false;
     },
     teamId() {
       return this.$store.state.staticData.players[this.occupation.playerId].teamId;
@@ -50,7 +73,6 @@ svg .city
   .cityArmy
     fill: #fff
   .fort
-    fill: #757575
     stroke-width: 5px
     &.selected
       stroke-width: 0px
