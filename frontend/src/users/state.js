@@ -1,4 +1,8 @@
 export default {
+  login: {
+    id: '5',
+    name: 'Veverka'
+  },
   players: {
     '3': {
       name: 'uuu',

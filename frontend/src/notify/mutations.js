@@ -3,21 +3,21 @@ import masterState from '../master/state';
 import masterMutations from '../master/mutations';
 
 const mutations = {
-  notify: (state, payload) => { // level, text, timeDestroy
+  notify: (state, payload) => { // level, text, permanent
     // create
     const guid = masterMutations.generateGuid();
     const newNotification = {
       id: guid,
       text: payload.text,
       level: payload.level,
-      timeDestroy: payload.timeDestroy
+      permanent: payload.permanent
     };
 
     // set
     Vue.set(state.notifications, guid, newNotification);
 
     // time destroy
-    if (payload.timeDestroy) {
+    if (!payload.permanent) {
       setTimeout(() => mutations.unNotify(state, { id: guid }), masterState.config.notificationDuration * 1000);
     }
   },

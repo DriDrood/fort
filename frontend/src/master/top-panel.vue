@@ -39,7 +39,7 @@ export default {
 </script>
 
 <style lang="sass">
-@import ../sass/_constants
+@import ../_sass/_constants
 
 nav.top
   position: fixed

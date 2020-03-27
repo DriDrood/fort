@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import login from "./master/login";
+import login from "./users/login";
 import notifications from "./notify/notification";
 import topPanel from "./master/top-panel";
 import worldMap from "./map/map";

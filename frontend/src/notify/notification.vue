@@ -31,7 +31,7 @@ export default {
 </script>
 
 <style lang="sass">
-@import ../sass/_constants
+@import ../_sass/_constants
 
 .notifications
   position: fixed

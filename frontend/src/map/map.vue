@@ -124,8 +124,7 @@ export default {
       if (!this.isTurnCurrent) {
         this.$store.commit("notify", {
           text: "Jste v minulosti",
-          level: "warning",
-          timeDestroy: true
+          level: "warning"
         });
         return;
       }
