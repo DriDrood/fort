@@ -120,6 +120,12 @@ export default {
   },
   methods: {
     select(cityId) {
+      // selected again same city
+      if (!cityId || cityId == this.selected) {
+        this.selected = null;
+        return;
+      }
+
       // I'm in history
       if (!this.isTurnCurrent) {
         this.$store.commit("notify", {
@@ -129,17 +135,27 @@ export default {
         return;
       }
 
-      // selected again same city
-      if (!cityId || cityId == this.selected) this.selected = null;
+      // select 1st
+      if (!this.selected) {
+        // my city
+        if (this.activeTurn.cityOccupation[cityId].playerId == this.$store.state.login.id) {
+          this.selected = cityId;
+          return
+        }
+
+        // foreign city
+        this.$store.commit("notify", {
+          text: "Toto není vaše město",
+          level: "warning"
+        });
+        return;
+      }
+
       // selected 2nd available city
-      else if (this.selected && this.roads[this.selected].includes(cityId)) {
+      if (this.roads[this.selected].includes(cityId)) {
         this.targetId = cityId;
         this.showModal = true;
       }
-
-      // select 1st
-      else if (this.activeTurn.cityOccupation[cityId].playerId == this.$store.state.login.id)
-        this.selected = cityId;
     },
     closeModal() {
       this.selected = null;
