@@ -4,6 +4,7 @@ export default {
     name: 'Veverka'
   },
   config: {
-    armyRunDuration: 0.4
+    armyRunDuration: 0.4,
+    notificationDuration: 10
   }
 }

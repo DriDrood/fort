@@ -3,6 +3,7 @@
     <login v-if="!login" />
     <template v-else>
       <topPanel />
+      <notifications />
       <worldMap />
     </template>
   </div>
@@ -10,6 +11,7 @@
 
 <script>
 import login from "./master/login";
+import notifications from "./notify/notification";
 import topPanel from "./master/top-panel";
 import worldMap from "./map/map";
 import { mapState } from 'vuex';
@@ -18,6 +20,7 @@ export default {
   name: "app",
   components: {
     login,
+    notifications,
     topPanel,
     worldMap
   },

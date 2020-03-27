@@ -8,15 +8,15 @@ export default {
 
     // init
     const orders = state.turns[state.activeTurnId - 1].orders;
-    var met = this.meetingResults(state, orders);
-    this.createMove(state, orders, met, true);
+    var met = helpers.meetingResults(state, orders);
+    helpers.createMove(state, orders, met, true);
 
     // move
-    await this.sleep(10);
+    await helpers.sleep(10);
     state.turnRun.armiesPosition = 1;
-    await this.sleep(state.config.armyRunDuration * 1000);
+    await helpers.sleep(state.config.armyRunDuration * 1000);
     state.turnRun.armiesPosition = 2;
-    await this.sleep(state.config.armyRunDuration * 1000);
+    await helpers.sleep(state.config.armyRunDuration * 1000);
 
     // decrease active
     state.activeTurnId -= 1;
@@ -30,16 +30,16 @@ export default {
     if (state.activeTurnId >= state.turns.last || state.turnRun.armiesPosition != 0) return;
 
     // init
-    const orders = turnsGetters.activeTurn.orders;
-    let met = this.meetingResults(state, orders);
-    this.createMove(state, orders, met, false);
+    const orders = turnsGetters.activeTurn(state).orders;
+    let met = helpers.meetingResults(state, orders);
+    helpers.createMove(state, orders, met, false);
 
     // move
-    await this.sleep(10);
+    await helpers.sleep(10);
     state.turnRun.armiesPosition = 1;
-    await this.sleep(state.config.armyRunDuration * 1000);
+    await helpers.sleep(state.config.armyRunDuration * 1000);
     state.turnRun.armiesPosition = 2;
-    await this.sleep(state.config.armyRunDuration * 1000);
+    await helpers.sleep(state.config.armyRunDuration * 1000);
 
     // increase active
     state.activeTurnId += 1;
@@ -49,22 +49,23 @@ export default {
     state.turnRun.armiesPosition = 0;
   },
   order(state, payload) { // sourceId, targetId, amount, sourceCityRemains
-    var currentTurn = turnsGetters.activeTurn;
+    var currentTurn = turnsGetters.activeTurn(state);
     const source = currentTurn.cityOccupation[payload.sourceId];
     if (source.playerId != state.login.id) return;
     if (payload.max < payload.amount) return;
 
     const orderKey = `${payload.sourceId}>>${payload.targetId}`;
     if (payload.amount > 0)
-      Vue.set(currentTurn.orders, orderKey, { playerId: state.login.id, amount: payload.amount, size: this.getArmySize(payload.amount) });
+      Vue.set(currentTurn.orders, orderKey, { playerId: state.login.id, amount: payload.amount, size: helpers.getArmySize(payload.amount) });
     else if (currentTurn.orders[orderKey])
       Vue.delete(currentTurn.orders, orderKey);
     // else nothing
 
     source.availableArmy = payload.max - payload.amount;
-  },
+  }
+}
 
-  // helpers
+const helpers = {
   meetingResults(state, orders) {
     let met = {};
     // meeting
@@ -83,13 +84,13 @@ export default {
       // meeting ;-)
       // first win
       if (order.size > reverseOrder.size) {
-        met[orderId] = this.meetingSize(order.size, reverseOrder.size);
+        met[orderId] = this.getSizeAfterMeeting(order.size, reverseOrder.size);
         met[reverseOrderId] = 0;
       }
       // second win
       else if (order.size < reverseOrder.size) {
         met[orderId] = 0;
-        met[reverseOrderId] = this.meetingSize(reverseOrder.size, order.size);
+        met[reverseOrderId] = this.getSizeAfterMeeting(reverseOrder.size, order.size);
       }
       // same size
       else {

@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import Vue from 'vue';
+import Vue from "vue";
 import { mapState, mapGetters } from "vuex";
 import city from "./city";
 import road from "./road";
@@ -83,7 +83,10 @@ export default {
         const targetIds = this.roads[sourceId];
         targetIds.forEach(targetId => {
           if (sourceId < targetId)
-            result.push({ source: this.cities[sourceId], target: this.cities[targetId] });
+            result.push({
+              source: this.cities[sourceId],
+              target: this.cities[targetId]
+            });
         });
       });
       return result;
@@ -106,7 +109,11 @@ export default {
       Object.values(this.activeTurn.cityOccupation).forEach(c => {
         const key = `U_${c.playerId}_${c.size}`;
         if (result[key] === undefined)
-          Vue.set(result, key, { playerId: c.playerId, size: c.size, key: key });
+          Vue.set(result, key, {
+            playerId: c.playerId,
+            size: c.size,
+            key: key
+          });
       });
       return Object.values(result);
     }
@@ -114,16 +121,19 @@ export default {
   methods: {
     select(cityId) {
       // I'm in history
-      if (!this.isTurnCurrent) return;
+      if (!this.isTurnCurrent) {
+        this.$store.commit("notify", {
+          text: "Jste v minulosti",
+          level: "warning",
+          timeDestroy: true
+        });
+        return;
+      }
 
       // selected again same city
       if (!cityId || cityId == this.selected) this.selected = null;
-
       // selected 2nd available city
-      else if (
-        this.selected &&
-        this.roads[this.selected].includes(cityId)
-      ) {
+      else if (this.selected && this.roads[this.selected].includes(cityId)) {
         this.targetId = cityId;
         this.showModal = true;
       }

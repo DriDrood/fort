@@ -39,12 +39,14 @@ export default {
 </script>
 
 <style lang="sass">
+@import ../sass/_constants
+
 nav.top
   position: fixed
   z-index: 3
   display: grid
   width: 100%
-  height: 5rem
+  height: $topPanel-height
 
   background: linear-gradient(170deg, #6f99acff 0%, #6f99ac60 100%)
   font-size: 2rem
