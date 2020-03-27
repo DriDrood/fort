@@ -27,15 +27,15 @@ export default {
     selected: { default: null }
   },
   computed: {
-    ...mapGetters(["currentTurn"]),
+    ...mapGetters(["activeTurn"]),
     occupation() {
-      return this.currentTurn.cityOccupation[this.city.id];
+      return this.activeTurn.cityOccupation[this.city.id];
     },
     isSelected() {
       return this.selected == this.city.id;
     },
     isAvailable() {
-      return this.$store.state.staticData.roads[this.city.id].includes(this.selected);
+      return this.$store.state.roads[this.city.id].includes(this.selected);
     },
     isOwnerVisible() {
       // same player
@@ -43,20 +43,20 @@ export default {
         return true;
 
       // same team
-      var currentPlayerTeamId = this.$store.state.staticData.players[this.$store.state.login.id].teamId;
-      if (this.$store.state.staticData.players[this.occupation.playerId].teamId == currentPlayerTeamId)
+      var currentPlayerTeamId = this.$store.state.players[this.$store.state.login.id].teamId;
+      if (this.$store.state.players[this.occupation.playerId].teamId == currentPlayerTeamId)
         return true;
 
       // next to my
-      if (this.$store.state.staticData.roads[this.city.id].some(neighbourId =>
-          this.$store.state.staticData.players[this.currentTurn.cityOccupation[neighbourId].playerId].teamId == currentPlayerTeamId))
+      if (this.$store.state.roads[this.city.id].some(neighbourId =>
+          this.$store.state.players[this.activeTurn.cityOccupation[neighbourId].playerId].teamId == currentPlayerTeamId))
         return true;
 
       // else
       return false;
     },
     teamId() {
-      return this.$store.state.staticData.players[this.occupation.playerId].teamId;
+      return this.$store.state.players[this.occupation.playerId].teamId;
     }
   },
   methods: {

@@ -4,7 +4,7 @@
       <svg viewBox="0 0 1920 1024" preserveAspectRatio="none">
         <defs>
           <linearGradient
-            v-for="(team, teamId) in staticData.teams"
+            v-for="(team, teamId) in teams"
             :key="`team-${teamId}`"
             :id="`team-${teamId}`"
           >
@@ -18,13 +18,13 @@
         <road v-for="(road, index) in distinctRoads" :key="index" :road="road" />
         <order v-for="(order, orderId) in orders" :key="orderId" :order="order" :orderId="orderId" />
         <city
-          v-for="city in staticData.cities"
+          v-for="city in cities"
           :key="`city-${city.id}`"
           :city="city"
           :selected="selected"
           @select="select(city.id)"
         />
-        <army v-for="(army, index) in moveRun.armies" :key="`army-${index}`" :army="army" />
+        <armyMove v-for="(armyMove, index) in turnRun.armies" :key="`armyMove-${index}`" :armyMove="armyMove" />
         <rect
           v-if="selected"
           class="darkness"
@@ -55,9 +55,9 @@ import Vue from 'vue';
 import { mapState, mapGetters } from "vuex";
 import city from "./city";
 import road from "./road";
-import order from "./order";
-import army from "./army";
-import selectArmy from "./select-army";
+import order from "../turns/order";
+import armyMove from "../turns/armyMove";
+import selectArmy from "../turns/select-army";
 
 export default {
   name: "worldMap",
@@ -65,7 +65,7 @@ export default {
     city,
     road,
     order,
-    army,
+    armyMove,
     selectArmy
   },
   data: () => ({
@@ -74,36 +74,36 @@ export default {
     showModal: false
   }),
   computed: {
-    ...mapState(["staticData", "moveRun"]),
-    ...mapGetters(["isTurnCurrent", "currentTurn"]),
+    ...mapState(["cities", "roads", "teams", "turnRun"]),
+    ...mapGetters(["isTurnCurrent", "activeTurn"]),
     distinctRoads() {
       let result = [];
-      Object.keys(this.staticData.roads).forEach(id => {
+      Object.keys(this.roads).forEach(id => {
         const sourceId = parseInt(id);
-        const targetIds = this.staticData.roads[sourceId];
+        const targetIds = this.roads[sourceId];
         targetIds.forEach(targetId => {
           if (sourceId < targetId)
-            result.push({ source: this.staticData.cities[sourceId], target: this.staticData.cities[targetId] });
+            result.push({ source: this.cities[sourceId], target: this.cities[targetId] });
         });
       });
       return result;
     },
     availableRoads() {
       if (!this.selected) return [];
-      return this.staticData.roads[this.selected].map(r =>
+      return this.roads[this.selected].map(r =>
         r < this.selected ? `${r}-${this.selected}` : `${this.selected}-${r}`
       );
     },
     availableCities() {
       if (!this.selected) return [];
-      return this.staticData.roads[this.selected].concat(this.selected);
+      return this.roads[this.selected].concat(this.selected);
     },
     orders() {
-      return this.currentTurn.orders;
+      return this.activeTurn.orders;
     },
     userAvatarSizes() {
       let result = {};
-      Object.values(this.currentTurn.cityOccupation).forEach(c => {
+      Object.values(this.activeTurn.cityOccupation).forEach(c => {
         const key = `U_${c.playerId}_${c.size}`;
         if (result[key] === undefined)
           Vue.set(result, key, { playerId: c.playerId, size: c.size, key: key });
@@ -122,14 +122,14 @@ export default {
       // selected 2nd available city
       else if (
         this.selected &&
-        this.staticData.roads[this.selected].includes(cityId)
+        this.roads[this.selected].includes(cityId)
       ) {
         this.targetId = cityId;
         this.showModal = true;
       }
 
       // select 1st
-      else if (this.currentTurn.cityOccupation[cityId].playerId == this.$store.state.login.id)
+      else if (this.activeTurn.cityOccupation[cityId].playerId == this.$store.state.login.id)
         this.selected = cityId;
     },
     closeModal() {

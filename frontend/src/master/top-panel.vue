@@ -1,10 +1,10 @@
 <template>
   <nav class="top">
     <img :src="`/users/${login.id}.jpg`" :alt="login.name" :title="login.name" />
-    <button v-if="currentTurn.activeId > 0" class="prev" title="Vrátit o kolo" @click="prevTurn">
+    <button v-if="activeTurnId > 0" class="prev" title="Vrátit o kolo" @click="prevTurn">
       <i class="fa fa-step-backward"></i>
     </button>
-    <div class="turn">{{ currentTurn.activeId + 1 }}</div>
+    <div class="turn">{{ activeTurnId + 1 }}</div>
     <button v-if="!isTurnCurrent" class="next" title="Vpřed o kolo" @click="nextTurn">
       <i class="fa fa-step-forward"></i>
     </button>
@@ -21,7 +21,7 @@ import { mapState, mapGetters } from "vuex";
 export default {
   name: "topPanel",
   computed: {
-    ...mapState(["currentTurn", "login"]),
+    ...mapState(["activeTurnId", "currentTurn", "login"]),
     ...mapGetters(["isTurnCurrent"])
   },
   methods: {

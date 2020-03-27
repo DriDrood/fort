@@ -9,9 +9,9 @@
 </template>
 
 <script>
-import login from "./components/login";
-import topPanel from "./components/top-panel";
-import worldMap from "./components/map";
+import login from "./master/login";
+import topPanel from "./master/top-panel";
+import worldMap from "./map/map";
 import { mapState } from 'vuex';
 
 export default {

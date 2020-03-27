@@ -22,6 +22,7 @@
 
 <script>
 import { mapGetters } from "vuex";
+
 export default {
   name: "selectArmy",
   props: {
@@ -32,16 +33,16 @@ export default {
     value: null
   }),
   computed: {
-    ...mapGetters(["currentTurn"]),
+    ...mapGetters(["activeTurn"]),
     max() {
-      const source = this.currentTurn.cityOccupation[this.sourceId];
+      const source = this.activeTurn.cityOccupation[this.sourceId];
       return (source.availableArmy != null ? source.availableArmy : source.army) + (this.prevOrderArmy || 0);
     },
     ratio() {
       return Math.floor((this.value / this.max) * 100);
     },
     prevOrderArmy() {
-      const prevOrder = this.currentTurn.orders[`${this.sourceId}>>${this.targetId}`]
+      const prevOrder = this.activeTurn.orders[`${this.sourceId}>>${this.targetId}`]
       return (prevOrder && prevOrder.amount) || 0;
     }
   },
