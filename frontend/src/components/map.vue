@@ -75,7 +75,19 @@ export default {
   }),
   computed: {
     ...mapState(["staticData", "moveRun"]),
-    ...mapGetters(["distinctRoads", "isTurnCurrent", "currentTurn"]),
+    ...mapGetters(["isTurnCurrent", "currentTurn"]),
+    distinctRoads() {
+      let result = [];
+      Object.keys(this.staticData.roads).forEach(id => {
+        const sourceId = parseInt(id);
+        const targetIds = this.staticData.roads[sourceId];
+        targetIds.forEach(targetId => {
+          if (sourceId < targetId)
+            result.push({ source: this.staticData.cities[sourceId], target: this.staticData.cities[targetId] });
+        });
+      });
+      return result;
+    },
     availableRoads() {
       if (!this.selected) return [];
       return this.staticData.roads[this.selected].map(r =>

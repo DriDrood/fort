@@ -131,19 +131,7 @@ export default new Vuex.Store({
   },
   getters: {
     isTurnCurrent: (state) => state.currentTurn.activeId == state.turns.length - 1,
-    currentTurn: (state) => state.turns[state.currentTurn.activeId],
-    distinctRoads: (state) => {
-      let result = [];
-      Object.keys(state.staticData.roads).forEach(id => {
-        const sourceId = parseInt(id);
-        const targetIds = state.staticData.roads[sourceId];
-        targetIds.forEach(targetId => {
-          if (sourceId < targetId)
-            result.push({ source: state.staticData.cities[sourceId], target: state.staticData.cities[targetId] });
-        });
-      });
-      return result;
-    }
+    currentTurn: (state) => state.turns[state.currentTurn.activeId]
   },
   mutations: {
     toggleDone: (state) => state.currentTurn.done = !state.currentTurn.done,
@@ -157,6 +145,7 @@ export default new Vuex.Store({
       createMove(state, orders, met, true);
 
       // move
+      await sleep(10);
       state.moveRun.armiesPosition = 1;
       await sleep(state.staticData.config.armyRunDuration * 1000);
       state.moveRun.armiesPosition = 2;
@@ -179,6 +168,7 @@ export default new Vuex.Store({
       createMove(state, orders, met, false);
       
       // move
+      await sleep(10);
       state.moveRun.armiesPosition = 1;
       await sleep(state.staticData.config.armyRunDuration * 1000);
       state.moveRun.armiesPosition = 2;
