@@ -1,8 +1,5 @@
 export default {
-  login: {
-    id: '5',
-    name: 'Veverka'
-  },
+  login: null,
   players: {
     '3': {
       name: 'uuu',

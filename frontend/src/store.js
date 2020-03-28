@@ -13,6 +13,7 @@ import turnsGetters from './turns/getters';
 import lifecycleMutations from './lifecycle/mutations';
 import notifyMutations from './notify/mutations';
 import turnsMutations from './turns/mutations';
+import usersMutations from './users/mutations';
 
 Vue.use(Vuex)
 
@@ -31,6 +32,7 @@ export default new Vuex.Store({
   mutations: {
     ...lifecycleMutations,
     ...notifyMutations,
-    ...turnsMutations
+    ...turnsMutations,
+    ...usersMutations
   }
 });
