@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
@@ -12,5 +13,9 @@ namespace Fort.Database.Entities
 
         public Guid TeamId { get; set; }
         public Team Team { get; set; }
+
+        public ICollection<CityOccupation> CityOccupations { get; set; } = new HashSet<CityOccupation>();
+        public ICollection<Order> Orders { get; set; } = new HashSet<Order>();
+        public ICollection<StartingPosition> StartingPositions { get; set; } = new HashSet<StartingPosition>();
     }
 }

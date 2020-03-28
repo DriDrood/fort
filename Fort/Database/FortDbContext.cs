@@ -21,6 +21,64 @@ namespace Fort.Database
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            // city occupation
+            builder.Entity<CityOccupation>()
+                .HasOne(e => e.City)
+                .WithMany(e => e.CityOccupations)
+                .HasForeignKey(e => e.CityId);
+            builder.Entity<CityOccupation>()
+                .HasOne(e => e.Owner)
+                .WithMany(e => e.CityOccupations)
+                .HasForeignKey(e => e.OwnerId);
+            builder.Entity<CityOccupation>()
+                .HasOne(e => e.Turn)
+                .WithMany(e => e.CityOccupations)
+                .HasForeignKey(e => e.TurnId);
+
+            // order
+            builder.Entity<Order>()
+                .HasOne(e => e.SourceCity)
+                .WithMany(e => e.SourceForOrders)
+                .HasForeignKey(e => e.SourceCityId);
+            builder.Entity<Order>()
+                .HasOne(e => e.TargetCity)
+                .WithMany(e => e.TargetForOrders)
+                .HasForeignKey(e => e.TargetCityId);
+            builder.Entity<Order>()
+                .HasOne(e => e.User)
+                .WithMany(e => e.Orders)
+                .HasForeignKey(e => e.UserId);
+            builder.Entity<Order>()
+                .HasOne(e => e.Turn)
+                .WithMany(e => e.Orders)
+                .HasForeignKey(e => e.TurnId);
+
+            // road
+            builder.Entity<Road>()
+                .HasOne(e => e.Source)
+                .WithMany(e => e.SourceForRoads)
+                .HasForeignKey(e => e.SourceId);
+            builder.Entity<Road>()
+                .HasOne(e => e.Target)
+                .WithMany(e => e.TargetForRoads)
+                .HasForeignKey(e => e.TargetId);
+
+            // starting position
+            builder.Entity<StartingPosition>()
+                .HasOne(e => e.City)
+                .WithMany(e => e.StartingPositionFor)
+                .HasForeignKey(e => e.CityId);
+            builder.Entity<StartingPosition>()
+                .HasOne(e => e.User)
+                .WithMany(e => e.StartingPositions)
+                .HasForeignKey(e => e.UserId);
+
+            // user
+            builder.Entity<User>()
+                .HasOne(e => e.Team)
+                .WithMany(e => e.Members)
+                .HasForeignKey(e => e.TeamId);
+
             DbSeed.Cities(builder);
             DbSeed.Roads(builder);
             DbSeed.Teams(builder);

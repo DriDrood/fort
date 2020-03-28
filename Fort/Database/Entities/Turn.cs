@@ -1,7 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fort.Database.Entities
 {
@@ -11,5 +9,8 @@ namespace Fort.Database.Entities
 
         public DateTime? StartsAt { get; set; }
         public DateTime? EndsAt { get; set; }
+
+        public ICollection<CityOccupation> CityOccupations { get; set; } = new HashSet<CityOccupation>();
+        public ICollection<Order> Orders { get; set; } = new HashSet<Order>();
     }
 }

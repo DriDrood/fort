@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace Fort.Database.Entities
@@ -6,7 +7,7 @@ namespace Fort.Database.Entities
     public class Team
     {
         public Guid Id { get; set; }
-        
+
         public double ArmyStrengthCoef { get; set; } = 1;
         public double PopulationGrowthCoef { get; set; } = 1;
         [Required]
@@ -15,5 +16,7 @@ namespace Fort.Database.Entities
         [Required]
         [StringLength(10)]
         public string ColorLight { get; set; }
+
+        public ICollection<User> Members { get; set; } = new HashSet<User>();
     }
 }
