@@ -166,13 +166,15 @@ export default {
 </script>
 
 <style lang="sass">
+@import ../_sass/_constants
+
 .mapContainer
   width: 100%
   height: 100%
   overflow: auto
   background-color: #000
   .map
-    margin-top: 5rem
+    margin-top: $topPanel-height
     width: 1920px
     height: 1024px
     background: url('/world.jpg') no-repeat
