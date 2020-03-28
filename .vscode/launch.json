@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Fort/bin/Debug/netcoreapp2.1/Fort.dll",
+            "program": "${workspaceFolder}/Fort/bin/Debug/netcoreapp2.2/Fort.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Fort",
             "stopAtEntry": false,

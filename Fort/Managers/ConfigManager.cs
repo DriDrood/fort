@@ -22,10 +22,10 @@ namespace Fort.Managers
         }
 
         public static string ConnectionString { get; private set; }
-        public static CommConfig Comm { get; private set; }
-        public static GameConfig Game { get; private set; }
-        public static JwtTokenConfig JwtToken { get; private set; }
-        public static LoggerConfig Logger { get; private set; }
+        public static CommConfig Comm { get; private set; } = new CommConfig();
+        public static GameConfig Game { get; private set; } = new GameConfig();
+        public static JwtTokenConfig JwtToken { get; private set; } = new JwtTokenConfig();
+        public static LoggerConfig Logger { get; private set; } = new LoggerConfig();
 
         public static Config Config { get; set; }
     }

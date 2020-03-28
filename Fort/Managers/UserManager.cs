@@ -46,6 +46,21 @@ namespace Fort.Managers
             return login;
         }
 
+        public User CreateUser(string username, string password, Guid teamId)
+        {
+            var user = new User
+            {
+                UserName = username,
+                TeamId = teamId
+            };
+            user.PasswordHash = _passwordHasher.HashPassword(user, password);
+            
+            _dbContext.Add(user);
+            _dbContext.SaveChanges();
+
+            return user;
+        }
+
         public Dictionary<Guid, Player> GetAllPlayers()
         {
             throw new NotImplementedException();

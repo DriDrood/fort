@@ -1,4 +1,5 @@
 using Fort.Managers;
+using Fort.Models;
 using Fort.Models.Store;
 using Fort.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -23,10 +24,10 @@ namespace Fort.Comm
         private readonly TurnManager _turnManager;
         private readonly UserManager _userManager;
 
-        public ActionResult Login(string username, string password)
+        public ActionResult Login([FromBody]LoginData loginData)
         {
             // authentication
-            var login = _userManager.Login(username, password);
+            var login = _userManager.Login(loginData.Username, loginData.Password);
             if (login == null)
                 return Unauthorized();
 
