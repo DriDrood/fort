@@ -50,10 +50,25 @@
 
         nav img {
             grid-area: avatar;
-            height: 140%;
+            height: 7rem;
             margin: -20% 0;
             border: 5px solid #241f16;
             border-radius: 50%;
+        }
+
+        nav .loading {
+            grid-area: avatar;
+            height: 7rem;
+            width: 7rem;
+            margin: -20% 0;
+            background-color: #00000060;
+            border-radius: 50%;
+            z-index: 3;
+
+            display: grid;
+            justify-items: center;
+            align-items: center;
+            color: #fff;
         }
 
         nav .prev {
@@ -71,6 +86,38 @@
         nav .time {
             grid-area: time;
             font-weight: bold;
+        }
+
+        .notifications {
+            position: fixed;
+            top: 5rem;
+            right: 0;
+            border-radius: 0 0 0 1rem;
+            overflow: hidden;
+        }
+
+        .notifications .notification {
+            padding: 1rem;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .notifications .notification.info {
+            background-color: #6f99ac60;
+        }
+
+        .notifications .notification.warning {
+            background-color: #bdc14e60;
+        }
+
+        .notifications .notification.error {
+            background-color: #772a2a60;
+        }
+
+        .notifications .notification i.fa {
+            float: right;
+            margin-left: 1rem;
+            cursor: pointer;
         }
 
         .content {
@@ -209,11 +256,17 @@
 <body>
     <nav>
         <img src="av.jpg" alt="avatar" title="Samuel" />
+        <div class="loading"><i class="fas fa-spin fa-circle-notch"></i></div>
         <button class="prev" title="Vrátit o kolo"><i class="fa fa-step-backward"></i></button>
         <button class="next" title="Vpřed o kolo"><i class="fa fa-step-forward"></i></button>
         <button class="done" title="Hotovo"><i class="fa fa-check"></i></button>
         <div class="time">5:37</div>
     </nav>
+    <div class="notifications">
+        <div class="notification info">Hello <i class="fa fa-times"></i></div>
+        <div class="notification warning">tohle ti nemůžu dovolit <i class="fa fa-times"></i></div>
+        <div class="notification error">Spojení se serverem nenavázáno <i class="fa fa-times"></i></div>
+    </div>
     <div class="content">
         <div class="map">
             <svg viewBox="0 0 1920 1024" preserveAspectRatio="none">
