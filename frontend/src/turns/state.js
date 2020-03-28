@@ -4,7 +4,7 @@ export default {
     {
       cityOccupation: {
         '1': {
-          playerId: '4',
+          playerId: '5',
           size: 50
         },
         '2': {
