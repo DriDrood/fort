@@ -1,6 +1,7 @@
 ﻿using System;
 using Fort.Database;
 using Fort.Managers;
+using Fort.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -16,15 +17,13 @@ namespace Fort
     {
         public Startup(IConfiguration configuration)
         {
-            Configuration = new ConfigManager(configuration);
+            ConfigManager.Setup(configuration);
         }
-
-        public static ConfigManager Configuration { get; private set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<FortDbContext>(options => options.UseMySql(Configuration.ConnectionString));
+            services.AddDbContext<FortDbContext>(options => options.UseMySql(ConfigManager.ConnectionString));
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
@@ -36,21 +35,19 @@ namespace Fort
                         ValidateIssuer = false,
                         ValidateAudience = false,
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(Configuration.JwtToken.PrivateKey))
+                        IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(ConfigManager.JwtToken.PrivateKey))
                     };
                 });
 
-            // services.AddScoped<MapUserService>();
-            // services.AddScoped<MapTeamService>();
-            // services.AddScoped<MapAdminService>();
-            // services.AddScoped<CurrentPlayerService>();
-            // services.AddSingleton<RoundService>();
-            // services.AddSingleton<ActionService>();
-            // services.AddSingleton<CommService>();
+            services.AddSingleton<LifecycleService>();
+            services.AddScoped<Context>();
+            services.AddScoped<MapManager>();
+            services.AddScoped<TurnManager>();
+            services.AddScoped<UserManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IConfiguration configuration)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -67,9 +64,6 @@ namespace Fort
             // app.UseMiddleware<LoggerMiddleware>();
             // app.UseMiddleware<WSMiddleware>();
             app.UseMvc(routes => routes.MapRoute("default", "api/{controller}/{action}/{id?}"));
-
-            // Logger.Configure(configuration.GetSection("Logger"));
-            // app.ApplicationServices.GetService<RoundService>().Setup(configuration.GetSection("StartingPositions"));
         }
 
         private static void MigrateDatabase(IApplicationBuilder app)

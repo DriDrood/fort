@@ -1,4 +1,5 @@
 using Fort.Database.Entities;
+using Fort.Managers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fort.Database
@@ -28,7 +29,7 @@ namespace Fort.Database
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
-                optionsBuilder.UseMySql(Startup.Configuration.ConnectionString);
+                optionsBuilder.UseMySql(ConfigManager.ConnectionString);
         }
     }
 }

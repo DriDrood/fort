@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
-using Fort.Database.Entities;
+using Fort.Models;
 
 namespace Fort.Managers
 {
-    public class CityManager
+    public class MapManager
     {
-        public IEnumerable<City> GetAllCities()
+        public Dictionary<Guid, City> GetAllCities()
         {
             throw new NotImplementedException();
         }
-        public IEnumerable<Road> GetAllRoads()
+        public IEnumerable<string> GetAllRoads()
         {
             throw new NotImplementedException();
         }

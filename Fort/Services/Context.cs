@@ -1,6 +1,6 @@
 using Fort.Database.Entities;
 
-namespace Fort.Models
+namespace Fort.Services
 {
     public class Context
     {

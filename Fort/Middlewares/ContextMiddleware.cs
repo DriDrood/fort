@@ -1,15 +1,12 @@
-using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Fort.Database;
-using Fort.Models;
+using Fort.Services;
 using Microsoft.AspNetCore.Http;
 
 namespace Fort.Middlewares
 {
     public class ContextMiddleware
     {
-
         public ContextMiddleware(RequestDelegate next)
         {
             _next = next;
