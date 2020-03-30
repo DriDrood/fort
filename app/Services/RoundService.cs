@@ -96,26 +96,19 @@ namespace Fort.Services
                     {
                         if (CurrentRound.RoundNumber > 1 || CurrentRound.Turns.Any())
                         {
-                            _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultAfterVisualizationSec));
+                            _timer.SetTime(TimeSpan.FromSeconds(Program.Config.AfterVisualizationSec));
                             Init(_timer.Remains.Value);
                             _timer.Start().GetAwaiter().GetResult();
                             if (_playTaskCanceled) return;
                         }
 
-                        TimeZoneInfo timezonePrague = TimeZoneInfo.GetSystemTimeZones().FirstOrDefault(tz => tz.Id == "Europe/Prague")
-                            ?? TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
-                        var cestNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezonePrague);
-                        var endRound = cestNow.Date.AddHours(21);
-                        if (endRound < cestNow)
-                            endRound = endRound.AddDays(1);
-                        var roundDuration = endRound - cestNow; // CEST
-
+                        var roundDuration = GetRoundDuration();
                         _timer.SetTime(roundDuration);
                         Start();
                         _timer.Start().GetAwaiter().GetResult();
                         if (_playTaskCanceled) return;
 
-                        _timer.SetTime(TimeSpan.FromSeconds(Program.Config.DefaultBeforeVisualizationSec));
+                        _timer.SetTime(TimeSpan.FromSeconds(Program.Config.BeforeVisualizationSec));
                         End();
                         var tt = _timer.Start();
 
@@ -365,6 +358,25 @@ namespace Fort.Services
 
             foreach (Task task in tasks)
                 task.GetAwaiter().GetResult();
+        }
+
+        private TimeSpan GetRoundDuration()
+        {
+            // by duration
+            if (Program.Config.RoundDurationSec.HasValue)
+                return TimeSpan.FromSeconds(Program.Config.RoundDurationSec.Value);
+
+            // by round end
+            var time = TimeSpan.Parse(Program.Config.RoundEndsAt);
+
+            TimeZoneInfo timezonePrague = TimeZoneInfo.GetSystemTimeZones().FirstOrDefault(tz => tz.Id == "Europe/Prague")
+                ?? TimeZoneInfo.FindSystemTimeZoneById("Central Europe Standard Time");
+            var cestNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timezonePrague);
+            var endRound = cestNow.Date + time;
+            if (endRound < cestNow)
+                endRound = endRound.AddDays(1);
+            var roundDuration = endRound - cestNow; // CEST
+            return roundDuration;
         }
         #endregion
 

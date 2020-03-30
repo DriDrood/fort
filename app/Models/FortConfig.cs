@@ -10,8 +10,9 @@ namespace Fort.Models
         public int DefaultPopulationGrow { get; set; }
         public Dictionary<string, int> NeutralCitiesPopulation { get; set; }
 
-        public int DefaultRoundDurationSec { get; set; }
-        public int DefaultBeforeVisualizationSec { get; set; }
-        public int DefaultAfterVisualizationSec { get; set; }
+        public string RoundEndsAt { get; set; }
+        public int? RoundDurationSec { get; set; }
+        public int BeforeVisualizationSec { get; set; }
+        public int AfterVisualizationSec { get; set; }
     }
 }
