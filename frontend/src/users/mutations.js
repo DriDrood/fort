@@ -1,12 +1,13 @@
 const mutations = {
-  login(state, payload) { // username, password
-    state.login = {
-      id: 5,
-      name: payload.username
-    }
+  login(state, payload) { // id, name, jwtToken
+    state.login = payload;
   },
   logout(state) {
-    state.login = null;
+    state.login = {
+      id: null,
+      name: null,
+      jwtToken: null
+    };
   }
 }
 export default mutations;

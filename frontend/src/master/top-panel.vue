@@ -1,6 +1,9 @@
 <template>
   <nav class="top">
     <img :src="`/users/${login.id}.jpg`" :alt="login.name" :title="login.name" />
+    <div v-if="loading" class="loading">
+      <i class="fas fa-spin fa-circle-notch"></i>
+    </div>
     <button v-if="activeTurnId > 0" class="prev" title="Vrátit o kolo" @click="prevTurn">
       <i class="fa fa-step-backward"></i>
     </button>
@@ -22,7 +25,7 @@ export default {
   name: "topPanel",
   computed: {
     ...mapState(["activeTurnId", "currentTurn", "login"]),
-    ...mapGetters(["isTurnCurrent"])
+    ...mapGetters(["isTurnCurrent", "loading"])
   },
   methods: {
     toggleDone() {
@@ -59,10 +62,23 @@ nav.top
 
   img
     grid-area: avatar
-    height: 140%
+    height: 7rem
     margin: -20% 0
     border: 5px solid #241f16
     border-radius: 50%
+  .loading
+    grid-area: avatar
+    height: 7rem
+    width: 7rem
+    margin: -20% 0
+    background-color: #00000060
+    border-radius: 50%
+    z-index: 3
+
+    display: grid
+    justify-items: center
+    align-items: center
+    color: #fff
   .prev
     grid-area: prev
   .next

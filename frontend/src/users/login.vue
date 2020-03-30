@@ -2,20 +2,28 @@
   <div class="login">
     <input type="text" placeholder="Jméno" class="username" v-model="username">
     <input type="password" placeholder="Heslo" class="password" v-model="password">
-    <button @click="login"><i class="fas fa-sign-in-alt" title="login"></i></button>
+    <button @click="login">
+      <i v-if="loading" class="fas fa-spin fa-circle-notch"></i>
+      <i v-else class="fas fa-sign-in-alt" title="login"></i>
+    </button>
   </div>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+
 export default {
   name: 'login',
   data: () => ({
     username: null,
     password: null
   }),
+  computed: {
+    ...mapGetters(["loading"])
+  },
   methods: {
     login() {
-      this.$store.commit('login', {
+      this.$store.dispatch('login', {
         username: this.username,
         password: this.password
       })

@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <login v-if="!login" />
+    <login v-if="!login.jwtToken" />
     <template v-else>
       <topPanel />
       <notifications />

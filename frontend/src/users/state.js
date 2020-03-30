@@ -1,5 +1,9 @@
 export default {
-  login: null,
+  login: {
+    id: null,
+    name: null,
+    jwtToken: null
+  },
   players: {
     '3': {
       name: 'uuu',
