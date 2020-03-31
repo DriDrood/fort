@@ -15,7 +15,7 @@
             <image v-bind:[`xlink:href`]="`/users/${userSize.playerId}.jpg`" x="0" y="0" :width="userSize.size * 2" :height="userSize.size * 2" />
           </pattern>
         </defs>
-        <road v-for="(road, index) in distinctRoads" :key="index" :road="road" />
+        <road v-for="(road, index) in roads" :key="index" :road="road" />
         <order v-for="(order, orderId) in orders" :key="orderId" :order="order" :orderId="orderId" />
         <city
           v-for="city in cities"
@@ -76,30 +76,15 @@ export default {
   computed: {
     ...mapState(["cities", "roads", "teams", "turnRun"]),
     ...mapGetters(["isTurnCurrent", "activeTurn"]),
-    distinctRoads() {
-      let result = [];
-      Object.keys(this.roads).forEach(id => {
-        const sourceId = parseInt(id);
-        const targetIds = this.roads[sourceId];
-        targetIds.forEach(targetId => {
-          if (sourceId < targetId)
-            result.push({
-              source: this.cities[sourceId],
-              target: this.cities[targetId]
-            });
-        });
-      });
-      return result;
-    },
     availableRoads() {
       if (!this.selected) return [];
-      return this.roads[this.selected].map(r =>
+      return this.$store.getters.cityRoads[this.selected].map(r =>
         r < this.selected ? `${r}-${this.selected}` : `${this.selected}-${r}`
       );
     },
     availableCities() {
       if (!this.selected) return [];
-      return this.roads[this.selected].concat(this.selected);
+      return this.$store.getters.cityRoads[this.selected].concat(this.selected);
     },
     orders() {
       return this.activeTurn.orders;
@@ -152,7 +137,7 @@ export default {
       }
 
       // selected 2nd available city
-      if (this.roads[this.selected].includes(cityId)) {
+      if (this.$store.getters.cityRoads[this.selected].includes(cityId)) {
         this.targetId = cityId;
         this.showModal = true;
       }

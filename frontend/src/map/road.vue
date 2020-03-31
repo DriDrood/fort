@@ -1,18 +1,26 @@
 <template>
   <line
     class="road"
-    :id="`road-${road.source.id}-${road.target.id}`"
-    :x1="road.source.x"
-    :y1="road.source.y"
-    :x2="road.target.x"
-    :y2="road.target.y"
+    :id="`road-${source.id}-${target.id}`"
+    :x1="source.x"
+    :y1="source.y"
+    :x2="target.x"
+    :y2="target.y"
   />
 </template>
 
 <script>
 export default {
   name: "road",
-  props: ["road"]
+  props: ["road"],
+  computed: {
+    source() {
+      return this.$store.state.cities[this.road.split("__")[0]];
+    },
+    target() {
+      return this.$store.state.cities[this.road.split("__")[1]];
+    }
+  }
 };
 </script>
 

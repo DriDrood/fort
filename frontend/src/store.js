@@ -11,6 +11,7 @@ import turnsState from './turns/state';
 import usersState from './users/state';
 
 import commGetters from './comm/getters';
+import mapGetters from './map/getters';
 import turnsGetters from './turns/getters';
 
 import commMutations from './comm/mutations';
@@ -36,6 +37,7 @@ export default new Vuex.Store({
   },
   getters: {
     ...commGetters,
+    ...mapGetters,
     ...turnsGetters
   },
   mutations: {

@@ -35,7 +35,7 @@ export default {
       return this.selected == this.city.id;
     },
     isAvailable() {
-      return this.$store.state.roads[this.city.id].includes(this.selected);
+      return this.$store.getters.cityRoads[this.city.id].includes(this.selected);
     },
     isOwnerVisible() {
       // same player
@@ -48,7 +48,7 @@ export default {
         return true;
 
       // next to my
-      if (this.$store.state.roads[this.city.id].some(neighbourId =>
+      if (this.$store.getters.cityRoads[this.city.id].some(neighbourId =>
           this.$store.state.players[this.activeTurn.cityOccupation[neighbourId].playerId].teamId == currentPlayerTeamId))
         return true;
 
