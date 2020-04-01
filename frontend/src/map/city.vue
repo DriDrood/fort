@@ -29,7 +29,7 @@ export default {
   computed: {
     ...mapGetters(["activeTurn"]),
     occupation() {
-      return this.activeTurn.cityOccupation[this.city.id];
+      return this.activeTurn.cityOccupations[this.city.id];
     },
     isSelected() {
       return this.selected == this.city.id;
@@ -49,7 +49,7 @@ export default {
 
       // next to my
       if (this.$store.getters.cityRoads[this.city.id].some(neighbourId =>
-          this.$store.state.players[this.activeTurn.cityOccupation[neighbourId].playerId].teamId == currentPlayerTeamId))
+          this.$store.state.players[this.activeTurn.cityOccupations[neighbourId].playerId].teamId == currentPlayerTeamId))
         return true;
 
       // else

@@ -13,19 +13,19 @@ namespace Fort.Managers
     {
         public UserManager(FortDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _db = dbContext;
             _passwordHasher = new PasswordHasher<User>();
             _jwtHandler = new JwtHandler();
         }
 
-        private readonly FortDbContext _dbContext;
+        private readonly FortDbContext _db;
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly JwtHandler _jwtHandler;
 
         public Login Login(string username, string password)
         {
             // get user
-            var user = _dbContext.Users.SingleOrDefault(u => u.UserName == username);
+            var user = _db.Users.SingleOrDefault(u => u.UserName == username);
             if (user == null)
                 return null;
 
@@ -41,7 +41,7 @@ namespace Fort.Managers
             {
                 Id = user.Id,
                 Name = user.UserName,
-                Token = _jwtHandler.GenerateToken(user)
+                JwtToken = _jwtHandler.GenerateToken(user)
             };
             return login;
         }
@@ -54,20 +54,36 @@ namespace Fort.Managers
                 TeamId = teamId
             };
             user.PasswordHash = _passwordHasher.HashPassword(user, password);
-            
-            _dbContext.Add(user);
-            _dbContext.SaveChanges();
+
+            _db.Add(user);
+            _db.SaveChanges();
 
             return user;
         }
 
         public Dictionary<Guid, Player> GetAllPlayers()
         {
-            throw new NotImplementedException();
+            var players = _db.Users.ToDictionary(
+                u => u.Id,
+                u => new Player
+                {
+                    Name = u.UserName,
+                    TeamId = u.TeamId
+                });
+            
+            return players;
         }
         public Dictionary<Guid, Team> GetAllTeams()
         {
-            throw new NotImplementedException();
+            var teams = _db.Teams.ToDictionary(
+                t => t.Id,
+                t => new Team
+                {
+                    Color = t.Color,
+                    LightColor = t.ColorLight
+                });
+
+            return teams;
         }
     }
 }

@@ -8,7 +8,7 @@ export default {
           state.currentTurn.remains = `${remainsDate.getMinutes()}:${remainsDate.getSeconds().toString().padStart(2, '0')}`;
         }
         else {
-          state.turn.remains = '-:--';
+          state.currentTurn.remains = '-:--';
         }
       }, 1000), new Date(state.currentTurn.endsAt - new Date()).getMilliseconds());
   }

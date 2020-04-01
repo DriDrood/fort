@@ -50,7 +50,7 @@ export default {
   },
   order(state, payload) { // sourceId, targetId, amount, sourceCityRemains
     var currentTurn = turnsGetters.activeTurn(state);
-    const source = currentTurn.cityOccupation[payload.sourceId];
+    const source = currentTurn.cityOccupations[payload.sourceId];
     if (source.playerId != state.login.id) return;
     if (payload.max < payload.amount) return;
 

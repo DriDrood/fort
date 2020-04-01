@@ -1,8 +1,8 @@
 export default {
-  activeTurnId: 1,
+  activeTurnId: 0,
   turns: [
     {
-      cityOccupation: {
+      cityOccupations: {
         '1': {
           playerId: '5',
           size: 50
@@ -34,7 +34,7 @@ export default {
       }
     },
     {
-      cityOccupation: {
+      cityOccupations: {
         '1': {
           playerId: '3',
           size: 15

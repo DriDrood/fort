@@ -35,7 +35,7 @@ export default {
   computed: {
     ...mapGetters(["activeTurn"]),
     max() {
-      const source = this.activeTurn.cityOccupation[this.sourceId];
+      const source = this.activeTurn.cityOccupations[this.sourceId];
       return (source.availableArmy != null ? source.availableArmy : source.army) + (this.prevOrderArmy || 0);
     },
     ratio() {

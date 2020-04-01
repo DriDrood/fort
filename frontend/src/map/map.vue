@@ -91,7 +91,7 @@ export default {
     },
     userAvatarSizes() {
       let result = {};
-      Object.values(this.activeTurn.cityOccupation).forEach(c => {
+      Object.values(this.activeTurn.cityOccupations).forEach(c => {
         const key = `U_${c.playerId}_${c.size}`;
         if (result[key] === undefined)
           Vue.set(result, key, {
@@ -123,9 +123,9 @@ export default {
       // select 1st
       if (!this.selected) {
         // my city
-        if (this.activeTurn.cityOccupation[cityId].playerId == this.$store.state.login.id) {
+        if (this.activeTurn.cityOccupations[cityId].playerId == this.$store.state.login.id) {
           this.selected = cityId;
-          return
+          return;
         }
 
         // foreign city

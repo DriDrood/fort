@@ -33,6 +33,7 @@ namespace Fort.Comm
 
             // init
             var init = GetInitData();
+            init.Login = login;
             return Ok(init);
         }
 

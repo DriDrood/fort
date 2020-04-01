@@ -1,6 +1,6 @@
 const mutations = {
-  login(state, payload) { // id, name, jwtToken
-    state.login = payload;
+  login(state, payload) {
+    state.login = payload.login;
   },
   logout(state) {
     state.login = {

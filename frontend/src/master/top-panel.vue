@@ -63,6 +63,7 @@ nav.top
   img
     grid-area: avatar
     height: 7rem
+    width: 7rem
     margin: -20% 0
     border: 5px solid #241f16
     border-radius: 50%
