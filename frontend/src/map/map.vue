@@ -79,7 +79,7 @@ export default {
     availableRoads() {
       if (!this.selected) return [];
       return this.$store.getters.cityRoads[this.selected].map(r =>
-        r < this.selected ? `${r}-${this.selected}` : `${this.selected}-${r}`
+        r < this.selected ? `${r}__${this.selected}` : `${this.selected}__${r}`
       );
     },
     availableCities() {

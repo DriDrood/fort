@@ -1,7 +1,7 @@
 <template>
   <line
     class="road"
-    :id="`road-${source.id}-${target.id}`"
+    :id="`road-${road}`"
     :x1="source.x"
     :y1="source.y"
     :x2="target.x"
