@@ -44,9 +44,9 @@ namespace Fort.Comm
         }
 
         [Authorize]
-        public ActionResult GetTurn(int id)
+        public ActionResult GetTurn([FromBody]TurnData data)
         {
-            var turn = _turnManager.GetTurn(id);
+            var turn = _turnManager.GetTurn(data.Id);
             return Ok(turn);
         }
 

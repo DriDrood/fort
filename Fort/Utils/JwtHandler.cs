@@ -23,7 +23,8 @@ namespace RingoRegistration.backend.Utils
                 Expires = DateTime.UtcNow.AddDays(1),
                 Subject = new ClaimsIdentity(new List<Claim> {
                     new Claim(ClaimTypes.Email, user.Email),
-                    new Claim(ClaimTypes.GivenName, user.UserName)
+                    new Claim(ClaimTypes.GivenName, user.UserName),
+                    new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
                 }),
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature)
             };

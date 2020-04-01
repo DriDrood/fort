@@ -32,10 +32,10 @@ export default {
       this.$store.commit("toggleDone");
     },
     prevTurn() {
-      this.$store.commit("prevTurn");
+      this.$store.dispatch("prevTurn");
     },
     nextTurn() {
-      this.$store.commit("nextTurn");
+      this.$store.dispatch("nextTurn");
     }
   }
 };

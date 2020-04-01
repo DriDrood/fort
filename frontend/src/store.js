@@ -21,6 +21,7 @@ import notifyMutations from './notify/mutations';
 import turnsMutations from './turns/mutations';
 import usersMutations from './users/mutations';
 
+import turnsActions from './turns/actions';
 import usersActions from './users/actions';
 
 Vue.use(Vuex);
@@ -50,6 +51,7 @@ export default new Vuex.Store({
     ...usersMutations
   },
   actions: {
+    ...turnsActions,
     ...usersActions
   }
 });

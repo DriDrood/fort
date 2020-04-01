@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Security.Claims;
 using Fort.Database;
 using Fort.Managers;
 using Fort.Services;
@@ -27,7 +28,8 @@ namespace Fort
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            services
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(opt =>
                 {
                     opt.TokenValidationParameters = new TokenValidationParameters
@@ -38,6 +40,7 @@ namespace Fort
                         IssuerSigningKey = new SymmetricSecurityKey(Convert.FromBase64String(ConfigManager.JwtToken.PrivateKey))
                     };
                 });
+            services.AddAuthorization(opt => opt.AddPolicy("Admin", policy => policy.RequireClaim(ClaimTypes.Role, "Admin")));
 
             services.AddSingleton<LifecycleService>();
             services.AddScoped<Context>();
@@ -58,6 +61,7 @@ namespace Fort
                 MigrateDatabase(app);
             }
 
+            app.UseAuthentication();
             // app.UseWebSockets();
             // app.UseMiddleware<WSTestMiddleware>();
             // app.UseMiddleware<CurrentPlayerMiddleware>();
