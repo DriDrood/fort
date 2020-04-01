@@ -9,7 +9,7 @@
             :id="`team-${teamId}`"
           >
             <stop :style="{ 'stop-color': team.color }" offset="0" />
-            <stop :style="{ 'stop-color': team.light }" offset="1" />
+            <stop :style="{ 'stop-color': team.colorLight }" offset="1" />
           </linearGradient>
           <pattern v-for="userSize in userAvatarSizes" :key="userSize.key" :id="userSize.key" width="1" height="1">
             <image v-bind:[`xlink:href`]="`/users/${userSize.playerId}.jpg`" x="0" y="0" :width="userSize.size * 2" :height="userSize.size * 2" />

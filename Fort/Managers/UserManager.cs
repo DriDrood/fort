@@ -22,10 +22,10 @@ namespace Fort.Managers
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly JwtHandler _jwtHandler;
 
-        public Login Login(string username, string password)
+        public Login Login(string email, string password)
         {
             // get user
-            var user = _db.Users.SingleOrDefault(u => u.UserName == username);
+            var user = _db.Users.SingleOrDefault(u => u.Email == email);
             if (user == null)
                 return null;
 
@@ -46,10 +46,11 @@ namespace Fort.Managers
             return login;
         }
 
-        public User CreateUser(string username, string password, Guid teamId)
+        public User CreateUser(string email, string username, string password, Guid teamId)
         {
             var user = new User
             {
+                Email = email,
                 UserName = username,
                 TeamId = teamId
             };
@@ -80,7 +81,7 @@ namespace Fort.Managers
                 t => new Team
                 {
                     Color = t.Color,
-                    LightColor = t.ColorLight
+                    ColorLight = t.ColorLight
                 });
 
             return teams;

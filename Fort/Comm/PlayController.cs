@@ -27,7 +27,7 @@ namespace Fort.Comm
         public ActionResult Login([FromBody]LoginData loginData)
         {
             // authentication
-            var login = _userManager.Login(loginData.Username, loginData.Password);
+            var login = _userManager.Login(loginData.Email, loginData.Password);
             if (login == null)
                 return Unauthorized();
 

@@ -19,8 +19,8 @@ export default {
     }
   },
   teams: {
-    '1': { color: '#83824b', light: '#c4c498' },
-    '2': { color: '#52834b', light: '#9dc498' },
-    '3': { color: '#4b7183', light: '#98b6c4' }
+    '1': { color: '#83824b', colorLight: '#c4c498' },
+    '2': { color: '#52834b', colorLight: '#9dc498' },
+    '3': { color: '#4b7183', colorLight: '#98b6c4' }
   }
 }

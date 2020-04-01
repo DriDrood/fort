@@ -1,6 +1,6 @@
 <template>
   <div class="login">
-    <input type="text" placeholder="Jméno" class="username" v-model="username">
+    <input type="text" placeholder="E-mail" class="email" v-model="email">
     <input type="password" placeholder="Heslo" class="password" v-model="password">
     <button @click="login">
       <i v-if="loading" class="fas fa-spin fa-circle-notch"></i>
@@ -15,7 +15,7 @@ import { mapGetters } from 'vuex';
 export default {
   name: 'login',
   data: () => ({
-    username: null,
+    email: null,
     password: null
   }),
   computed: {
@@ -24,7 +24,7 @@ export default {
   methods: {
     login() {
       this.$store.dispatch('login', {
-        username: this.username,
+        email: this.email,
         password: this.password
       })
     }
@@ -37,7 +37,7 @@ export default {
   display: grid
   width: 100%
   height: 100%
-  grid-template-areas: "username login" "password login"
+  grid-template-areas: "email login" "password login"
   grid-row: 1fr auto auto 1fr
 
   overflow: hidden
@@ -49,8 +49,8 @@ export default {
     width: 10rem
     padding: .5rem .7rem
     background-color: white
-    &.username
-      grid-area: username
+    &.email
+      grid-area: email
       justify-self: end
       align-self: end
       border-radius: 1rem 0 0 0

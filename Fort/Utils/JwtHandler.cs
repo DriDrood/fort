@@ -22,7 +22,7 @@ namespace RingoRegistration.backend.Utils
                 NotBefore = DateTime.UtcNow,
                 Expires = DateTime.UtcNow.AddDays(1),
                 Subject = new ClaimsIdentity(new List<Claim> {
-                    // new Claim(ClaimTypes.Email, user.Email),
+                    new Claim(ClaimTypes.Email, user.Email),
                     new Claim(ClaimTypes.GivenName, user.UserName)
                 }),
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature)
