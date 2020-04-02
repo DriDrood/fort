@@ -1,6 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import VueResource from 'vue-resource';
+import LocalStorage from 'vue-localstorage';
 
 import commState from './comm/state';
 import lifecycleState from './lifecycle/state';
@@ -21,11 +22,13 @@ import notifyMutations from './notify/mutations';
 import turnsMutations from './turns/mutations';
 import usersMutations from './users/mutations';
 
+import masterActions from './master/actions';
 import turnsActions from './turns/actions';
 import usersActions from './users/actions';
 
 Vue.use(Vuex);
 Vue.use(VueResource);
+Vue.use(LocalStorage, { name: 'ls', bind: true });
 
 export default new Vuex.Store({
   state: {
@@ -51,6 +54,7 @@ export default new Vuex.Store({
     ...usersMutations
   },
   actions: {
+    ...masterActions,
     ...turnsActions,
     ...usersActions
   }

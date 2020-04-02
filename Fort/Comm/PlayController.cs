@@ -40,7 +40,8 @@ namespace Fort.Comm
         [Authorize]
         public ActionResult Init()
         {
-            return Ok(GetInitData());
+            var init = GetInitData();
+            return Ok(init);
         }
 
         [Authorize]
