@@ -2,6 +2,7 @@
 using System.Security.Claims;
 using Fort.Database;
 using Fort.Managers;
+using Fort.Middlewares;
 using Fort.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -62,6 +63,7 @@ namespace Fort
             }
 
             app.UseAuthentication();
+            app.UseMiddleware<ContextMiddleware>();
             // app.UseWebSockets();
             // app.UseMiddleware<WSTestMiddleware>();
             // app.UseMiddleware<CurrentPlayerMiddleware>();
