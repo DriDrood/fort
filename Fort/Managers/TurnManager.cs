@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Fort.Database;
+using Fort.Models;
 using Fort.Models.Store;
 using Microsoft.EntityFrameworkCore;
 
@@ -64,6 +65,20 @@ namespace Fort.Managers
                 Orders = orders
             };
             return turn;
+        }
+
+        public void SetOrder(OrderData order, Guid playerId, int turnId)
+        {
+            var dbOrder = new Database.Entities.Order
+            {
+                TurnId = turnId,
+                Amount = order.Amount,
+                SourceCityId = order.SourceId,
+                TargetCityId = order.TargetId,
+                UserId = playerId
+            };
+            _db.Orders.Add(dbOrder);
+            _db.SaveChanges();
         }
 
         private bool IsFriendly(Guid city)

@@ -1,5 +1,5 @@
 export default {
-  toggleDone: (state) => state.currentTurn.done = !state.currentTurn.done,
+  done: (state, payload) => state.currentTurn.done = payload.done,
   countDown: (state) => {
     setTimeout(() =>
       setInterval(() => {

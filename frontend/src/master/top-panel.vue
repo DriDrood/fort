@@ -29,7 +29,7 @@ export default {
   },
   methods: {
     toggleDone() {
-      this.$store.commit("toggleDone");
+      this.$store.dispatch("toggleDone");
     },
     prevTurn() {
       this.$store.dispatch("prevTurn");

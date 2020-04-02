@@ -52,9 +52,17 @@ namespace Fort.Comm
         }
 
         [Authorize]
-        public ActionResult TurnDone(bool done)
+        public ActionResult TurnDone([FromBody]DoneData data)
         {
-            _lifecycleService.Done(_context.CurrentUser.Id, done);
+            _lifecycleService.Done(_context.CurrentUser.Id, data.Done);
+
+            return Ok();
+        }
+
+        [Authorize]
+        public ActionResult SetOrder([FromBody]OrderData data)
+        {
+            _turnManager.SetOrder(data, _context.CurrentUser.Id, _lifecycleService.CurrentTurnId);
 
             return Ok();
         }

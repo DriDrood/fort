@@ -48,11 +48,10 @@ export default {
     Vue.set(state.turnRun, 'armies', []);
     state.turnRun.armiesPosition = 0;
   },
-  order(state, payload) { // sourceId, targetId, amount, sourceCityRemains
+  order(state, payload) { // sourceId, targetId, amount
     var currentTurn = turnsGetters.activeTurn(state);
     const source = currentTurn.cityOccupations[payload.sourceId];
     if (source.playerId != state.login.id) return;
-    if (payload.max < payload.amount) return;
 
     const orderKey = `${payload.sourceId}>>${payload.targetId}`;
     if (payload.amount > 0)

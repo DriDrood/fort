@@ -22,6 +22,7 @@ import notifyMutations from './notify/mutations';
 import turnsMutations from './turns/mutations';
 import usersMutations from './users/mutations';
 
+import lifecycleActions from './lifecycle/actions';
 import masterActions from './master/actions';
 import turnsActions from './turns/actions';
 import usersActions from './users/actions';
@@ -54,6 +55,7 @@ export default new Vuex.Store({
     ...usersMutations
   },
   actions: {
+    ...lifecycleActions,
     ...masterActions,
     ...turnsActions,
     ...usersActions

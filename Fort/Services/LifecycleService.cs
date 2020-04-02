@@ -5,6 +5,8 @@ namespace Fort.Services
 {
     public class LifecycleService
     {
+        public int CurrentTurnId { get; }
+
         public void Done(Guid userId, bool done)
         {
             _usersDone[userId] = done;

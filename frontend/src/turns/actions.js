@@ -39,6 +39,14 @@ const actions = {
     {
       context.commit('nextTurn');
     }
+  },
+  order(context, payload) { // sourceId, targetId, amount
+    const source = context.getters.activeTurn.cityOccupations[payload.sourceId];
+    if (source.playerId != context.state.login.id) return;
+
+    comm.post('play/setorder', payload, context, () => {
+      context.commit('order', payload);
+    });
   }
 };
 export default actions;

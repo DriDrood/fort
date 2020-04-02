@@ -61,11 +61,19 @@ export default {
       this.value = Math.round((e.offsetX / e.target.offsetWidth) * this.max);
     },
     accept() {
-      this.$store.commit('order', {
+      if (this.value > this.max)
+      {
+        this.commit('notify', {
+          text: "Posíláte větší armádu než jakou máte.",
+          level: 'warning'
+        });
+        return;
+      }
+
+      this.$store.dispatch('order', {
         sourceId: this.sourceId,
         targetId: this.targetId,
-        amount: this.value,
-        max: this.max
+        amount: this.value
       });
       this.$emit("close");
     },
