@@ -47,7 +47,8 @@ namespace Fort.Managers
                     {
                         PlayerId = c.OwnerId,
                         Size = GetCitySize(c.Army),
-                        Army = IsFriendly(c.CityId) ? (int?)c.Army : null
+                        Army = IsFriendly(c.CityId) ? (int?)c.Army : null,
+                        AvailableArmy = IsFriendly(c.CityId) ? (int?)(c.Army - turnDb.Orders.Where(o => o.SourceCityId == c.CityId).Sum(o => o.Amount)) : null
                     });
             var orders = turnDb.Orders
                 .ToDictionary(

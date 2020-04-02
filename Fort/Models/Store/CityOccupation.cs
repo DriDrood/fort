@@ -7,5 +7,6 @@ namespace Fort.Models.Store
         public Guid PlayerId { get; set; }
         public int Size { get; set; }
         public int? Army { get; set; }
+        public int? AvailableArmy { get; set; }
     }
 }

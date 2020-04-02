@@ -49,18 +49,19 @@ export default {
     state.turnRun.armiesPosition = 0;
   },
   order(state, payload) { // sourceId, targetId, amount
-    var currentTurn = turnsGetters.activeTurn(state);
+    const currentTurn = turnsGetters.activeTurn(state);
     const source = currentTurn.cityOccupations[payload.sourceId];
     if (source.playerId != state.login.id) return;
 
     const orderKey = `${payload.sourceId}>>${payload.targetId}`;
+    const max = ((currentTurn.orders[orderKey] && currentTurn.orders[orderKey].amount) || 0) + source.availableArmy;
     if (payload.amount > 0)
       Vue.set(currentTurn.orders, orderKey, { playerId: state.login.id, amount: payload.amount, size: helpers.getArmySize(payload.amount) });
     else if (currentTurn.orders[orderKey])
       Vue.delete(currentTurn.orders, orderKey);
     // else nothing
 
-    source.availableArmy = payload.max - payload.amount;
+    source.availableArmy = max - payload.amount;
   }
 }
 
