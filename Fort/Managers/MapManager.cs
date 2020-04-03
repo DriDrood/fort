@@ -27,7 +27,7 @@ namespace Fort.Managers
         public IEnumerable<string> GetAllRoads()
         {
             var roads = _db.Roads
-                .Select(r => string.Compare(r.SourceId.ToString(), r.TargetId.ToString()) < 0 ? $"{r.SourceId}__{r.TargetId}" : $"{r.TargetId}__{r.SourceId}")
+                .Select(r => r.Id)
                 .ToArray();
             return roads;
         }

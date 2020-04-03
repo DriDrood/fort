@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Fort.Migrations
 {
-    public partial class Init : Migration
+    public partial class init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -15,8 +15,8 @@ namespace Fort.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     X = table.Column<int>(nullable: false),
                     Y = table.Column<int>(nullable: false),
-                    PopulationGrowCoef = table.Column<double>(nullable: false),
-                    DefenceCoef = table.Column<double>(nullable: false)
+                    PopulationGrowCoef = table.Column<double>(nullable: false, defaultValue: 1),
+                    DefenceCoef = table.Column<double>(nullable: false, defaultValue: 1)
                 },
                 constraints: table =>
                 {
@@ -28,8 +28,8 @@ namespace Fort.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    ArmyStrengthCoef = table.Column<double>(nullable: false),
-                    PopulationGrowthCoef = table.Column<double>(nullable: false),
+                    ArmyStrengthCoef = table.Column<double>(nullable: false, defaultValue: 1),
+                    PopulationGrowthCoef = table.Column<double>(nullable: false, defaultValue: 1),
                     Color = table.Column<string>(maxLength: 10, nullable: false),
                     ColorLight = table.Column<string>(maxLength: 10, nullable: false)
                 },
@@ -56,13 +56,12 @@ namespace Fort.Migrations
                 name: "Roads",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
                     SourceId = table.Column<Guid>(nullable: false),
                     TargetId = table.Column<Guid>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Roads", x => x.Id);
+                    table.PrimaryKey("PK_Roads", x => new { x.SourceId, x.TargetId });
                     table.ForeignKey(
                         name: "FK_Roads_Cities_SourceId",
                         column: x => x.SourceId,
@@ -223,9 +222,10 @@ namespace Fort.Migrations
                 column: "OwnerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CityOccupations_TurnId",
+                name: "IX_CityOccupations_TurnId_CityId",
                 table: "CityOccupations",
-                column: "TurnId");
+                columns: new[] { "TurnId", "CityId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_SourceCityId",
@@ -238,19 +238,15 @@ namespace Fort.Migrations
                 column: "TargetCityId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_TurnId",
-                table: "Orders",
-                column: "TurnId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Orders_UserId",
                 table: "Orders",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Roads_SourceId",
-                table: "Roads",
-                column: "SourceId");
+                name: "IX_Orders_TurnId_SourceCityId_TargetCityId",
+                table: "Orders",
+                columns: new[] { "TurnId", "SourceCityId", "TargetCityId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roads_TargetId",
@@ -260,7 +256,8 @@ namespace Fort.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_StartingPositions_CityId",
                 table: "StartingPositions",
-                column: "CityId");
+                column: "CityId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StartingPositions_UserId",
@@ -268,9 +265,21 @@ namespace Fort.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_Email",
+                table: "Users",
+                column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_TeamId",
                 table: "Users",
                 column: "TeamId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_UserName",
+                table: "Users",
+                column: "UserName",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

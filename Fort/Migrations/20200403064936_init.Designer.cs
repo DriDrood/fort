@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fort.Migrations
 {
     [DbContext(typeof(FortDbContext))]
-    [Migration("20200328115656_Init")]
-    partial class Init
+    [Migration("20200403064936_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -58,7 +58,8 @@ namespace Fort.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.HasIndex("TurnId");
+                    b.HasIndex("TurnId", "CityId")
+                        .IsUnique();
 
                     b.ToTable("CityOccupations");
                 });
@@ -86,25 +87,21 @@ namespace Fort.Migrations
 
                     b.HasIndex("TargetCityId");
 
-                    b.HasIndex("TurnId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("TurnId", "SourceCityId", "TargetCityId")
+                        .IsUnique();
 
                     b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Fort.Database.Entities.Road", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
                     b.Property<Guid>("SourceId");
 
                     b.Property<Guid>("TargetId");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("SourceId");
+                    b.HasKey("SourceId", "TargetId");
 
                     b.HasIndex("TargetId");
 
@@ -124,7 +121,8 @@ namespace Fort.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CityId");
+                    b.HasIndex("CityId")
+                        .IsUnique();
 
                     b.HasIndex("UserId");
 
@@ -209,7 +207,13 @@ namespace Fort.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Email")
+                        .IsUnique();
+
                     b.HasIndex("TeamId");
+
+                    b.HasIndex("UserName")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });

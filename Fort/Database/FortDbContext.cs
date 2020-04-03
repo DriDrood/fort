@@ -34,6 +34,9 @@ namespace Fort.Database
                 .HasOne(e => e.Turn)
                 .WithMany(e => e.CityOccupations)
                 .HasForeignKey(e => e.TurnId);
+            builder.Entity<CityOccupation>()
+                .HasIndex(e => new { e.TurnId, e.CityId })
+                .IsUnique();
 
             // order
             builder.Entity<Order>()
@@ -52,8 +55,13 @@ namespace Fort.Database
                 .HasOne(e => e.Turn)
                 .WithMany(e => e.Orders)
                 .HasForeignKey(e => e.TurnId);
+            builder.Entity<Order>()
+                .HasIndex(e => new { e.TurnId, e.SourceCityId, e.TargetCityId })
+                .IsUnique();
 
             // road
+            builder.Entity<Road>()
+                .HasKey(e => new { e.SourceId, e.TargetId });
             builder.Entity<Road>()
                 .HasOne(e => e.Source)
                 .WithMany(e => e.SourceForRoads)
@@ -72,12 +80,21 @@ namespace Fort.Database
                 .HasOne(e => e.User)
                 .WithMany(e => e.StartingPositions)
                 .HasForeignKey(e => e.UserId);
+            builder.Entity<StartingPosition>()
+                .HasIndex(e => e.CityId)
+                .IsUnique();
 
             // user
             builder.Entity<User>()
                 .HasOne(e => e.Team)
                 .WithMany(e => e.Members)
                 .HasForeignKey(e => e.TeamId);
+            builder.Entity<User>()
+                .HasIndex(e => e.UserName)
+                .IsUnique();
+            builder.Entity<User>()
+                .HasIndex(e => e.Email)
+                .IsUnique();
 
             DbSeed.Cities(builder);
             DbSeed.Roads(builder);
