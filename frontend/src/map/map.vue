@@ -40,6 +40,11 @@
           v-bind:[`xlink:href`]="`#road-${roadId}`"
         />
         <use
+          v-for="orderId in availableOrders"
+          :key="`reuse-${orderId}`"
+          v-bind:[`xlink:href`]="`#order-${orderId}`"
+        />
+        <use
           v-for="cityId in availableCities"
           :key="`reuse-${cityId}`"
           v-bind:[`xlink:href`]="`#city-${cityId}`"
@@ -81,6 +86,10 @@ export default {
       return this.$store.getters.cityRoads[this.selected].map(r =>
         r < this.selected ? `${r}__${this.selected}` : `${this.selected}__${r}`
       );
+    },
+    availableOrders() {
+      if (!this.selected) return [];
+      return Object.keys(this.activeTurn.orders).filter(id => id.split('>>')[0] == this.selected);
     },
     availableCities() {
       if (!this.selected) return [];
@@ -160,14 +169,16 @@ export default {
   background-color: #000
   .map
     margin-top: $topPanel-height
-    width: 1920px
-    height: 1024px
+    width: $map-width
+    height: $map-height
     background: url('/world.jpg') no-repeat
     background-size: 100% 100%
     svg
       width: 100%
       height: 100%
       .darkness
+        width: $map-width
+        height: $map-height
         fill: #000
         fill-opacity: 0.8
 </style>
