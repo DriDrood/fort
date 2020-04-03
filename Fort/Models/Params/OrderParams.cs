@@ -1,8 +1,8 @@
 using System;
 
-namespace Fort.Models
+namespace Fort.Models.Params
 {
-    public class OrderData
+    public class OrderParams
     {
         public Guid SourceId { get; set; }
         public Guid TargetId { get; set; }

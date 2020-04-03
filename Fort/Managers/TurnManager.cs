@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using Fort.Database;
-using Fort.Models;
+using Fort.Models.Params;
 using Fort.Models.Store;
 using Microsoft.EntityFrameworkCore;
 
@@ -68,7 +68,7 @@ namespace Fort.Managers
             return turn;
         }
 
-        public void SetOrder(OrderData order, Guid playerId, int turnId)
+        public void SetOrder(OrderParams order, Guid playerId, int turnId)
         {
             var dbOrder = _db.Orders.SingleOrDefault(o => o.TurnId == turnId && o.SourceCityId == order.SourceId && o.TargetCityId == order.TargetId);
 

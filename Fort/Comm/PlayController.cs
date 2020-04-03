@@ -1,5 +1,5 @@
 using Fort.Managers;
-using Fort.Models;
+using Fort.Models.Params;
 using Fort.Models.Store;
 using Fort.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fort.Comm
 {
+    [Authorize]
     public class PlayController : Controller
     {
         public PlayController(Context context, DoneService doneService, LifecycleService lifecycleService, MapManager mapManager, TurnManager turnManager, UserManager userManager)
@@ -26,10 +27,11 @@ namespace Fort.Comm
         private readonly TurnManager _turnManager;
         private readonly UserManager _userManager;
 
-        public ActionResult Login([FromBody]LoginData loginData)
+        [AllowAnonymous]
+        public ActionResult Login([FromBody]LoginParams param)
         {
             // authentication
-            var login = _userManager.Login(loginData.Email, loginData.Password);
+            var login = _userManager.Login(param.Email, param.Password);
             if (login == null)
                 return Unauthorized();
 
@@ -39,32 +41,37 @@ namespace Fort.Comm
             return Ok(init);
         }
 
-        [Authorize]
         public ActionResult Init()
         {
             var init = GetInitData();
             return Ok(init);
         }
 
-        [Authorize]
-        public ActionResult GetTurn([FromBody]TurnData data)
+        public ActionResult CheckState([FromBody]CheckParams param)
         {
-            var turn = _turnManager.GetTurn(data.Id);
+            if (_lifecycleService.State == param.State && _lifecycleService.CurrentTurnId == param.TurnId)
+                return StatusCode(304);
+
+            var turn = _turnManager.GetTurn(_lifecycleService.CurrentTurnId);
             return Ok(turn);
         }
 
-        [Authorize]
-        public ActionResult TurnDone([FromBody]DoneData data)
+        public ActionResult GetTurn([FromBody]TurnParams param)
         {
-            _doneService.Done(_context.CurrentUser.Id, data.Done);
+            var turn = _turnManager.GetTurn(param.Id);
+            return Ok(turn);
+        }
+
+        public ActionResult TurnDone([FromBody]DoneParams param)
+        {
+            _doneService.Done(_context.CurrentUser.Id, param.Done);
 
             return Ok();
         }
 
-        [Authorize]
-        public ActionResult SetOrder([FromBody]OrderData data)
+        public ActionResult SetOrder([FromBody]OrderParams param)
         {
-            _turnManager.SetOrder(data, _context.CurrentUser.Id, _lifecycleService.CurrentTurnId);
+            _turnManager.SetOrder(param, _context.CurrentUser.Id, _lifecycleService.CurrentTurnId);
 
             return Ok();
         }

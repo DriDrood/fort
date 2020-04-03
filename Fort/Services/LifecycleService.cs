@@ -199,7 +199,7 @@ namespace Fort.Services
                     Turn = _currentTurn,
                     CityId = city.Id,
                     OwnerId = ownerId,
-                    Army = army + (ownerId != null ? ConfigManager.Game.Population.DefaultTurnGrow : 0)
+                    Army = army
                 };
                 db.CityOccupations.Add(occupation);
             }
@@ -271,12 +271,15 @@ namespace Fort.Services
                     ownerId = cityOccupation.OwnerId;
                 }
 
+                var populationGrow = ownerId != null
+                    ? ConfigManager.Game.Population.DefaultTurnGrow
+                    : 0;
                 var newOccupation = new CityOccupation
                 {
                     Turn = turn,
                     CityId = cityOccupation.CityId,
                     OwnerId = ownerId,
-                    Army = result
+                    Army = result + populationGrow
                 };
                 db.Add(newOccupation);
             }
