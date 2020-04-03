@@ -42,7 +42,7 @@ namespace Fort.Managers
 
             var cityOccupations = turnDb.CityOccupations
                 .ToDictionary(
-                    c => c.CityId, 
+                    c => c.CityId,
                     c => new CityOccupation
                     {
                         PlayerId = c.OwnerId,
@@ -52,7 +52,7 @@ namespace Fort.Managers
                     });
             var orders = turnDb.Orders
                 .ToDictionary(
-                    o => $"{o.SourceCityId}>>{o.TargetCityId}", 
+                    o => $"{o.SourceCityId}>>{o.TargetCityId}",
                     o => new Order
                     {
                         PlayerId = o.UserId,
@@ -70,15 +70,34 @@ namespace Fort.Managers
 
         public void SetOrder(OrderData order, Guid playerId, int turnId)
         {
-            var dbOrder = new Database.Entities.Order
+            var dbOrder = _db.Orders.SingleOrDefault(o => o.TurnId == turnId && o.SourceCityId == order.SourceId && o.TargetCityId == order.TargetId);
+
+            // add
+            if (dbOrder == null)
             {
-                TurnId = turnId,
-                Amount = order.Amount,
-                SourceCityId = order.SourceId,
-                TargetCityId = order.TargetId,
-                UserId = playerId
-            };
-            _db.Orders.Add(dbOrder);
+                dbOrder = new Database.Entities.Order
+                {
+                    TurnId = turnId,
+                    Amount = order.Amount,
+                    SourceCityId = order.SourceId,
+                    TargetCityId = order.TargetId,
+                    UserId = playerId
+                };
+                _db.Orders.Add(dbOrder);
+            }
+
+            // remove
+            else if (order.Amount == 0)
+            {
+                _db.Orders.Remove(dbOrder);
+            }
+
+            // update
+            else
+            {
+                dbOrder.Amount = order.Amount;
+            }
+
             _db.SaveChanges();
         }
 
