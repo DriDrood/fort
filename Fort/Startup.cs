@@ -44,6 +44,7 @@ namespace Fort
             services.AddAuthorization(opt => opt.AddPolicy("Admin", policy => policy.RequireClaim(ClaimTypes.Role, "Admin")));
 
             services.AddSingleton<LifecycleService>();
+            services.AddSingleton<DoneService>();
             services.AddScoped<Context>();
             services.AddScoped<MapManager>();
             services.AddScoped<TurnManager>();
@@ -70,6 +71,8 @@ namespace Fort
             // app.UseMiddleware<LoggerMiddleware>();
             // app.UseMiddleware<WSMiddleware>();
             app.UseMvc(routes => routes.MapRoute("default", "api/{controller}/{action}/{id?}"));
+
+            app.ApplicationServices.GetService<LifecycleService>().Setup();
         }
 
         private static void MigrateDatabase(IApplicationBuilder app)

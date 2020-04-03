@@ -9,9 +9,10 @@ namespace Fort.Comm
 {
     public class PlayController : Controller
     {
-        public PlayController(Context context, LifecycleService lifecycleService, MapManager mapManager, TurnManager turnManager, UserManager userManager)
+        public PlayController(Context context, DoneService doneService, LifecycleService lifecycleService, MapManager mapManager, TurnManager turnManager, UserManager userManager)
         {
             _context = context;
+            _doneService = doneService;
             _lifecycleService = lifecycleService;
             _mapManager = mapManager;
             _turnManager = turnManager;
@@ -19,6 +20,7 @@ namespace Fort.Comm
         }
 
         private readonly Context _context;
+        private readonly DoneService _doneService;
         private readonly LifecycleService _lifecycleService;
         private readonly MapManager _mapManager;
         private readonly TurnManager _turnManager;
@@ -54,7 +56,7 @@ namespace Fort.Comm
         [Authorize]
         public ActionResult TurnDone([FromBody]DoneData data)
         {
-            _lifecycleService.Done(_context.CurrentUser.Id, data.Done);
+            _doneService.Done(_context.CurrentUser.Id, data.Done);
 
             return Ok();
         }
