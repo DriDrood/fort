@@ -2,7 +2,28 @@ import Vue from 'vue';
 import turnsGetters from './getters';
 
 export default {
-  prevTurn: async (state) => {
+  updateTurn(state, payload) {
+    for (let i = state.turns.length; i < state.currentTurn.id; i++) {
+      state.turns.push(null);
+    }
+    state.turns.push(payload.currentTurn.turn);
+  },
+  updateOrder(state, payload) { // sourceId, targetId, amount
+    const currentTurn = turnsGetters.activeTurn(state);
+    const source = currentTurn.cityOccupations[payload.sourceId];
+    if (source.playerId != state.login.id) return;
+
+    const orderKey = `${payload.sourceId}>>${payload.targetId}`;
+    const max = ((currentTurn.orders[orderKey] && currentTurn.orders[orderKey].amount) || 0) + source.availableArmy;
+    if (payload.amount > 0)
+      Vue.set(currentTurn.orders, orderKey, { playerId: state.login.id, amount: payload.amount, size: helpers.getArmySize(payload.amount) });
+    else if (currentTurn.orders[orderKey])
+      Vue.delete(currentTurn.orders, orderKey);
+    // else nothing
+
+    source.availableArmy = max - payload.amount;
+  },
+  updatePrevTurn: async (state) => {
     // invalid command
     if (state.activeTurnId <= 0 || state.turnRun.armiesPosition != 0) return;
 
@@ -25,7 +46,7 @@ export default {
     Vue.set(state.turnRun, 'armies', []);
     state.turnRun.armiesPosition = 0;
   },
-  nextTurn: async (state) => {
+  updateNextTurn: async (state) => {
     // invalid command
     if (state.activeTurnId >= state.turns.last || state.turnRun.armiesPosition != 0) return;
 
@@ -47,21 +68,6 @@ export default {
     // clean
     Vue.set(state.turnRun, 'armies', []);
     state.turnRun.armiesPosition = 0;
-  },
-  order(state, payload) { // sourceId, targetId, amount
-    const currentTurn = turnsGetters.activeTurn(state);
-    const source = currentTurn.cityOccupations[payload.sourceId];
-    if (source.playerId != state.login.id) return;
-
-    const orderKey = `${payload.sourceId}>>${payload.targetId}`;
-    const max = ((currentTurn.orders[orderKey] && currentTurn.orders[orderKey].amount) || 0) + source.availableArmy;
-    if (payload.amount > 0)
-      Vue.set(currentTurn.orders, orderKey, { playerId: state.login.id, amount: payload.amount, size: helpers.getArmySize(payload.amount) });
-    else if (currentTurn.orders[orderKey])
-      Vue.delete(currentTurn.orders, orderKey);
-    // else nothing
-
-    source.availableArmy = max - payload.amount;
   }
 }
 
@@ -72,15 +78,15 @@ const helpers = {
     Object.keys(orders).forEach(orderId => {
       // already met
       if (met[orderId] != null) return;
-  
+
       const [sourceId, targetId] = orderId.split('>>');
       const reverseOrderId = `${targetId}>>${sourceId}`;
-  
+
       const order = orders[orderId];
       const reverseOrder = orders[reverseOrderId];
       // no enemy reverse turn
       if (!reverseOrder || state.players[order.playerId].teamId == state.players[reverseOrder.playerId].teamId) return;
-  
+
       // meeting ;-)
       // first win
       if (order.size > reverseOrder.size) {
@@ -98,7 +104,7 @@ const helpers = {
         met[reverseOrderId] = 5;
       }
     });
-  
+
     return met;
   },
   createMove(state, orders, met, reverse) {
@@ -117,7 +123,7 @@ const helpers = {
       const size2 = reverse
         ? order.size
         : met[orderId] || order.size;
-  
+
       // return
       state.turnRun.armies.push({
         startX: start.x,
@@ -136,7 +142,7 @@ const helpers = {
   getArmySize(army) {
     if (!army)
       return null;
-  
+
     return Math.floor(Math.sqrt(army)) + 5;
   },
   sleep(ms) {

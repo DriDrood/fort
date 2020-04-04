@@ -28,7 +28,8 @@ export default {
     ...mapState(['login'])
   },
   mounted() {
-    this.$store.commit('countDown');
+    this.$store.commit('countDownPeriodicaly');
+    this.$store.dispatch('checkStatePeriodicaly');
   }
 };
 </script>

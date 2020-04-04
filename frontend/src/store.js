@@ -15,7 +15,6 @@ import commGetters from './comm/getters';
 import mapGetters from './map/getters';
 import turnsGetters from './turns/getters';
 
-import commMutations from './comm/mutations';
 import lifecycleMutations from './lifecycle/mutations';
 import masterMutations from './master/mutations';
 import notifyMutations from './notify/mutations';
@@ -47,7 +46,6 @@ export default new Vuex.Store({
     ...turnsGetters
   },
   mutations: {
-    ...commMutations,
     ...lifecycleMutations,
     ...masterMutations,
     ...notifyMutations,

@@ -1,7 +1,11 @@
 import Vue from 'vue';
 
 const mutations = {
-  login(state, payload) {
+  updateUsers(state, payload) {
+    state.players = payload.players;
+    state.teams = payload.teams;
+  },
+  updateLogin(state, payload) {
     state.login = payload.login;
 
     Vue.ls.set('id', payload.login.id);

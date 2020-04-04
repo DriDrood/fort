@@ -1,6 +1,4 @@
-import lifecycleGetters from '../lifecycle/getters';
-
 export default {
-  isTurnCurrent: (state) => state.activeTurnId == lifecycleGetters.currentTurnId(state),
+  isTurnCurrent: (state) => state.activeTurnId == state.currentTurn.id,
   activeTurn: (state) => state.turns[state.activeTurnId]
 }

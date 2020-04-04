@@ -52,8 +52,8 @@ namespace Fort.Comm
             if (_lifecycleService.State == param.State && _lifecycleService.CurrentTurnId == param.TurnId)
                 return StatusCode(304);
 
-            var turn = _turnManager.GetTurn(_lifecycleService.CurrentTurnId);
-            return Ok(turn);
+            var turn = _turnManager.GetCurrentTurn();
+            return Ok(new { CurrentTurn = turn });
         }
 
         public ActionResult GetTurn([FromBody]TurnParams param)

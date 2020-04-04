@@ -101,6 +101,9 @@ export default {
     userAvatarSizes() {
       let result = {};
       Object.values(this.activeTurn.cityOccupations).forEach(c => {
+        if (c.playerId == null)
+          return;
+          
         const key = `U_${c.playerId}_${c.size}`;
         if (result[key] === undefined)
           Vue.set(result, key, {

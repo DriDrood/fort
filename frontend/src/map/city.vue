@@ -38,6 +38,10 @@ export default {
       return this.$store.getters.cityRoads[this.city.id].includes(this.selected);
     },
     isOwnerVisible() {
+      // neutral city
+      if (this.occupation.playerId == null)
+        return false;
+
       // same player
       if (this.occupation.playerId == this.$store.state.login.id)
         return true;
@@ -56,6 +60,9 @@ export default {
       return false;
     },
     teamId() {
+      if (this.occupation.playerId == null)
+        return 'neutral';
+        
       return this.$store.state.players[this.occupation.playerId].teamId;
     }
   },

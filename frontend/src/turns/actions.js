@@ -2,6 +2,14 @@ import Vue from 'vue';
 import comm from '../comm/comm';
 
 const actions = {
+  order(context, payload) { // sourceId, targetId, amount
+    const source = context.getters.activeTurn.cityOccupations[payload.sourceId];
+    if (source.playerId != context.state.login.id) return;
+
+    comm.post('play/setorder', payload, context, () => {
+      context.commit('updateOrder', payload);
+    });
+  },
   prevTurn(context) {
     // invalid command - first turn || already running
     if (context.state.activeTurnId <= 0 || context.state.turnRun.armiesPosition != 0) return;
@@ -12,13 +20,13 @@ const actions = {
     {
       comm.post('play/getTurn', { id: finalTurn}, context, (data) => {
         Vue.set(context.state.turns, finalTurn, data);
-        context.commit('prevTurn');
+        context.commit('updatePrevTurn');
       });
     }
     // already loaded
     else
     {
-      context.commit('prevTurn');
+      context.commit('updatePrevTurn');
     }
   },
   nextTurn(context) {
@@ -31,22 +39,14 @@ const actions = {
     {
       comm.post('play/getTurn', { id: finalTurn}, context, (data) => {
         Vue.set(context.state.turns, finalTurn, data);
-        context.commit('nextTurn');
+        context.commit('updateNextTurn');
       });
     }
     // already loaded
     else
     {
-      context.commit('nextTurn');
+      context.commit('updateNextTurn');
     }
-  },
-  order(context, payload) { // sourceId, targetId, amount
-    const source = context.getters.activeTurn.cityOccupations[payload.sourceId];
-    if (source.playerId != context.state.login.id) return;
-
-    comm.post('play/setorder', payload, context, () => {
-      context.commit('order', payload);
-    });
   }
 };
 export default actions;

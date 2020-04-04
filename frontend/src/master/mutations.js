@@ -1,21 +1,33 @@
-const mutations = {
-  init(state, payload) { //
-    state.cities = payload.cities;
-    state.roads = payload.roads;
-    state.players = payload.players;
-    state.teams = payload.teams;
-    state.config = payload.config;
+import lifecycleMutations from '../lifecycle/mutations';
+import mapMutations from '../map/mutations';
+import turnMutations from '../turns/mutations';
+import userMutations from '../users/mutations';
 
-    // turns
-    state.activeTurnId = payload.currentTurn.id; 
-    state.currentTurn.endsAt = payload.currentTurn.endsAt
-    state.turns = [];
-    for (let i = 0; i < payload.currentTurn.id; i++) {
-      state.turns.push(null);
-    }
-    state.turns.push(payload.currentTurn.turn);
+const mutations = {
+  countDownPeriodicaly: (state) => {
+    setTimeout(() =>
+      setInterval(() => {
+        if (state.currentTurn.endsAt) {
+          const remainsDate = new Date(state.currentTurn.endsAt - new Date());
+          state.currentTurn.remains = `${remainsDate.getMinutes()}:${remainsDate.getSeconds().toString().padStart(2, '0')}`;
+        }
+        else {
+          state.currentTurn.remains = '-:--';
+        }
+      }, 1000), new Date(state.currentTurn.endsAt - new Date()).getMilliseconds());
   },
-  generateGuid: () => `${mutations.s4()}${mutations.s4()}-${mutations.s4()}-4${mutations.s4().substr(0, 3)}-${mutations.s4()}-${mutations.s4()}${mutations.s4()}${mutations.s4()}`.toLowerCase(),
-  s4: () => (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
+  updateInit(state, payload) { //
+    state.config = payload.config;
+    mapMutations.updateMap(state, payload);
+    userMutations.updateUsers(state, payload);
+    lifecycleMutations.updateCurrentTurn(state, payload);
+    turnMutations.updateTurn(state, payload);
+  },
+  updateDone: (state, payload) => state.currentTurn.done = payload.done,
+  generateGuid: () => `${helpers.s4()}${helpers.s4()}-${helpers.s4()}-4${helpers.s4().substr(0, 3)}-${helpers.s4()}-${helpers.s4()}${helpers.s4()}${helpers.s4()}`.toLowerCase()
 };
 export default mutations;
+
+const helpers = {
+  s4: () => (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1)
+}

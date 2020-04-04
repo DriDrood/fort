@@ -3,24 +3,25 @@ using System.Linq;
 using Fort.Database;
 using Fort.Models.Params;
 using Fort.Models.Store;
+using Fort.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fort.Managers
 {
     public class TurnManager
     {
-        public TurnManager(FortDbContext db)
+        public TurnManager(FortDbContext db, LifecycleService lifecycleService)
         {
             _db = db;
+            _lifecycleService = lifecycleService;
         }
 
         private readonly FortDbContext _db;
+        private readonly LifecycleService _lifecycleService;
 
         public CurrentTurn GetCurrentTurn()
         {
-            var lastTurn = _db.Turns
-                .OrderByDescending(t => t.Id)
-                .FirstOrDefault();
+            var lastTurn = _db.Turns.Find(_lifecycleService.CurrentTurnId);
             if (lastTurn == null)
                 return null;
 
@@ -28,6 +29,7 @@ namespace Fort.Managers
             return new CurrentTurn
             {
                 Id = lastTurn.Id,
+                State = _lifecycleService.State.ToString(),
                 EndsAt = lastTurn.EndsAt,
                 Turn = turn
             };
