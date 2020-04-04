@@ -13,7 +13,6 @@ const actions = {
       { state: context.state.currentTurn.state, turnId: context.state.currentTurn.id },
       context,
       (data) => {
-        console.log(data);
         context.commit('updateCurrentTurn', data);
         context.commit('updateTurn', data);
       });

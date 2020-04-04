@@ -59,7 +59,7 @@ const helpers = {
     Vue.delete(state.requests, requestId);
   },
   error(context, err) {
-    console.log(err);
+    // console.log(err);
     let text = err;
     if (err.body != null)
       text = err.body
