@@ -123,12 +123,23 @@ export default {
         return;
       }
 
+      if (this.$store.state.currentTurn.state != 'Running')
+      {
+        this.$store.commit("notify", {
+          text: "Kolo neběží",
+          level: "warning"
+        });
+        this.selected = null;
+        return;
+      }
+
       // I'm in history
       if (!this.isTurnCurrent) {
         this.$store.commit("notify", {
           text: "Jste v minulosti",
           level: "warning"
         });
+        this.selected = null;
         return;
       }
 

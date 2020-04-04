@@ -21,16 +21,18 @@ namespace Fort.Managers
 
         public CurrentTurn GetCurrentTurn()
         {
-            var lastTurn = _db.Turns.Find(_lifecycleService.CurrentTurnId);
-            if (lastTurn == null)
+            var currentTurn = _db.Turns.Find(_lifecycleService.CurrentTurnId);
+            if (currentTurn == null)
                 return null;
 
-            var turn = GetTurn(lastTurn.Id);
+            var turn = GetTurn(currentTurn.Id);
             return new CurrentTurn
             {
-                Id = lastTurn.Id,
+                Id = currentTurn.Id,
                 State = _lifecycleService.State.ToString(),
-                EndsAt = lastTurn.EndsAt,
+                EndsAt = _lifecycleService.State == ELifecycleState.Finalizing
+                    ? currentTurn.EndsAt.Value.AddSeconds(ConfigManager.Game.Animations.PauseBeforeArmyRunSec)
+                    : currentTurn.EndsAt,
                 Turn = turn
             };
         }

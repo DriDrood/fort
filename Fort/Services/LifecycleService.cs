@@ -38,7 +38,9 @@ namespace Fort.Services
                 if (_currentTurn.EndsAt == null)
                     return ELifecycleState.Paused;
 
-                if (_currentTurn.EndsAt < DateTime.UtcNow)
+                // in time of finalizing
+                if (_currentTurn.EndsAt < DateTime.UtcNow
+                        && _currentTurn.EndsAt.Value.AddSeconds(ConfigManager.Game.Animations.PauseBeforeArmyRunSec) > DateTime.UtcNow)
                     return ELifecycleState.Finalizing;
 
                 return ELifecycleState.Running;
@@ -88,6 +90,7 @@ namespace Fort.Services
                             _cancel.Cancel();
                             break;
                         case ELifecycleState.Running:
+                            _startTurn(db);
                             wait = _currentTurn.EndsAt.Value - DateTime.UtcNow;
                             break;
                         case ELifecycleState.Paused:
@@ -206,7 +209,9 @@ namespace Fort.Services
         }
         private void _startTurn(FortDbContext db)
         {
-            _currentTurn = db.Turns.Find(CurrentTurnId);
+            _currentTurn = db.Turns
+                .OrderByDescending(t => t.Id)
+                .First();
 
             var now = DateTime.UtcNow;
             _currentTurn.StartsAt = now;
@@ -260,7 +265,7 @@ namespace Fort.Services
                 {
                     // biggest enemy army
                     ownerId = db.Orders
-                        .Where(o => o.TurnId == CurrentTurnId && o.TargetCityId == cityOccupation.CityId && o.User.TeamId != cityOccupation.Owner.TeamId)
+                        .Where(o => o.TurnId == CurrentTurnId && o.TargetCityId == cityOccupation.CityId && (cityOccupation.Owner == null || o.User.TeamId != cityOccupation.Owner.TeamId))
                         .OrderByDescending(o => o.Amount)
                         .First().UserId;
                     result = -result;
@@ -283,10 +288,6 @@ namespace Fort.Services
                 };
                 db.Add(newOccupation);
             }
-
-            _currentTurn = turn;
-
-            _startTurn(db);
         }
         #endregion
     }

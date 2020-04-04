@@ -2,6 +2,27 @@ import Vue from 'vue';
 import comm from '../comm/comm';
 
 const actions = {
+  countDownPeriodicaly: (context) => {
+    setTimeout(() =>
+      setInterval(() => {
+        if (context.state.currentTurn.endsAt) {
+          const remains = context.state.currentTurn.endsAt - new Date();
+
+          // turn end
+          if (remains <= 0) {
+            context.dispatch('checkState');
+          }
+          // turn is running
+          else {
+            const remainsDate = new Date(remains);
+            context.state.currentTurn.remains = `${remainsDate.getMinutes()}:${remainsDate.getSeconds().toString().padStart(2, '0')}`;
+          }
+        }
+        else {
+          context.state.currentTurn.remains = '-:--';
+        }
+      }, 1000), new Date(context.state.currentTurn.endsAt - new Date()).getMilliseconds());
+  },
   init(context) {
     var id = Vue.ls.get('id');
     var name = Vue.ls.get('name');

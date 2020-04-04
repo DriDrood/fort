@@ -4,18 +4,6 @@ import turnMutations from '../turns/mutations';
 import userMutations from '../users/mutations';
 
 const mutations = {
-  countDownPeriodicaly: (state) => {
-    setTimeout(() =>
-      setInterval(() => {
-        if (state.currentTurn.endsAt) {
-          const remainsDate = new Date(state.currentTurn.endsAt - new Date());
-          state.currentTurn.remains = `${remainsDate.getMinutes()}:${remainsDate.getSeconds().toString().padStart(2, '0')}`;
-        }
-        else {
-          state.currentTurn.remains = '-:--';
-        }
-      }, 1000), new Date(state.currentTurn.endsAt - new Date()).getMilliseconds());
-  },
   updateInit(state, payload) { //
     state.config = payload.config;
     mapMutations.updateMap(state, payload);
