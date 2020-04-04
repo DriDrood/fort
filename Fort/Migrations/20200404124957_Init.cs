@@ -1,10 +1,9 @@
 ﻿using System;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Fort.Migrations
 {
-    public partial class init : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -15,8 +14,8 @@ namespace Fort.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     X = table.Column<int>(nullable: false),
                     Y = table.Column<int>(nullable: false),
-                    PopulationGrowCoef = table.Column<double>(nullable: false, defaultValue: 1),
-                    DefenceCoef = table.Column<double>(nullable: false, defaultValue: 1)
+                    PopulationGrowCoef = table.Column<double>(nullable: false),
+                    DefenceCoef = table.Column<double>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -28,8 +27,8 @@ namespace Fort.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(nullable: false),
-                    ArmyStrengthCoef = table.Column<double>(nullable: false, defaultValue: 1),
-                    PopulationGrowthCoef = table.Column<double>(nullable: false, defaultValue: 1),
+                    ArmyStrengthCoef = table.Column<double>(nullable: false),
+                    PopulationGrowthCoef = table.Column<double>(nullable: false),
                     Color = table.Column<string>(maxLength: 10, nullable: false),
                     ColorLight = table.Column<string>(maxLength: 10, nullable: false)
                 },
@@ -42,8 +41,7 @@ namespace Fort.Migrations
                 name: "Turns",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                    Id = table.Column<int>(nullable: false),
                     StartsAt = table.Column<DateTime>(nullable: true),
                     EndsAt = table.Column<DateTime>(nullable: true)
                 },
@@ -117,7 +115,7 @@ namespace Fort.Migrations
                     Id = table.Column<Guid>(nullable: false),
                     Army = table.Column<int>(nullable: false),
                     CityId = table.Column<Guid>(nullable: false),
-                    OwnerId = table.Column<Guid>(nullable: false),
+                    OwnerId = table.Column<Guid>(nullable: true),
                     TurnId = table.Column<int>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false)
                 },
@@ -135,7 +133,7 @@ namespace Fort.Migrations
                         column: x => x.OwnerId,
                         principalTable: "Users",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_CityOccupations_Turns_TurnId",
                         column: x => x.TurnId,

@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fort.Migrations
 {
     [DbContext(typeof(FortDbContext))]
-    [Migration("20200403064936_init")]
-    partial class init
+    [Migration("20200404124957_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -48,7 +48,7 @@ namespace Fort.Migrations
 
                     b.Property<DateTime>("CreatedAt");
 
-                    b.Property<Guid>("OwnerId");
+                    b.Property<Guid?>("OwnerId");
 
                     b.Property<int>("TurnId");
 
@@ -153,8 +153,7 @@ namespace Fort.Migrations
 
             modelBuilder.Entity("Fort.Database.Entities.Turn", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<int>("Id");
 
                     b.Property<DateTime?>("EndsAt");
 
@@ -227,8 +226,7 @@ namespace Fort.Migrations
 
                     b.HasOne("Fort.Database.Entities.User", "Owner")
                         .WithMany("CityOccupations")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .HasForeignKey("OwnerId");
 
                     b.HasOne("Fort.Database.Entities.Turn", "Turn")
                         .WithMany("CityOccupations")

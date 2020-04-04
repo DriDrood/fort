@@ -151,8 +151,7 @@ namespace Fort.Migrations
 
             modelBuilder.Entity("Fort.Database.Entities.Turn", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<int>("Id");
 
                     b.Property<DateTime?>("EndsAt");
 

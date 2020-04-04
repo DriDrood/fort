@@ -84,6 +84,11 @@ namespace Fort.Database
                 .HasIndex(e => e.CityId)
                 .IsUnique();
 
+            // turn
+            builder.Entity<Turn>()
+                .Property(e => e.Id)
+                .ValueGeneratedNever();
+
             // user
             builder.Entity<User>()
                 .HasOne(e => e.Team)
