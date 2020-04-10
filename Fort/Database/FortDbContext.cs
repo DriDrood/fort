@@ -104,6 +104,7 @@ namespace Fort.Database
             DbSeed.Cities(builder);
             DbSeed.Roads(builder);
             DbSeed.Teams(builder);
+            DbSeed.Users(builder);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
