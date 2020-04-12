@@ -105,6 +105,7 @@ namespace Fort.Database
             DbSeed.Roads(builder);
             DbSeed.Teams(builder);
             DbSeed.Users(builder);
+            DbSeed.StartingPositions(builder);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
