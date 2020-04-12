@@ -15,13 +15,13 @@ namespace Fort.Services
         public LifecycleService(IServiceScopeFactory serviceScopeFactory)
         {
             _serviceScopeFactory = serviceScopeFactory;
-            _remaining = ConfigManager.GetDuration();
+            _remainingTurnDuration = ConfigManager.GetDuration();
         }
 
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
         private Turn _currentTurn;
-        private TimeSpan? _remaining;
+        private TimeSpan? _remainingTurnDuration;
         private Task _lifecycleTask;
         private CancellationTokenSource _cancel;
 
@@ -38,12 +38,26 @@ namespace Fort.Services
                 if (_currentTurn.EndsAt == null)
                     return ELifecycleState.Paused;
 
-                // in time of finalizing
-                if (_currentTurn.EndsAt < DateTime.UtcNow
-                        && _currentTurn.EndsAt.Value.AddSeconds(ConfigManager.Game.Animations.PauseBeforeArmyRunSec) > DateTime.UtcNow)
-                    return ELifecycleState.Finalizing;
+                if (_currentTurn.EndsAt > DateTime.UtcNow)
+                    return ELifecycleState.Running;
 
-                return ELifecycleState.Running;
+                return ELifecycleState.Finalizing;
+            }
+        }
+        public DateTime? EndsAt
+        {
+            get
+            {
+                // running
+                if (State == ELifecycleState.Running)
+                    return _currentTurn.EndsAt;
+
+                // finalize
+                if (State == ELifecycleState.Finalizing)
+                    return _currentTurn.EndsAt.Value.AddSeconds(ConfigManager.Game.Animations.PauseBeforeArmyRunSec);
+
+                // not running
+                return null;
             }
         }
         public int CurrentTurnId => _currentTurn?.Id ?? -1;
@@ -73,15 +87,24 @@ namespace Fort.Services
         {
             while (!(IsGameEnd() || _cancel.IsCancellationRequested))
             {
-                // init
-                TimeSpan wait = TimeSpan.Zero;
+                var waitingState = State;
+                // wait
+                if (EndsAt != null && EndsAt > DateTime.UtcNow)
+                {
+                    try
+                    {
+                        await Task.Delay(EndsAt.Value - DateTime.UtcNow, _cancel.Token);
+                    }
+                    catch (TaskCanceledException)
+                    { }
+                }
 
                 // do
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
                     var db = scope.ServiceProvider.GetService<FortDbContext>();
 
-                    switch (State)
+                    switch (waitingState)
                     {
                         case ELifecycleState.Init:
                             _startGame(db);
@@ -90,28 +113,18 @@ namespace Fort.Services
                             _cancel.Cancel();
                             break;
                         case ELifecycleState.Running:
-                            _startTurn(db);
-                            wait = _currentTurn.EndsAt.Value - DateTime.UtcNow;
+                            _endTurn(db);
                             break;
                         case ELifecycleState.Paused:
                             _cancel.Cancel();
                             break;
                         case ELifecycleState.Finalizing:
-                            _endTurn(db);
-                            wait = TimeSpan.FromSeconds(ConfigManager.Game.Animations.PauseBeforeArmyRunSec);
+                            _startTurn(db);
                             break;
                     }
 
                     db.SaveChanges();
                 }
-
-                // wait
-                try
-                {
-                    await Task.Delay(wait, _cancel.Token);
-                }
-                catch(TaskCanceledException)
-                { }
             }
         }
 
@@ -127,7 +140,7 @@ namespace Fort.Services
             _cancel.Cancel();
             db.Database.ExecuteSqlCommand("DELETE FROM Turns;");
             _currentTurn = null;
-            
+
             RunLifecycle();
         }
         public void StartTurn(FortDbContext db)
@@ -171,11 +184,11 @@ namespace Fort.Services
         private void _startGame(FortDbContext db)
         {
             // create turn
-            _currentTurn = new Turn
+            var turn = new Turn
             {
                 Id = 0
             };
-            db.Add(_currentTurn);
+            db.Add(turn);
 
             // set occupations
             var random = new Random();
@@ -206,31 +219,35 @@ namespace Fort.Services
                 };
                 db.CityOccupations.Add(occupation);
             }
+
+            _currentTurn = turn;
         }
         private void _startTurn(FortDbContext db)
         {
-            _currentTurn = db.Turns
+            var turn = db.Turns
                 .OrderByDescending(t => t.Id)
                 .First();
 
             var now = DateTime.UtcNow;
-            _currentTurn.StartsAt = now;
-            _currentTurn.EndsAt = ConfigManager.GetTurnEnd(now);
+            turn.StartsAt = now;
+            turn.EndsAt = ConfigManager.GetTurnEnd(now);
+            
+            _currentTurn = turn;
         }
         private void _pauseTurn(FortDbContext db)
         {
             _currentTurn = db.Turns.Find(CurrentTurnId);
-            var now = DateTime.UtcNow;
 
-            _remaining = _currentTurn.EndsAt - now;
+            var now = DateTime.UtcNow;
+            _remainingTurnDuration = _currentTurn.EndsAt - now;
             _currentTurn.EndsAt = null;
         }
         private void _resumeTurn(FortDbContext db)
         {
             _currentTurn = db.Turns.Find(CurrentTurnId);
-            var now = DateTime.UtcNow;
 
-            _currentTurn.EndsAt = now + _remaining;
+            var now = DateTime.UtcNow;
+            _currentTurn.EndsAt = now + _remainingTurnDuration;
         }
         private void _endTurn(FortDbContext db)
         {

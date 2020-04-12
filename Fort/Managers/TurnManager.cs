@@ -30,9 +30,7 @@ namespace Fort.Managers
             {
                 Id = currentTurn.Id,
                 State = _lifecycleService.State.ToString(),
-                EndsAt = _lifecycleService.State == ELifecycleState.Finalizing
-                    ? currentTurn.EndsAt.Value.AddSeconds(ConfigManager.Game.Animations.PauseBeforeArmyRunSec)
-                    : currentTurn.EndsAt,
+                EndsAt = _lifecycleService.EndsAt,
                 Turn = turn
             };
         }

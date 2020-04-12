@@ -3,10 +3,13 @@ import turnsGetters from './getters';
 
 export default {
   updateTurn(state, payload) {
+    // add empty turns
     for (let i = state.turns.length; i < state.currentTurn.id; i++) {
       state.turns.push(null);
     }
-    state.turns.push(payload.currentTurn.turn);
+    
+    // add current turn
+    Vue.set(state.turns, state.currentTurn.id, payload.currentTurn.turn);
   },
   updateOrder(state, payload) { // sourceId, targetId, amount
     const currentTurn = turnsGetters.activeTurn(state);

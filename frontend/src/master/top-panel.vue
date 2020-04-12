@@ -12,7 +12,7 @@
       <i class="fa fa-step-forward"></i>
     </button>
     <button class="done" :class="{active: currentTurn.done}" title="Hotovo" @click="toggleDone">
-      <i class="fa fa-check"></i>
+      <i class="fa" :class="icon"></i>
     </button>
     <div class="time">{{ currentTurn.remains }}</div>
   </nav>
@@ -25,7 +25,17 @@ export default {
   name: "topPanel",
   computed: {
     ...mapState(["activeTurnId", "currentTurn", "login"]),
-    ...mapGetters(["isTurnCurrent", "loading"])
+    ...mapGetters(["isTurnCurrent", "loading"]),
+    icon() {
+      switch (this.currentTurn.state) {
+        case "Running":
+          return "fa-check";
+        case "Finalizing":
+          return "fa-flag-checkered";
+        default:
+          return "fa-stop";
+      }
+    }
   },
   methods: {
     toggleDone() {
