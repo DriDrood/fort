@@ -10,12 +10,14 @@ namespace Fort.Managers
 {
     public class TurnManager
     {
-        public TurnManager(FortDbContext db, LifecycleService lifecycleService)
+        public TurnManager(Context context, FortDbContext db, LifecycleService lifecycleService)
         {
+            _context = context;
             _db = db;
             _lifecycleService = lifecycleService;
         }
 
+        private readonly Context _context;
         private readonly FortDbContext _db;
         private readonly LifecycleService _lifecycleService;
 
@@ -38,7 +40,7 @@ namespace Fort.Managers
         public Turn GetTurn(int id)
         {
             var turnDb = _db.Turns
-                .Include(t => t.CityOccupations)
+                .Include(t => t.CityOccupations).ThenInclude(co => co.Owner)
                 .Include(t => t.Orders)
                 .SingleOrDefault(t => t.Id == id);
 
@@ -49,8 +51,8 @@ namespace Fort.Managers
                     {
                         PlayerId = c.OwnerId,
                         Size = GetCitySize(c.Army),
-                        Army = IsFriendly(c.CityId) ? (int?)c.Army : null,
-                        AvailableArmy = IsFriendly(c.CityId) ? (int?)(c.Army - turnDb.Orders.Where(o => o.SourceCityId == c.CityId).Sum(o => o.Amount)) : null
+                        Army = IsFriendly(c) ? (int?)c.Army : null,
+                        AvailableArmy = IsMy(c) ? (int?)(c.Army - turnDb.Orders.Where(o => o.SourceCityId == c.CityId).Sum(o => o.Amount)) : null
                     });
             var orders = turnDb.Orders
                 .ToDictionary(
@@ -59,7 +61,7 @@ namespace Fort.Managers
                     {
                         PlayerId = o.UserId,
                         Size = GetOrderSize(o.Amount),
-                        Amount = IsFriendly(o.SourceCityId) ? (int?)o.Amount : null
+                        Amount = IsMy(o) ? (int?)o.Amount : null
                     });
 
             var turn = new Turn
@@ -103,10 +105,17 @@ namespace Fort.Managers
             _db.SaveChanges();
         }
 
-        private bool IsFriendly(Guid city)
+        private bool IsFriendly(Database.Entities.CityOccupation cityOccupation)
         {
-            return true;
-            throw new NotImplementedException();
+            return (cityOccupation.Owner?.TeamId == _context.CurrentUser.TeamId);
+        }
+        private bool IsMy(Database.Entities.CityOccupation cityOccupation)
+        {
+            return (cityOccupation.OwnerId == _context.CurrentUser.Id);
+        }
+        private bool IsMy(Database.Entities.Order order)
+        {
+            return (order.UserId == _context.CurrentUser.Id);
         }
 
         private int GetCitySize(int army)

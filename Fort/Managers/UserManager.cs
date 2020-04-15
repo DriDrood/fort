@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Fort.Database;
 using Fort.Models.Store;
+using Fort.Services;
 using Microsoft.AspNetCore.Identity;
 using RingoRegistration.backend.Utils;
 using User = Fort.Database.Entities.User;
@@ -11,13 +12,15 @@ namespace Fort.Managers
 {
     public class UserManager
     {
-        public UserManager(FortDbContext dbContext)
+        public UserManager(Context context, FortDbContext dbContext)
         {
+            _context = context;
             _db = dbContext;
             _passwordHasher = new PasswordHasher<User>();
             _jwtHandler = new JwtHandler();
         }
 
+        private readonly Context _context;
         private readonly FortDbContext _db;
         private readonly PasswordHasher<User> _passwordHasher;
         private readonly JwtHandler _jwtHandler;
@@ -37,6 +40,8 @@ namespace Fort.Managers
                 return null;
             }
 
+            // success
+            _context.CurrentUser = user;
             var login = new Login
             {
                 Id = user.Id,
@@ -71,7 +76,7 @@ namespace Fort.Managers
                     Name = u.UserName,
                     TeamId = u.TeamId
                 });
-            
+
             return players;
         }
         public Dictionary<Guid, Team> GetAllTeams()
