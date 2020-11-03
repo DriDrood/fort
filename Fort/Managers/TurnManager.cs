@@ -38,7 +38,7 @@ namespace Fort.Managers
             {
                 Id = currentTurn.Id,
                 State = _lifecycleService.State.ToString(),
-                EndsAt = _lifecycleService.EndsAt,
+                EndsAt = _lifecycleService.WaitTill,
                 Turn = turn
             };
         }
@@ -82,12 +82,27 @@ namespace Fort.Managers
 
         public void SetOrder(OrderParams order, Guid playerId, int turnId)
         {
-            var dbOrder = _db.Orders.SingleOrDefault(o => o.TurnId == turnId && o.SourceCityId == order.SourceId && o.TargetCityId == order.TargetId);
+            if (_lifecycleService.State != ELifecycleState.Running)
+                throw new Exception("Turn is not running");
+
+            var isReverseDirection = string.Compare(order.SourceId.ToString(), order.TargetId.ToString()) > 0;
+            var dbOrder = _db.Orders.SingleOrDefault(o =>
+                o.TurnId == turnId
+                && o.SourceCityId == order.SourceId
+                && o.TargetCityId == order.TargetId
+                && o.IsReverseDirection == isReverseDirection);
+
+            // validate
+            var sourceCity = _db.CityOccupations
+                .Include(co => co.SourceForOrders)
+                .SingleOrDefault(co => co.CityId == order.SourceId && co.TurnId == turnId)
+                ?? throw new Exception("City not found");
+            if (sourceCity.Army < (sourceCity.SourceForOrders.Sum(o => o.Amount) - (dbOrder?.Amount ?? 0)))
+                throw new Exception("City has not enought army");
 
             // add
             if (dbOrder == null)
             {
-                var isReverseDirection = string.Compare(order.SourceId.ToString(), order.TargetId.ToString()) > 0;
                 dbOrder = new Database.Entities.Order
                 {
                     TurnId = turnId,

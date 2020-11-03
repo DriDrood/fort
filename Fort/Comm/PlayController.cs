@@ -27,6 +27,7 @@ namespace Fort.Comm
         private readonly TurnManager _turnManager;
         private readonly UserManager _userManager;
 
+        /// Login and get initial state
         [AllowAnonymous]
         public ActionResult Login([FromBody]LoginParams param)
         {
@@ -41,12 +42,14 @@ namespace Fort.Comm
             return Ok(init);
         }
 
+        /// Get Initial state
         public ActionResult Init()
         {
             var init = GetInitData();
             return Ok(init);
         }
 
+        /// Check state - not used in websocket
         public ActionResult CheckState([FromBody]CheckParams param)
         {
             if (_lifecycleService.State == param.State && _lifecycleService.CurrentTurnId == param.TurnId)
@@ -56,12 +59,14 @@ namespace Fort.Comm
             return Ok(new { CurrentTurn = turn });
         }
 
+        /// Get history or new turn
         public ActionResult GetTurn([FromBody]TurnParams param)
         {
             var turn = _turnManager.GetTurn(param.Id);
             return Ok(turn);
         }
 
+        /// User marks himself as finished
         public ActionResult TurnDone([FromBody]DoneParams param)
         {
             _doneService.Done(_context.CurrentUser.Id, param.Done);
@@ -69,6 +74,7 @@ namespace Fort.Comm
             return Ok();
         }
 
+        // create / update new order 
         public ActionResult SetOrder([FromBody]OrderParams param)
         {
             _turnManager.SetOrder(param, _context.CurrentUser.Id, _lifecycleService.CurrentTurnId);
