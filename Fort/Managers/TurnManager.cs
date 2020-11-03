@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Fort.Database;
 using Fort.Models.Params;
@@ -10,6 +11,8 @@ namespace Fort.Managers
 {
     public class TurnManager
     {
+        public const int DEFAULT_CITY_SIZE = 10;
+
         public TurnManager(Context context, FortDbContext db, LifecycleService lifecycleService)
         {
             _context = context;
@@ -20,6 +23,9 @@ namespace Fort.Managers
         private readonly Context _context;
         private readonly FortDbContext _db;
         private readonly LifecycleService _lifecycleService;
+
+        private readonly Dictionary<int, HashSet<Guid>> _visibleCities = new Dictionary<int, HashSet<Guid>>();
+        private readonly Dictionary<int, HashSet<Guid>> _friendlyCities = new Dictionary<int, HashSet<Guid>>();
 
         public CurrentTurn GetCurrentTurn()
         {
@@ -39,24 +45,26 @@ namespace Fort.Managers
 
         public Turn GetTurn(int id)
         {
-            var turnDb = _db.Turns
-                .Include(t => t.CityOccupations).ThenInclude(co => co.Owner)
-                .Include(t => t.Orders)
-                .SingleOrDefault(t => t.Id == id);
-
-            var cityOccupations = turnDb.CityOccupations
+            var cityOccupations = _db.CityOccupations
+                .Where(co => co.TurnId == id)
                 .ToDictionary(
                     c => c.CityId,
                     c => new CityOccupation
                     {
                         PlayerId = c.OwnerId,
-                        Size = GetCitySize(c.Army),
+                        Size = IsVisible(c) ? GetCitySize(c.Army) : DEFAULT_CITY_SIZE,
                         Army = IsFriendly(c) ? (int?)c.Army : null,
-                        AvailableArmy = IsMy(c) ? (int?)(c.Army - turnDb.Orders.Where(o => o.SourceCityId == c.CityId).Sum(o => o.Amount)) : null
+                        AvailableArmy = IsMy(c) ? (int?)(c.Army - _db.Orders.Where(o => o.TurnId == id && o.SourceCityId == c.CityId).Sum(o => o.Amount)) : null
                     });
-            var orders = turnDb.Orders
+
+            var visibleCities = GetVisibleCities(id);
+            var orders = _db.Orders
+                // filter by turn
+                .Where(o => o.TurnId == id)
+                // filter visible
+                .Where(o => visibleCities.Contains(o.SourceCityId) || visibleCities.Contains(o.TargetCityId))
                 .ToDictionary(
-                    o => $"{o.SourceCityId}>>{o.TargetCityId}",
+                    o => o.IsReverseDirection ? $"{o.TargetCityId}>>{o.SourceCityId}" : $"{o.SourceCityId}>>{o.TargetCityId}",
                     o => new Order
                     {
                         PlayerId = o.UserId,
@@ -79,12 +87,14 @@ namespace Fort.Managers
             // add
             if (dbOrder == null)
             {
+                var isReverseDirection = string.Compare(order.SourceId.ToString(), order.TargetId.ToString()) > 0;
                 dbOrder = new Database.Entities.Order
                 {
                     TurnId = turnId,
+                    IsReverseDirection = isReverseDirection,
                     Amount = order.Amount,
-                    SourceCityId = order.SourceId,
-                    TargetCityId = order.TargetId,
+                    SourceCityId = isReverseDirection ? order.TargetId : order.SourceId,
+                    TargetCityId = isReverseDirection ? order.SourceId : order.TargetId,
                     UserId = playerId
                 };
                 _db.Orders.Add(dbOrder);
@@ -105,9 +115,17 @@ namespace Fort.Managers
             _db.SaveChanges();
         }
 
+        private bool IsVisible(Database.Entities.CityOccupation cityOccupation)
+        {
+            return
+                GetVisibleCities(cityOccupation.TurnId)
+                    .Contains(cityOccupation.CityId);
+        }
         private bool IsFriendly(Database.Entities.CityOccupation cityOccupation)
         {
-            return (cityOccupation.Owner?.TeamId == _context.CurrentUser.TeamId);
+            return
+                GetFriendlyCities(cityOccupation.TurnId)
+                    .Contains(cityOccupation.CityId);
         }
         private bool IsMy(Database.Entities.CityOccupation cityOccupation)
         {
@@ -125,6 +143,42 @@ namespace Fort.Managers
         private int GetOrderSize(int army)
         {
             return (int)Math.Sqrt(army) + 5;
+        }
+        
+        private HashSet<Guid> GetVisibleCities(int turnId)
+        {
+            if (_visibleCities.TryGetValue(turnId, out var visibleCities))
+                return visibleCities;
+
+            var friendlyCities = GetFriendlyCities(turnId);
+            visibleCities = new HashSet<Guid>(friendlyCities);
+
+            var cityIds = _db.Roads
+                .Where(r => friendlyCities.Contains(r.SourceId) || friendlyCities.Contains(r.TargetId))
+                .Select(r => new { r.SourceId, r.TargetId });
+            foreach(var road in cityIds)
+            {
+                visibleCities.Add(road.SourceId);
+                visibleCities.Add(road.TargetId);
+            }
+
+            _visibleCities.Add(turnId, visibleCities);
+            return visibleCities;
+        }
+        private HashSet<Guid> GetFriendlyCities(int turnId)
+        {
+            if (_friendlyCities.TryGetValue(turnId, out var cities))
+                return cities;
+
+            var citiesList = _db.CityOccupations
+                .Include(co => co.Owner)
+                .Include(co => co.City)
+                .Where(co => co.TurnId == turnId && co.Owner.TeamId == _context.CurrentUser.TeamId)
+                .Select(co => co.City.Id);
+            cities = new HashSet<Guid>(citiesList);
+            _friendlyCities.Add(turnId, cities);
+
+            return cities;
         }
     }
 }

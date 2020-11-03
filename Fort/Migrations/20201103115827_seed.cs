@@ -246,18 +246,18 @@ namespace Fort.Migrations
 
             migrationBuilder.InsertData(
                 table: "StartingPositions",
-                columns: new[] { "Id", "Army", "CityId", "UserId" },
-                values: new object[] { new Guid("5642e279-b912-4286-8b8d-5758aaaa547a"), 15, new Guid("a591ed84-9567-4d05-9a92-95e1b233b36c"), new Guid("08d7d312-5b73-86fb-7e7c-5d6b08a519b0") });
+                columns: new[] { "CityId", "Army", "UserId" },
+                values: new object[] { new Guid("a591ed84-9567-4d05-9a92-95e1b233b36c"), 15, new Guid("08d7d312-5b73-86fb-7e7c-5d6b08a519b0") });
 
             migrationBuilder.InsertData(
                 table: "StartingPositions",
-                columns: new[] { "Id", "Army", "CityId", "UserId" },
-                values: new object[] { new Guid("5615e00c-5183-4b6f-9a7c-ee591a44699d"), 15, new Guid("2431da6c-ddf9-4653-8344-d66de031955e"), new Guid("8c1d1996-4d41-4892-82d9-29d00b986958") });
+                columns: new[] { "CityId", "Army", "UserId" },
+                values: new object[] { new Guid("2431da6c-ddf9-4653-8344-d66de031955e"), 15, new Guid("8c1d1996-4d41-4892-82d9-29d00b986958") });
 
             migrationBuilder.InsertData(
                 table: "StartingPositions",
-                columns: new[] { "Id", "Army", "CityId", "UserId" },
-                values: new object[] { new Guid("5f723791-271f-47e5-b609-291e3a625aca"), 15, new Guid("aafbf738-869b-4f13-81a9-55847b242d7a"), new Guid("07af142f-2ba3-4499-b9a7-d3347920b04a") });
+                columns: new[] { "CityId", "Army", "UserId" },
+                values: new object[] { new Guid("aafbf738-869b-4f13-81a9-55847b242d7a"), 15, new Guid("07af142f-2ba3-4499-b9a7-d3347920b04a") });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -939,18 +939,18 @@ namespace Fort.Migrations
 
             migrationBuilder.DeleteData(
                 table: "StartingPositions",
-                keyColumn: "Id",
-                keyValue: new Guid("5615e00c-5183-4b6f-9a7c-ee591a44699d"));
+                keyColumn: "CityId",
+                keyValue: new Guid("2431da6c-ddf9-4653-8344-d66de031955e"));
 
             migrationBuilder.DeleteData(
                 table: "StartingPositions",
-                keyColumn: "Id",
-                keyValue: new Guid("5642e279-b912-4286-8b8d-5758aaaa547a"));
+                keyColumn: "CityId",
+                keyValue: new Guid("a591ed84-9567-4d05-9a92-95e1b233b36c"));
 
             migrationBuilder.DeleteData(
                 table: "StartingPositions",
-                keyColumn: "Id",
-                keyValue: new Guid("5f723791-271f-47e5-b609-291e3a625aca"));
+                keyColumn: "CityId",
+                keyValue: new Guid("aafbf738-869b-4f13-81a9-55847b242d7a"));
 
             migrationBuilder.DeleteData(
                 table: "Cities",

@@ -80,7 +80,7 @@ namespace Fort.Services
         public void RunLifecycle()
         {
             _cancel = new CancellationTokenSource();
-            _lifecycleTask = Task.Run(Lifecycle);
+            _lifecycleTask = Lifecycle();
         }
 
         private async Task Lifecycle()

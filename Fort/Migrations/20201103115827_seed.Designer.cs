@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fort.Migrations
 {
     [DbContext(typeof(FortDbContext))]
-    [Migration("20200412145758_seed")]
+    [Migration("20201103115827_seed")]
     partial class seed
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -585,58 +585,50 @@ namespace Fort.Migrations
 
             modelBuilder.Entity("Fort.Database.Entities.CityOccupation", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<Guid>("CityId");
+
+                    b.Property<int>("TurnId");
 
                     b.Property<int>("Army");
-
-                    b.Property<Guid>("CityId");
 
                     b.Property<DateTime>("CreatedAt");
 
                     b.Property<Guid?>("OwnerId");
 
-                    b.Property<int>("TurnId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CityId");
+                    b.HasKey("CityId", "TurnId");
 
                     b.HasIndex("OwnerId");
 
-                    b.HasIndex("TurnId", "CityId")
-                        .IsUnique();
+                    b.HasIndex("TurnId");
 
                     b.ToTable("CityOccupations");
                 });
 
             modelBuilder.Entity("Fort.Database.Entities.Order", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Amount");
-
-                    b.Property<DateTime>("CreatedAt");
-
                     b.Property<Guid>("SourceCityId");
 
                     b.Property<Guid>("TargetCityId");
 
                     b.Property<int>("TurnId");
 
+                    b.Property<bool>("IsReverseDirection");
+
+                    b.Property<int>("Amount");
+
+                    b.Property<DateTime>("CreatedAt");
+
                     b.Property<Guid>("UserId");
 
-                    b.HasKey("Id");
+                    b.HasKey("SourceCityId", "TargetCityId", "TurnId", "IsReverseDirection");
 
-                    b.HasIndex("SourceCityId");
-
-                    b.HasIndex("TargetCityId");
+                    b.HasIndex("TurnId");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("TurnId", "SourceCityId", "TargetCityId")
-                        .IsUnique();
+                    b.HasIndex("SourceCityId", "TurnId");
+
+                    b.HasIndex("TargetCityId", "TurnId");
 
                     b.ToTable("Orders");
                 });
@@ -1333,19 +1325,13 @@ namespace Fort.Migrations
 
             modelBuilder.Entity("Fort.Database.Entities.StartingPosition", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<Guid>("CityId");
 
                     b.Property<int?>("Army");
 
-                    b.Property<Guid>("CityId");
-
                     b.Property<Guid>("UserId");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("CityId")
-                        .IsUnique();
+                    b.HasKey("CityId");
 
                     b.HasIndex("UserId");
 
@@ -1354,23 +1340,20 @@ namespace Fort.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("5642e279-b912-4286-8b8d-5758aaaa547a"),
-                            Army = 15,
                             CityId = new Guid("a591ed84-9567-4d05-9a92-95e1b233b36c"),
+                            Army = 15,
                             UserId = new Guid("08d7d312-5b73-86fb-7e7c-5d6b08a519b0")
                         },
                         new
                         {
-                            Id = new Guid("5615e00c-5183-4b6f-9a7c-ee591a44699d"),
-                            Army = 15,
                             CityId = new Guid("2431da6c-ddf9-4653-8344-d66de031955e"),
+                            Army = 15,
                             UserId = new Guid("8c1d1996-4d41-4892-82d9-29d00b986958")
                         },
                         new
                         {
-                            Id = new Guid("5f723791-271f-47e5-b609-291e3a625aca"),
-                            Army = 15,
                             CityId = new Guid("aafbf738-869b-4f13-81a9-55847b242d7a"),
+                            Army = 15,
                             UserId = new Guid("07af142f-2ba3-4499-b9a7-d3347920b04a")
                         });
                 });
@@ -1573,6 +1556,21 @@ namespace Fort.Migrations
                     b.HasOne("Fort.Database.Entities.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Fort.Database.Entities.Road", "Road")
+                        .WithMany("Orders")
+                        .HasForeignKey("SourceCityId", "TargetCityId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Fort.Database.Entities.CityOccupation", "SourceCityOccupation")
+                        .WithMany("SourceForOrders")
+                        .HasForeignKey("SourceCityId", "TurnId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Fort.Database.Entities.CityOccupation", "TargetCityOccupation")
+                        .WithMany("TargetForOrders")
+                        .HasForeignKey("TargetCityId", "TurnId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

@@ -241,9 +241,9 @@ namespace Fort.Database
         public static void StartingPositions(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<StartingPosition>().HasData(
-                new StartingPosition { Id = Guid.Parse("5642e279-b912-4286-8b8d-5758aaaa547a"), UserId = Guid.Parse("08d7d312-5b73-86fb-7e7c-5d6b08a519b0"), CityId = Guid.Parse("a591ed84-9567-4d05-9a92-95e1b233b36c"), Army = 15 },
-                new StartingPosition { Id = Guid.Parse("5615e00c-5183-4b6f-9a7c-ee591a44699d"), UserId = Guid.Parse("8c1d1996-4d41-4892-82d9-29d00b986958"), CityId = Guid.Parse("2431da6c-ddf9-4653-8344-d66de031955e"), Army = 15 },
-                new StartingPosition { Id = Guid.Parse("5f723791-271f-47e5-b609-291e3a625aca"), UserId = Guid.Parse("07af142f-2ba3-4499-b9a7-d3347920b04a"), CityId = Guid.Parse("aafbf738-869b-4f13-81a9-55847b242d7a"), Army = 15 }
+                new StartingPosition { UserId = Guid.Parse("08d7d312-5b73-86fb-7e7c-5d6b08a519b0"), CityId = Guid.Parse("a591ed84-9567-4d05-9a92-95e1b233b36c"), Army = 15 },
+                new StartingPosition { UserId = Guid.Parse("8c1d1996-4d41-4892-82d9-29d00b986958"), CityId = Guid.Parse("2431da6c-ddf9-4653-8344-d66de031955e"), Army = 15 },
+                new StartingPosition { UserId = Guid.Parse("07af142f-2ba3-4499-b9a7-d3347920b04a"), CityId = Guid.Parse("aafbf738-869b-4f13-81a9-55847b242d7a"), Army = 15 }
             );
         }
     }

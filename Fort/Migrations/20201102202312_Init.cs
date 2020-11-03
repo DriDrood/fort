@@ -112,16 +112,15 @@ namespace Fort.Migrations
                 name: "CityOccupations",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    Army = table.Column<int>(nullable: false),
                     CityId = table.Column<Guid>(nullable: false),
-                    OwnerId = table.Column<Guid>(nullable: true),
                     TurnId = table.Column<int>(nullable: false),
+                    Army = table.Column<int>(nullable: false),
+                    OwnerId = table.Column<Guid>(nullable: true),
                     CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CityOccupations", x => x.Id);
+                    table.PrimaryKey("PK_CityOccupations", x => new { x.CityId, x.TurnId });
                     table.ForeignKey(
                         name: "FK_CityOccupations_Cities_CityId",
                         column: x => x.CityId,
@@ -143,20 +142,45 @@ namespace Fort.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "StartingPositions",
+                columns: table => new
+                {
+                    CityId = table.Column<Guid>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
+                    Army = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StartingPositions", x => x.CityId);
+                    table.ForeignKey(
+                        name: "FK_StartingPositions_Cities_CityId",
+                        column: x => x.CityId,
+                        principalTable: "Cities",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StartingPositions_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Orders",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(nullable: false),
-                    Amount = table.Column<int>(nullable: false),
+                    IsReverseDirection = table.Column<bool>(nullable: false),
                     SourceCityId = table.Column<Guid>(nullable: false),
                     TargetCityId = table.Column<Guid>(nullable: false),
-                    UserId = table.Column<Guid>(nullable: false),
                     TurnId = table.Column<int>(nullable: false),
+                    Amount = table.Column<int>(nullable: false),
+                    UserId = table.Column<Guid>(nullable: false),
                     CreatedAt = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Orders", x => x.Id);
+                    table.PrimaryKey("PK_Orders", x => new { x.SourceCityId, x.TargetCityId, x.TurnId, x.IsReverseDirection });
                     table.ForeignKey(
                         name: "FK_Orders_Cities_SourceCityId",
                         column: x => x.SourceCityId,
@@ -181,38 +205,25 @@ namespace Fort.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "StartingPositions",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(nullable: false),
-                    CityId = table.Column<Guid>(nullable: false),
-                    UserId = table.Column<Guid>(nullable: false),
-                    Army = table.Column<int>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_StartingPositions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_StartingPositions_Cities_CityId",
-                        column: x => x.CityId,
-                        principalTable: "Cities",
-                        principalColumn: "Id",
+                        name: "FK_Orders_Roads_SourceCityId_TargetCityId",
+                        columns: x => new { x.SourceCityId, x.TargetCityId },
+                        principalTable: "Roads",
+                        principalColumns: new[] { "SourceId", "TargetId" },
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_StartingPositions_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
+                        name: "FK_Orders_CityOccupations_SourceCityId_TurnId",
+                        columns: x => new { x.SourceCityId, x.TurnId },
+                        principalTable: "CityOccupations",
+                        principalColumns: new[] { "CityId", "TurnId" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Orders_CityOccupations_TargetCityId_TurnId",
+                        columns: x => new { x.TargetCityId, x.TurnId },
+                        principalTable: "CityOccupations",
+                        principalColumns: new[] { "CityId", "TurnId" },
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CityOccupations_CityId",
-                table: "CityOccupations",
-                column: "CityId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CityOccupations_OwnerId",
@@ -220,20 +231,14 @@ namespace Fort.Migrations
                 column: "OwnerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CityOccupations_TurnId_CityId",
+                name: "IX_CityOccupations_TurnId",
                 table: "CityOccupations",
-                columns: new[] { "TurnId", "CityId" },
-                unique: true);
+                column: "TurnId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_SourceCityId",
+                name: "IX_Orders_TurnId",
                 table: "Orders",
-                column: "SourceCityId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Orders_TargetCityId",
-                table: "Orders",
-                column: "TargetCityId");
+                column: "TurnId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_UserId",
@@ -241,21 +246,19 @@ namespace Fort.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Orders_TurnId_SourceCityId_TargetCityId",
+                name: "IX_Orders_SourceCityId_TurnId",
                 table: "Orders",
-                columns: new[] { "TurnId", "SourceCityId", "TargetCityId" },
-                unique: true);
+                columns: new[] { "SourceCityId", "TurnId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Orders_TargetCityId_TurnId",
+                table: "Orders",
+                columns: new[] { "TargetCityId", "TurnId" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roads_TargetId",
                 table: "Roads",
                 column: "TargetId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_StartingPositions_CityId",
-                table: "StartingPositions",
-                column: "CityId",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_StartingPositions_UserId",
@@ -283,25 +286,25 @@ namespace Fort.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CityOccupations");
-
-            migrationBuilder.DropTable(
                 name: "Orders");
-
-            migrationBuilder.DropTable(
-                name: "Roads");
 
             migrationBuilder.DropTable(
                 name: "StartingPositions");
 
             migrationBuilder.DropTable(
-                name: "Turns");
+                name: "Roads");
+
+            migrationBuilder.DropTable(
+                name: "CityOccupations");
 
             migrationBuilder.DropTable(
                 name: "Cities");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "Turns");
 
             migrationBuilder.DropTable(
                 name: "Teams");

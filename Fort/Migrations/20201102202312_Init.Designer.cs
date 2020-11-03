@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fort.Migrations
 {
     [DbContext(typeof(FortDbContext))]
-    [Migration("20200404124957_Init")]
+    [Migration("20201102202312_Init")]
     partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,58 +39,50 @@ namespace Fort.Migrations
 
             modelBuilder.Entity("Fort.Database.Entities.CityOccupation", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<Guid>("CityId");
+
+                    b.Property<int>("TurnId");
 
                     b.Property<int>("Army");
-
-                    b.Property<Guid>("CityId");
 
                     b.Property<DateTime>("CreatedAt");
 
                     b.Property<Guid?>("OwnerId");
 
-                    b.Property<int>("TurnId");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CityId");
+                    b.HasKey("CityId", "TurnId");
 
                     b.HasIndex("OwnerId");
 
-                    b.HasIndex("TurnId", "CityId")
-                        .IsUnique();
+                    b.HasIndex("TurnId");
 
                     b.ToTable("CityOccupations");
                 });
 
             modelBuilder.Entity("Fort.Database.Entities.Order", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("Amount");
-
-                    b.Property<DateTime>("CreatedAt");
-
                     b.Property<Guid>("SourceCityId");
 
                     b.Property<Guid>("TargetCityId");
 
                     b.Property<int>("TurnId");
 
+                    b.Property<bool>("IsReverseDirection");
+
+                    b.Property<int>("Amount");
+
+                    b.Property<DateTime>("CreatedAt");
+
                     b.Property<Guid>("UserId");
 
-                    b.HasKey("Id");
+                    b.HasKey("SourceCityId", "TargetCityId", "TurnId", "IsReverseDirection");
 
-                    b.HasIndex("SourceCityId");
-
-                    b.HasIndex("TargetCityId");
+                    b.HasIndex("TurnId");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("TurnId", "SourceCityId", "TargetCityId")
-                        .IsUnique();
+                    b.HasIndex("SourceCityId", "TurnId");
+
+                    b.HasIndex("TargetCityId", "TurnId");
 
                     b.ToTable("Orders");
                 });
@@ -110,19 +102,13 @@ namespace Fort.Migrations
 
             modelBuilder.Entity("Fort.Database.Entities.StartingPosition", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<Guid>("CityId");
 
                     b.Property<int?>("Army");
 
-                    b.Property<Guid>("CityId");
-
                     b.Property<Guid>("UserId");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("CityId")
-                        .IsUnique();
+                    b.HasKey("CityId");
 
                     b.HasIndex("UserId");
 
@@ -254,6 +240,21 @@ namespace Fort.Migrations
                     b.HasOne("Fort.Database.Entities.User", "User")
                         .WithMany("Orders")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Fort.Database.Entities.Road", "Road")
+                        .WithMany("Orders")
+                        .HasForeignKey("SourceCityId", "TargetCityId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Fort.Database.Entities.CityOccupation", "SourceCityOccupation")
+                        .WithMany("SourceForOrders")
+                        .HasForeignKey("SourceCityId", "TurnId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Fort.Database.Entities.CityOccupation", "TargetCityOccupation")
+                        .WithMany("TargetForOrders")
+                        .HasForeignKey("TargetCityId", "TurnId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

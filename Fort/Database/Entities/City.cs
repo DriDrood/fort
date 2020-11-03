@@ -21,15 +21,5 @@ namespace Fort.Database.Entities
         public ICollection<Road> TargetForRoads { get; set; } = new HashSet<Road>();
 
         public ICollection<StartingPosition> StartingPositionFor { get; set; } = new HashSet<StartingPosition>();
-
-        // public virtual ICollection<Path> SourceToPaths { get; set; }
-        // public virtual ICollection<Path> TargetToPaths { get; set; }
-        // public virtual ICollection<Turn> SourceToTurns { get; set; }
-        // public virtual ICollection<Turn> TargetToTurns { get; set; }
-
-        // public virtual ICollection<StartingPosition> Start { get; set; }
-
-        // [NotMapped]
-        // public IEnumerable<City> Neighbour => SourceToPaths.Select(p => p.Target).Union(TargetToPaths.Select(p => p.Source));
     }
 }
