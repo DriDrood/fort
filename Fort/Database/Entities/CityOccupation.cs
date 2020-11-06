@@ -16,8 +16,8 @@ namespace Fort.Database.Entities
     public int TurnId { get; set; } // key
     public Turn Turn { get; set; }
 
-    public ICollection<Order> SourceForOrders { get; set; } = new HashSet<Order>();
-    public ICollection<Order> TargetForOrders { get; set; } = new HashSet<Order>();
+    public ICollection<Order> StForOrders { get; set; } = new HashSet<Order>();
+    public ICollection<Order> NdForOrders { get; set; } = new HashSet<Order>();
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
   }

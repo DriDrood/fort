@@ -39,27 +39,27 @@ namespace Fort.Database
 
             // order
             builder.Entity<Order>()
-                .HasKey(e => new { e.SourceCityId, e.TargetCityId, e.TurnId, e.IsReverseDirection });
+                .HasKey(e => new { e.StCityId, e.NdCityId, e.TurnId, e.StIsSource });
             builder.Entity<Order>()
-                .HasOne(e => e.SourceCity)
-                .WithMany(e => e.SourceForOrders)
-                .HasForeignKey(e => e.SourceCityId);
+                .HasOne(e => e.StCity)
+                .WithMany(e => e.StForOrders)
+                .HasForeignKey(e => e.StCityId);
             builder.Entity<Order>()
-                .HasOne(e => e.TargetCity)
-                .WithMany(e => e.TargetForOrders)
-                .HasForeignKey(e => e.TargetCityId);
+                .HasOne(e => e.NdCity)
+                .WithMany(e => e.NdForOrders)
+                .HasForeignKey(e => e.NdCityId);
             builder.Entity<Order>()
-                .HasOne(e => e.SourceCityOccupation)
-                .WithMany(e => e.SourceForOrders)
-                .HasForeignKey(e => new { e.SourceCityId, e.TurnId });
+                .HasOne(e => e.StCityOccupation)
+                .WithMany(e => e.StForOrders)
+                .HasForeignKey(e => new { e.StCityId, e.TurnId });
             builder.Entity<Order>()
-                .HasOne(e => e.TargetCityOccupation)
-                .WithMany(e => e.TargetForOrders)
-                .HasForeignKey(e => new { e.TargetCityId, e.TurnId });
+                .HasOne(e => e.NdCityOccupation)
+                .WithMany(e => e.NdForOrders)
+                .HasForeignKey(e => new { e.NdCityId, e.TurnId });
             builder.Entity<Order>()
                 .HasOne(e => e.Road)
                 .WithMany(e => e.Orders)
-                .HasForeignKey(e => new { e.SourceCityId, e.TargetCityId });
+                .HasForeignKey(e => new { e.StCityId, e.NdCityId });
             builder.Entity<Order>()
                 .HasOne(e => e.User)
                 .WithMany(e => e.Orders)
@@ -71,15 +71,15 @@ namespace Fort.Database
 
             // road
             builder.Entity<Road>()
-                .HasKey(e => new { e.SourceId, e.TargetId });
+                .HasKey(e => new { e.StCityId, e.NdCityId });
             builder.Entity<Road>()
-                .HasOne(e => e.Source)
-                .WithMany(e => e.SourceForRoads)
-                .HasForeignKey(e => e.SourceId);
+                .HasOne(e => e.StCity)
+                .WithMany(e => e.StForRoads)
+                .HasForeignKey(e => e.StCityId);
             builder.Entity<Road>()
-                .HasOne(e => e.Target)
-                .WithMany(e => e.TargetForRoads)
-                .HasForeignKey(e => e.TargetId);
+                .HasOne(e => e.NdCity)
+                .WithMany(e => e.NdForRoads)
+                .HasForeignKey(e => e.NdCityId);
 
             // starting position
             builder.Entity<StartingPosition>()

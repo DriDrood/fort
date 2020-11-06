@@ -6,11 +6,11 @@ namespace Fort.Database.Entities
 {
   public class Road
   {
-    public Guid SourceId { get; set; } // key
-    public City Source { get; set; }
+    public Guid StCityId { get; set; } // key
+    public City StCity { get; set; }
 
-    public Guid TargetId { get; set; } // key
-    public City Target { get; set; }
+    public Guid NdCityId { get; set; } // key
+    public City NdCity { get; set; }
 
     public IEnumerable<Order> Orders { get; set; } = new HashSet<Order>();
 
@@ -19,6 +19,6 @@ namespace Fort.Database.Entities
     /// </summary>
     [NotMapped]
     public string Id
-        => $"{SourceId}__{TargetId}";
+        => $"{StCityId}__{NdCityId}";
   }
 }

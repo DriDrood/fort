@@ -54,21 +54,23 @@ namespace Fort.Managers
                         PlayerId = c.OwnerId,
                         Size = IsVisible(c) ? GetCitySize(c.Army) : DEFAULT_CITY_SIZE,
                         Army = IsFriendly(c) ? (int?)c.Army : null,
-                        AvailableArmy = IsMy(c) ? (int?)(c.Army - _db.Orders.Where(o => o.TurnId == id && o.SourceCityId == c.CityId).Sum(o => o.Amount)) : null
+                        AvailableArmy = IsMy(c) ? (int?)(c.Army - _db.Orders.Where(o => o.TurnId == id && (o.StIsSource ? o.StCityId : o.NdCityId) == c.CityId).Sum(o => o.Amount)) : null
                     });
 
             var visibleCities = GetVisibleCities(id);
             var orders = _db.Orders
+                .Include(o => o.Road).ThenInclude(r => r.Orders)
                 // filter by turn
                 .Where(o => o.TurnId == id)
                 // filter visible
-                .Where(o => visibleCities.Contains(o.SourceCityId) || visibleCities.Contains(o.TargetCityId))
+                .Where(o => visibleCities.Contains(o.StCityId) || visibleCities.Contains(o.NdCityId))
                 .ToDictionary(
-                    o => o.IsReverseDirection ? $"{o.TargetCityId}>>{o.SourceCityId}" : $"{o.SourceCityId}>>{o.TargetCityId}",
+                    o => o.StIsSource ? $"{o.StCityId}>>{o.NdCityId}" : $"{o.NdCityId}>>{o.StCityId}",
                     o => new Order
                     {
                         PlayerId = o.UserId,
                         Size = GetOrderSize(o.Amount),
+                        SizeAfterFight = GetOrderSize(o.Amount - o.Road.Orders.Where(ro => ro.StIsSource != o.StIsSource).Sum(ro => ro.Amount)),
                         Amount = IsMy(o) ? (int?)o.Amount : null
                     });
 
@@ -85,19 +87,20 @@ namespace Fort.Managers
             if (_lifecycleService.State != ELifecycleState.Running)
                 throw new Exception("Turn is not running");
 
-            var isReverseDirection = string.Compare(order.SourceId.ToString(), order.TargetId.ToString()) > 0;
+            var stIsSource = string.Compare(order.SourceId.ToString(), order.TargetId.ToString()) < 0;
             var dbOrder = _db.Orders.SingleOrDefault(o =>
                 o.TurnId == turnId
-                && o.SourceCityId == order.SourceId
-                && o.TargetCityId == order.TargetId
-                && o.IsReverseDirection == isReverseDirection);
+                && o.StCityId == (stIsSource ? order.SourceId : order.TargetId)
+                && o.NdCityId == (stIsSource ? order.TargetId : order.SourceId)
+                && o.StIsSource == stIsSource);
 
             // validate
             var sourceCity = _db.CityOccupations
-                .Include(co => co.SourceForOrders)
+                .Include(co => co.StForOrders)
+                .Include(co => co.NdForOrders)
                 .SingleOrDefault(co => co.CityId == order.SourceId && co.TurnId == turnId)
                 ?? throw new Exception("City not found");
-            if (sourceCity.Army < (sourceCity.SourceForOrders.Sum(o => o.Amount) - (dbOrder?.Amount ?? 0)))
+            if (sourceCity.Army < ((stIsSource ? sourceCity.StForOrders : sourceCity.NdForOrders).Sum(o => o.Amount) - (dbOrder?.Amount ?? 0)))
                 throw new Exception("City has not enought army");
 
             // add
@@ -106,10 +109,10 @@ namespace Fort.Managers
                 dbOrder = new Database.Entities.Order
                 {
                     TurnId = turnId,
-                    IsReverseDirection = isReverseDirection,
+                    StIsSource = stIsSource,
                     Amount = order.Amount,
-                    SourceCityId = isReverseDirection ? order.TargetId : order.SourceId,
-                    TargetCityId = isReverseDirection ? order.SourceId : order.TargetId,
+                    StCityId = stIsSource ? order.SourceId : order.TargetId,
+                    NdCityId = stIsSource ? order.TargetId : order.SourceId,
                     UserId = playerId
                 };
                 _db.Orders.Add(dbOrder);
@@ -157,6 +160,9 @@ namespace Fort.Managers
         }
         private int GetOrderSize(int army)
         {
+            if (army == 0)
+                return 0;
+
             return (int)Math.Sqrt(army) + 5;
         }
         
@@ -169,12 +175,12 @@ namespace Fort.Managers
             visibleCities = new HashSet<Guid>(friendlyCities);
 
             var cityIds = _db.Roads
-                .Where(r => friendlyCities.Contains(r.SourceId) || friendlyCities.Contains(r.TargetId))
-                .Select(r => new { r.SourceId, r.TargetId });
+                .Where(r => friendlyCities.Contains(r.StCityId) || friendlyCities.Contains(r.NdCityId))
+                .Select(r => new { r.StCityId, r.NdCityId });
             foreach(var road in cityIds)
             {
-                visibleCities.Add(road.SourceId);
-                visibleCities.Add(road.TargetId);
+                visibleCities.Add(road.StCityId);
+                visibleCities.Add(road.NdCityId);
             }
 
             _visibleCities.Add(turnId, visibleCities);

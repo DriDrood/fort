@@ -280,13 +280,13 @@ namespace Fort.Services
             {
                 // get armies
                 var armyOut = db.Orders
-                    .Where(o => o.TurnId == CurrentTurnId && (o.IsReverseDirection ? o.TargetCityId : o.SourceCityId) == cityOccupation.CityId)
+                    .Where(o => o.TurnId == CurrentTurnId && (o.StIsSource ? o.StCityId : o.NdCityId) == cityOccupation.CityId)
                     .Sum(o => o.Amount);
                 var armyIn = db.Orders
-                    .Where(o => o.TurnId == CurrentTurnId && (o.IsReverseDirection ? o.SourceCityId : o.TargetCityId) == cityOccupation.CityId && cityOccupation.Owner != null && o.User.TeamId == cityOccupation.Owner.TeamId)
+                    .Where(o => o.TurnId == CurrentTurnId && (o.StIsSource ? o.NdCityId : o.StCityId) == cityOccupation.CityId && cityOccupation.Owner != null && o.User.TeamId == cityOccupation.Owner.TeamId)
                     .Sum(o => o.Amount);
                 var armyCounter = db.Orders
-                    .Where(o => o.TurnId == CurrentTurnId && (o.IsReverseDirection ? o.SourceCityId : o.TargetCityId) == cityOccupation.CityId && (cityOccupation.Owner == null || o.User.TeamId != cityOccupation.Owner.TeamId))
+                    .Where(o => o.TurnId == CurrentTurnId && (o.StIsSource ? o.NdCityId : o.StCityId) == cityOccupation.CityId && (cityOccupation.Owner == null || o.User.TeamId != cityOccupation.Owner.TeamId))
                     .Sum(o => o.Amount);
 
                 // new occupation
@@ -298,7 +298,7 @@ namespace Fort.Services
                     // biggest enemy army
                     owner = db.Orders
                         .Include(o => o.User)
-                        .Where(o => o.TurnId == CurrentTurnId && (o.IsReverseDirection ? o.SourceCityId : o.TargetCityId) == cityOccupation.CityId && (cityOccupation.Owner == null || o.User.TeamId != cityOccupation.Owner.TeamId))
+                        .Where(o => o.TurnId == CurrentTurnId && (o.StIsSource ? o.NdCityId : o.StCityId) == cityOccupation.CityId && (cityOccupation.Owner == null || o.User.TeamId != cityOccupation.Owner.TeamId))
                         .OrderByDescending(o => o.Amount)
                         .First().User;
                     result = -result;

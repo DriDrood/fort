@@ -14,11 +14,11 @@ namespace Fort.Database.Entities
 
         public ICollection<CityOccupation> CityOccupations { get; set; } = new HashSet<CityOccupation>();
 
-        public ICollection<Order> SourceForOrders { get; set; } = new HashSet<Order>();
-        public ICollection<Order> TargetForOrders { get; set; } = new HashSet<Order>();
+        public ICollection<Order> StForOrders { get; set; } = new HashSet<Order>();
+        public ICollection<Order> NdForOrders { get; set; } = new HashSet<Order>();
 
-        public ICollection<Road> SourceForRoads { get; set; } = new HashSet<Road>();
-        public ICollection<Road> TargetForRoads { get; set; } = new HashSet<Road>();
+        public ICollection<Road> StForRoads { get; set; } = new HashSet<Road>();
+        public ICollection<Road> NdForRoads { get; set; } = new HashSet<Road>();
 
         public ICollection<StartingPosition> StartingPositionFor { get; set; } = new HashSet<StartingPosition>();
     }

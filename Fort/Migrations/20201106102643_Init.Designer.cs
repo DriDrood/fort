@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fort.Migrations
 {
     [DbContext(typeof(FortDbContext))]
-    [Migration("20201103115827_seed")]
-    partial class seed
+    [Migration("20201106102643_Init")]
+    partial class Init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -606,13 +606,13 @@ namespace Fort.Migrations
 
             modelBuilder.Entity("Fort.Database.Entities.Order", b =>
                 {
-                    b.Property<Guid>("SourceCityId");
+                    b.Property<Guid>("StCityId");
 
-                    b.Property<Guid>("TargetCityId");
+                    b.Property<Guid>("NdCityId");
 
                     b.Property<int>("TurnId");
 
-                    b.Property<bool>("IsReverseDirection");
+                    b.Property<bool>("StIsSource");
 
                     b.Property<int>("Amount");
 
@@ -620,706 +620,706 @@ namespace Fort.Migrations
 
                     b.Property<Guid>("UserId");
 
-                    b.HasKey("SourceCityId", "TargetCityId", "TurnId", "IsReverseDirection");
+                    b.HasKey("StCityId", "NdCityId", "TurnId", "StIsSource");
 
                     b.HasIndex("TurnId");
 
                     b.HasIndex("UserId");
 
-                    b.HasIndex("SourceCityId", "TurnId");
+                    b.HasIndex("NdCityId", "TurnId");
 
-                    b.HasIndex("TargetCityId", "TurnId");
+                    b.HasIndex("StCityId", "TurnId");
 
                     b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("Fort.Database.Entities.Road", b =>
                 {
-                    b.Property<Guid>("SourceId");
+                    b.Property<Guid>("StCityId");
 
-                    b.Property<Guid>("TargetId");
+                    b.Property<Guid>("NdCityId");
 
-                    b.HasKey("SourceId", "TargetId");
+                    b.HasKey("StCityId", "NdCityId");
 
-                    b.HasIndex("TargetId");
+                    b.HasIndex("NdCityId");
 
                     b.ToTable("Roads");
 
                     b.HasData(
                         new
                         {
-                            SourceId = new Guid("178b0049-509f-42da-9008-d49e5ea98142"),
-                            TargetId = new Guid("20ae2fa2-907b-4f57-9d24-76dbc53972ff")
+                            StCityId = new Guid("178b0049-509f-42da-9008-d49e5ea98142"),
+                            NdCityId = new Guid("20ae2fa2-907b-4f57-9d24-76dbc53972ff")
                         },
                         new
                         {
-                            SourceId = new Guid("7a0b25d1-2edd-49cd-a37c-ae5b6550aa89"),
-                            TargetId = new Guid("95e8d61e-068a-4374-9883-89224161c0d9")
+                            StCityId = new Guid("7a0b25d1-2edd-49cd-a37c-ae5b6550aa89"),
+                            NdCityId = new Guid("95e8d61e-068a-4374-9883-89224161c0d9")
                         },
                         new
                         {
-                            SourceId = new Guid("178b0049-509f-42da-9008-d49e5ea98142"),
-                            TargetId = new Guid("7a0b25d1-2edd-49cd-a37c-ae5b6550aa89")
+                            StCityId = new Guid("178b0049-509f-42da-9008-d49e5ea98142"),
+                            NdCityId = new Guid("7a0b25d1-2edd-49cd-a37c-ae5b6550aa89")
                         },
                         new
                         {
-                            SourceId = new Guid("178b0049-509f-42da-9008-d49e5ea98142"),
-                            TargetId = new Guid("44e5bdfa-329a-41c4-aee2-a2ffc07211b7")
+                            StCityId = new Guid("178b0049-509f-42da-9008-d49e5ea98142"),
+                            NdCityId = new Guid("44e5bdfa-329a-41c4-aee2-a2ffc07211b7")
                         },
                         new
                         {
-                            SourceId = new Guid("44e5bdfa-329a-41c4-aee2-a2ffc07211b7"),
-                            TargetId = new Guid("f39e5b14-6633-4b17-b86d-b06076d0430c")
+                            StCityId = new Guid("44e5bdfa-329a-41c4-aee2-a2ffc07211b7"),
+                            NdCityId = new Guid("f39e5b14-6633-4b17-b86d-b06076d0430c")
                         },
                         new
                         {
-                            SourceId = new Guid("494df006-1afd-4b96-bcf3-9f0c4442965d"),
-                            TargetId = new Guid("6e660a3f-7c0c-4597-91ae-2c877518da0a")
+                            StCityId = new Guid("494df006-1afd-4b96-bcf3-9f0c4442965d"),
+                            NdCityId = new Guid("6e660a3f-7c0c-4597-91ae-2c877518da0a")
                         },
                         new
                         {
-                            SourceId = new Guid("20ae2fa2-907b-4f57-9d24-76dbc53972ff"),
-                            TargetId = new Guid("95e8d61e-068a-4374-9883-89224161c0d9")
+                            StCityId = new Guid("20ae2fa2-907b-4f57-9d24-76dbc53972ff"),
+                            NdCityId = new Guid("95e8d61e-068a-4374-9883-89224161c0d9")
                         },
                         new
                         {
-                            SourceId = new Guid("20ae2fa2-907b-4f57-9d24-76dbc53972ff"),
-                            TargetId = new Guid("f39e5b14-6633-4b17-b86d-b06076d0430c")
+                            StCityId = new Guid("20ae2fa2-907b-4f57-9d24-76dbc53972ff"),
+                            NdCityId = new Guid("f39e5b14-6633-4b17-b86d-b06076d0430c")
                         },
                         new
                         {
-                            SourceId = new Guid("7a0b25d1-2edd-49cd-a37c-ae5b6550aa89"),
-                            TargetId = new Guid("c517921b-d088-45cd-a456-2c613a4feb9e")
+                            StCityId = new Guid("7a0b25d1-2edd-49cd-a37c-ae5b6550aa89"),
+                            NdCityId = new Guid("c517921b-d088-45cd-a456-2c613a4feb9e")
                         },
                         new
                         {
-                            SourceId = new Guid("7a0b25d1-2edd-49cd-a37c-ae5b6550aa89"),
-                            TargetId = new Guid("7ef620a5-9462-452a-b779-ca343f470625")
+                            StCityId = new Guid("7a0b25d1-2edd-49cd-a37c-ae5b6550aa89"),
+                            NdCityId = new Guid("7ef620a5-9462-452a-b779-ca343f470625")
                         },
                         new
                         {
-                            SourceId = new Guid("a75127b3-d2a7-4d8b-9f1d-986297ecece1"),
-                            TargetId = new Guid("d285bf5a-5439-4cb7-82fb-d6f59ee09af5")
+                            StCityId = new Guid("a75127b3-d2a7-4d8b-9f1d-986297ecece1"),
+                            NdCityId = new Guid("d285bf5a-5439-4cb7-82fb-d6f59ee09af5")
                         },
                         new
                         {
-                            SourceId = new Guid("56f636ea-4898-4a14-be55-295f21fb663a"),
-                            TargetId = new Guid("a75127b3-d2a7-4d8b-9f1d-986297ecece1")
+                            StCityId = new Guid("56f636ea-4898-4a14-be55-295f21fb663a"),
+                            NdCityId = new Guid("a75127b3-d2a7-4d8b-9f1d-986297ecece1")
                         },
                         new
                         {
-                            SourceId = new Guid("e315725c-fc53-4be6-9da1-1e259ab37748"),
-                            TargetId = new Guid("ec88c63d-214b-4980-9a0a-55d8d1505b2c")
+                            StCityId = new Guid("e315725c-fc53-4be6-9da1-1e259ab37748"),
+                            NdCityId = new Guid("ec88c63d-214b-4980-9a0a-55d8d1505b2c")
                         },
                         new
                         {
-                            SourceId = new Guid("7ef620a5-9462-452a-b779-ca343f470625"),
-                            TargetId = new Guid("c517921b-d088-45cd-a456-2c613a4feb9e")
+                            StCityId = new Guid("7ef620a5-9462-452a-b779-ca343f470625"),
+                            NdCityId = new Guid("c517921b-d088-45cd-a456-2c613a4feb9e")
                         },
                         new
                         {
-                            SourceId = new Guid("178b0049-509f-42da-9008-d49e5ea98142"),
-                            TargetId = new Guid("4d814ee8-8d6a-49e2-93cb-71199f987f74")
+                            StCityId = new Guid("178b0049-509f-42da-9008-d49e5ea98142"),
+                            NdCityId = new Guid("4d814ee8-8d6a-49e2-93cb-71199f987f74")
                         },
                         new
                         {
-                            SourceId = new Guid("5acf8b05-b2ad-4e00-87a8-541d977717da"),
-                            TargetId = new Guid("95037d18-01e5-483f-93ec-712f87298a76")
+                            StCityId = new Guid("5acf8b05-b2ad-4e00-87a8-541d977717da"),
+                            NdCityId = new Guid("95037d18-01e5-483f-93ec-712f87298a76")
                         },
                         new
                         {
-                            SourceId = new Guid("1997df31-8e36-4166-91ba-423bcef19794"),
-                            TargetId = new Guid("95037d18-01e5-483f-93ec-712f87298a76")
+                            StCityId = new Guid("1997df31-8e36-4166-91ba-423bcef19794"),
+                            NdCityId = new Guid("95037d18-01e5-483f-93ec-712f87298a76")
                         },
                         new
                         {
-                            SourceId = new Guid("5fad7a28-61c8-46d3-916f-ead505a06e64"),
-                            TargetId = new Guid("95037d18-01e5-483f-93ec-712f87298a76")
+                            StCityId = new Guid("5fad7a28-61c8-46d3-916f-ead505a06e64"),
+                            NdCityId = new Guid("95037d18-01e5-483f-93ec-712f87298a76")
                         },
                         new
                         {
-                            SourceId = new Guid("4d814ee8-8d6a-49e2-93cb-71199f987f74"),
-                            TargetId = new Guid("5fad7a28-61c8-46d3-916f-ead505a06e64")
+                            StCityId = new Guid("4d814ee8-8d6a-49e2-93cb-71199f987f74"),
+                            NdCityId = new Guid("5fad7a28-61c8-46d3-916f-ead505a06e64")
                         },
                         new
                         {
-                            SourceId = new Guid("1997df31-8e36-4166-91ba-423bcef19794"),
-                            TargetId = new Guid("9d4a6fc5-a5ea-4e07-8354-15dff81c356d")
+                            StCityId = new Guid("1997df31-8e36-4166-91ba-423bcef19794"),
+                            NdCityId = new Guid("9d4a6fc5-a5ea-4e07-8354-15dff81c356d")
                         },
                         new
                         {
-                            SourceId = new Guid("667d6946-47cf-4db6-bbc1-3c911bcc43f6"),
-                            TargetId = new Guid("93205cf8-ec43-4464-b717-685442dcd641")
+                            StCityId = new Guid("667d6946-47cf-4db6-bbc1-3c911bcc43f6"),
+                            NdCityId = new Guid("93205cf8-ec43-4464-b717-685442dcd641")
                         },
                         new
                         {
-                            SourceId = new Guid("36a87ae2-ab57-4b9e-965d-42e7dc4cf0f1"),
-                            TargetId = new Guid("93205cf8-ec43-4464-b717-685442dcd641")
+                            StCityId = new Guid("36a87ae2-ab57-4b9e-965d-42e7dc4cf0f1"),
+                            NdCityId = new Guid("93205cf8-ec43-4464-b717-685442dcd641")
                         },
                         new
                         {
-                            SourceId = new Guid("a75127b3-d2a7-4d8b-9f1d-986297ecece1"),
-                            TargetId = new Guid("da6b69f7-d94f-42ca-bad1-54f1906102c6")
+                            StCityId = new Guid("a75127b3-d2a7-4d8b-9f1d-986297ecece1"),
+                            NdCityId = new Guid("da6b69f7-d94f-42ca-bad1-54f1906102c6")
                         },
                         new
                         {
-                            SourceId = new Guid("49ef30e1-000d-4b64-a13d-3d1828be6781"),
-                            TargetId = new Guid("5acf8b05-b2ad-4e00-87a8-541d977717da")
+                            StCityId = new Guid("49ef30e1-000d-4b64-a13d-3d1828be6781"),
+                            NdCityId = new Guid("5acf8b05-b2ad-4e00-87a8-541d977717da")
                         },
                         new
                         {
-                            SourceId = new Guid("5acf8b05-b2ad-4e00-87a8-541d977717da"),
-                            TargetId = new Guid("da6b69f7-d94f-42ca-bad1-54f1906102c6")
+                            StCityId = new Guid("5acf8b05-b2ad-4e00-87a8-541d977717da"),
+                            NdCityId = new Guid("da6b69f7-d94f-42ca-bad1-54f1906102c6")
                         },
                         new
                         {
-                            SourceId = new Guid("49ef30e1-000d-4b64-a13d-3d1828be6781"),
-                            TargetId = new Guid("95f92740-ee83-4054-b957-b01be3879d85")
+                            StCityId = new Guid("49ef30e1-000d-4b64-a13d-3d1828be6781"),
+                            NdCityId = new Guid("95f92740-ee83-4054-b957-b01be3879d85")
                         },
                         new
                         {
-                            SourceId = new Guid("4d814ee8-8d6a-49e2-93cb-71199f987f74"),
-                            TargetId = new Guid("9d4a6fc5-a5ea-4e07-8354-15dff81c356d")
+                            StCityId = new Guid("4d814ee8-8d6a-49e2-93cb-71199f987f74"),
+                            NdCityId = new Guid("9d4a6fc5-a5ea-4e07-8354-15dff81c356d")
                         },
                         new
                         {
-                            SourceId = new Guid("44e5bdfa-329a-41c4-aee2-a2ffc07211b7"),
-                            TargetId = new Guid("9d4a6fc5-a5ea-4e07-8354-15dff81c356d")
+                            StCityId = new Guid("44e5bdfa-329a-41c4-aee2-a2ffc07211b7"),
+                            NdCityId = new Guid("9d4a6fc5-a5ea-4e07-8354-15dff81c356d")
                         },
                         new
                         {
-                            SourceId = new Guid("494df006-1afd-4b96-bcf3-9f0c4442965d"),
-                            TargetId = new Guid("f39e5b14-6633-4b17-b86d-b06076d0430c")
+                            StCityId = new Guid("494df006-1afd-4b96-bcf3-9f0c4442965d"),
+                            NdCityId = new Guid("f39e5b14-6633-4b17-b86d-b06076d0430c")
                         },
                         new
                         {
-                            SourceId = new Guid("36a87ae2-ab57-4b9e-965d-42e7dc4cf0f1"),
-                            TargetId = new Guid("e5f97401-4aff-4527-94af-c517f152156c")
+                            StCityId = new Guid("36a87ae2-ab57-4b9e-965d-42e7dc4cf0f1"),
+                            NdCityId = new Guid("e5f97401-4aff-4527-94af-c517f152156c")
                         },
                         new
                         {
-                            SourceId = new Guid("161e17f0-c63d-4793-b8c1-76d5d863518c"),
-                            TargetId = new Guid("e5f97401-4aff-4527-94af-c517f152156c")
+                            StCityId = new Guid("161e17f0-c63d-4793-b8c1-76d5d863518c"),
+                            NdCityId = new Guid("e5f97401-4aff-4527-94af-c517f152156c")
                         },
                         new
                         {
-                            SourceId = new Guid("161e17f0-c63d-4793-b8c1-76d5d863518c"),
-                            TargetId = new Guid("494df006-1afd-4b96-bcf3-9f0c4442965d")
+                            StCityId = new Guid("161e17f0-c63d-4793-b8c1-76d5d863518c"),
+                            NdCityId = new Guid("494df006-1afd-4b96-bcf3-9f0c4442965d")
                         },
                         new
                         {
-                            SourceId = new Guid("7a0b25d1-2edd-49cd-a37c-ae5b6550aa89"),
-                            TargetId = new Guid("a75127b3-d2a7-4d8b-9f1d-986297ecece1")
+                            StCityId = new Guid("7a0b25d1-2edd-49cd-a37c-ae5b6550aa89"),
+                            NdCityId = new Guid("a75127b3-d2a7-4d8b-9f1d-986297ecece1")
                         },
                         new
                         {
-                            SourceId = new Guid("c517921b-d088-45cd-a456-2c613a4feb9e"),
-                            TargetId = new Guid("e315725c-fc53-4be6-9da1-1e259ab37748")
+                            StCityId = new Guid("c517921b-d088-45cd-a456-2c613a4feb9e"),
+                            NdCityId = new Guid("e315725c-fc53-4be6-9da1-1e259ab37748")
                         },
                         new
                         {
-                            SourceId = new Guid("95e8d61e-068a-4374-9883-89224161c0d9"),
-                            TargetId = new Guid("ec88c63d-214b-4980-9a0a-55d8d1505b2c")
+                            StCityId = new Guid("95e8d61e-068a-4374-9883-89224161c0d9"),
+                            NdCityId = new Guid("ec88c63d-214b-4980-9a0a-55d8d1505b2c")
                         },
                         new
                         {
-                            SourceId = new Guid("20ae2fa2-907b-4f57-9d24-76dbc53972ff"),
-                            TargetId = new Guid("ec88c63d-214b-4980-9a0a-55d8d1505b2c")
+                            StCityId = new Guid("20ae2fa2-907b-4f57-9d24-76dbc53972ff"),
+                            NdCityId = new Guid("ec88c63d-214b-4980-9a0a-55d8d1505b2c")
                         },
                         new
                         {
-                            SourceId = new Guid("93205cf8-ec43-4464-b717-685442dcd641"),
-                            TargetId = new Guid("ec88c63d-214b-4980-9a0a-55d8d1505b2c")
+                            StCityId = new Guid("93205cf8-ec43-4464-b717-685442dcd641"),
+                            NdCityId = new Guid("ec88c63d-214b-4980-9a0a-55d8d1505b2c")
                         },
                         new
                         {
-                            SourceId = new Guid("93205cf8-ec43-4464-b717-685442dcd641"),
-                            TargetId = new Guid("f39e5b14-6633-4b17-b86d-b06076d0430c")
+                            StCityId = new Guid("93205cf8-ec43-4464-b717-685442dcd641"),
+                            NdCityId = new Guid("f39e5b14-6633-4b17-b86d-b06076d0430c")
                         },
                         new
                         {
-                            SourceId = new Guid("36a87ae2-ab57-4b9e-965d-42e7dc4cf0f1"),
-                            TargetId = new Guid("667d6946-47cf-4db6-bbc1-3c911bcc43f6")
+                            StCityId = new Guid("36a87ae2-ab57-4b9e-965d-42e7dc4cf0f1"),
+                            NdCityId = new Guid("667d6946-47cf-4db6-bbc1-3c911bcc43f6")
                         },
                         new
                         {
-                            SourceId = new Guid("667d6946-47cf-4db6-bbc1-3c911bcc43f6"),
-                            TargetId = new Guid("ec88c63d-214b-4980-9a0a-55d8d1505b2c")
+                            StCityId = new Guid("667d6946-47cf-4db6-bbc1-3c911bcc43f6"),
+                            NdCityId = new Guid("ec88c63d-214b-4980-9a0a-55d8d1505b2c")
                         },
                         new
                         {
-                            SourceId = new Guid("20ae2fa2-907b-4f57-9d24-76dbc53972ff"),
-                            TargetId = new Guid("93205cf8-ec43-4464-b717-685442dcd641")
+                            StCityId = new Guid("20ae2fa2-907b-4f57-9d24-76dbc53972ff"),
+                            NdCityId = new Guid("93205cf8-ec43-4464-b717-685442dcd641")
                         },
                         new
                         {
-                            SourceId = new Guid("56f636ea-4898-4a14-be55-295f21fb663a"),
-                            TargetId = new Guid("d285bf5a-5439-4cb7-82fb-d6f59ee09af5")
+                            StCityId = new Guid("56f636ea-4898-4a14-be55-295f21fb663a"),
+                            NdCityId = new Guid("d285bf5a-5439-4cb7-82fb-d6f59ee09af5")
                         },
                         new
                         {
-                            SourceId = new Guid("56f636ea-4898-4a14-be55-295f21fb663a"),
-                            TargetId = new Guid("7ef620a5-9462-452a-b779-ca343f470625")
+                            StCityId = new Guid("56f636ea-4898-4a14-be55-295f21fb663a"),
+                            NdCityId = new Guid("7ef620a5-9462-452a-b779-ca343f470625")
                         },
                         new
                         {
-                            SourceId = new Guid("7ef620a5-9462-452a-b779-ca343f470625"),
-                            TargetId = new Guid("a75127b3-d2a7-4d8b-9f1d-986297ecece1")
+                            StCityId = new Guid("7ef620a5-9462-452a-b779-ca343f470625"),
+                            NdCityId = new Guid("a75127b3-d2a7-4d8b-9f1d-986297ecece1")
                         },
                         new
                         {
-                            SourceId = new Guid("95037d18-01e5-483f-93ec-712f87298a76"),
-                            TargetId = new Guid("da6b69f7-d94f-42ca-bad1-54f1906102c6")
+                            StCityId = new Guid("95037d18-01e5-483f-93ec-712f87298a76"),
+                            NdCityId = new Guid("da6b69f7-d94f-42ca-bad1-54f1906102c6")
                         },
                         new
                         {
-                            SourceId = new Guid("5fad7a28-61c8-46d3-916f-ead505a06e64"),
-                            TargetId = new Guid("da6b69f7-d94f-42ca-bad1-54f1906102c6")
+                            StCityId = new Guid("5fad7a28-61c8-46d3-916f-ead505a06e64"),
+                            NdCityId = new Guid("da6b69f7-d94f-42ca-bad1-54f1906102c6")
                         },
                         new
                         {
-                            SourceId = new Guid("1997df31-8e36-4166-91ba-423bcef19794"),
-                            TargetId = new Guid("5fad7a28-61c8-46d3-916f-ead505a06e64")
+                            StCityId = new Guid("1997df31-8e36-4166-91ba-423bcef19794"),
+                            NdCityId = new Guid("5fad7a28-61c8-46d3-916f-ead505a06e64")
                         },
                         new
                         {
-                            SourceId = new Guid("1997df31-8e36-4166-91ba-423bcef19794"),
-                            TargetId = new Guid("49ef30e1-000d-4b64-a13d-3d1828be6781")
+                            StCityId = new Guid("1997df31-8e36-4166-91ba-423bcef19794"),
+                            NdCityId = new Guid("49ef30e1-000d-4b64-a13d-3d1828be6781")
                         },
                         new
                         {
-                            SourceId = new Guid("318137aa-fcf8-430a-b7b6-c98e2215510c"),
-                            TargetId = new Guid("95f92740-ee83-4054-b957-b01be3879d85")
+                            StCityId = new Guid("318137aa-fcf8-430a-b7b6-c98e2215510c"),
+                            NdCityId = new Guid("95f92740-ee83-4054-b957-b01be3879d85")
                         },
                         new
                         {
-                            SourceId = new Guid("318137aa-fcf8-430a-b7b6-c98e2215510c"),
-                            TargetId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716")
+                            StCityId = new Guid("318137aa-fcf8-430a-b7b6-c98e2215510c"),
+                            NdCityId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716")
                         },
                         new
                         {
-                            SourceId = new Guid("675a39ff-499d-4735-b54a-e7f8502edb33"),
-                            TargetId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716")
+                            StCityId = new Guid("675a39ff-499d-4735-b54a-e7f8502edb33"),
+                            NdCityId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716")
                         },
                         new
                         {
-                            SourceId = new Guid("95f92740-ee83-4054-b957-b01be3879d85"),
-                            TargetId = new Guid("c8784857-2efe-4fad-b278-178b2b63e8db")
+                            StCityId = new Guid("95f92740-ee83-4054-b957-b01be3879d85"),
+                            NdCityId = new Guid("c8784857-2efe-4fad-b278-178b2b63e8db")
                         },
                         new
                         {
-                            SourceId = new Guid("a5c86f14-024e-4e31-8b8a-8218e8d9daa9"),
-                            TargetId = new Guid("c8784857-2efe-4fad-b278-178b2b63e8db")
+                            StCityId = new Guid("a5c86f14-024e-4e31-8b8a-8218e8d9daa9"),
+                            NdCityId = new Guid("c8784857-2efe-4fad-b278-178b2b63e8db")
                         },
                         new
                         {
-                            SourceId = new Guid("965997a3-604a-46ea-a19a-ad8a9b3bc37e"),
-                            TargetId = new Guid("a5c86f14-024e-4e31-8b8a-8218e8d9daa9")
+                            StCityId = new Guid("965997a3-604a-46ea-a19a-ad8a9b3bc37e"),
+                            NdCityId = new Guid("a5c86f14-024e-4e31-8b8a-8218e8d9daa9")
                         },
                         new
                         {
-                            SourceId = new Guid("1b584abf-2d44-44fa-af36-2aaa97405e87"),
-                            TargetId = new Guid("965997a3-604a-46ea-a19a-ad8a9b3bc37e")
+                            StCityId = new Guid("1b584abf-2d44-44fa-af36-2aaa97405e87"),
+                            NdCityId = new Guid("965997a3-604a-46ea-a19a-ad8a9b3bc37e")
                         },
                         new
                         {
-                            SourceId = new Guid("5039ec78-3834-4922-97d8-18785aa5b187"),
-                            TargetId = new Guid("965997a3-604a-46ea-a19a-ad8a9b3bc37e")
+                            StCityId = new Guid("5039ec78-3834-4922-97d8-18785aa5b187"),
+                            NdCityId = new Guid("965997a3-604a-46ea-a19a-ad8a9b3bc37e")
                         },
                         new
                         {
-                            SourceId = new Guid("965997a3-604a-46ea-a19a-ad8a9b3bc37e"),
-                            TargetId = new Guid("c8784857-2efe-4fad-b278-178b2b63e8db")
+                            StCityId = new Guid("965997a3-604a-46ea-a19a-ad8a9b3bc37e"),
+                            NdCityId = new Guid("c8784857-2efe-4fad-b278-178b2b63e8db")
                         },
                         new
                         {
-                            SourceId = new Guid("1b584abf-2d44-44fa-af36-2aaa97405e87"),
-                            TargetId = new Guid("5039ec78-3834-4922-97d8-18785aa5b187")
+                            StCityId = new Guid("1b584abf-2d44-44fa-af36-2aaa97405e87"),
+                            NdCityId = new Guid("5039ec78-3834-4922-97d8-18785aa5b187")
                         },
                         new
                         {
-                            SourceId = new Guid("5039ec78-3834-4922-97d8-18785aa5b187"),
-                            TargetId = new Guid("95f92740-ee83-4054-b957-b01be3879d85")
+                            StCityId = new Guid("5039ec78-3834-4922-97d8-18785aa5b187"),
+                            NdCityId = new Guid("95f92740-ee83-4054-b957-b01be3879d85")
                         },
                         new
                         {
-                            SourceId = new Guid("1b584abf-2d44-44fa-af36-2aaa97405e87"),
-                            TargetId = new Guid("5d6a5e74-61cd-4f45-941d-e5bb8a81d66e")
+                            StCityId = new Guid("1b584abf-2d44-44fa-af36-2aaa97405e87"),
+                            NdCityId = new Guid("5d6a5e74-61cd-4f45-941d-e5bb8a81d66e")
                         },
                         new
                         {
-                            SourceId = new Guid("5039ec78-3834-4922-97d8-18785aa5b187"),
-                            TargetId = new Guid("5d6a5e74-61cd-4f45-941d-e5bb8a81d66e")
+                            StCityId = new Guid("5039ec78-3834-4922-97d8-18785aa5b187"),
+                            NdCityId = new Guid("5d6a5e74-61cd-4f45-941d-e5bb8a81d66e")
                         },
                         new
                         {
-                            SourceId = new Guid("5d6a5e74-61cd-4f45-941d-e5bb8a81d66e"),
-                            TargetId = new Guid("675a39ff-499d-4735-b54a-e7f8502edb33")
+                            StCityId = new Guid("5d6a5e74-61cd-4f45-941d-e5bb8a81d66e"),
+                            NdCityId = new Guid("675a39ff-499d-4735-b54a-e7f8502edb33")
                         },
                         new
                         {
-                            SourceId = new Guid("5039ec78-3834-4922-97d8-18785aa5b187"),
-                            TargetId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716")
+                            StCityId = new Guid("5039ec78-3834-4922-97d8-18785aa5b187"),
+                            NdCityId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716")
                         },
                         new
                         {
-                            SourceId = new Guid("5d6a5e74-61cd-4f45-941d-e5bb8a81d66e"),
-                            TargetId = new Guid("8db03f1c-ffd5-4895-8a64-cbdfd52c6aa1")
+                            StCityId = new Guid("5d6a5e74-61cd-4f45-941d-e5bb8a81d66e"),
+                            NdCityId = new Guid("8db03f1c-ffd5-4895-8a64-cbdfd52c6aa1")
                         },
                         new
                         {
-                            SourceId = new Guid("675a39ff-499d-4735-b54a-e7f8502edb33"),
-                            TargetId = new Guid("8db03f1c-ffd5-4895-8a64-cbdfd52c6aa1")
+                            StCityId = new Guid("675a39ff-499d-4735-b54a-e7f8502edb33"),
+                            NdCityId = new Guid("8db03f1c-ffd5-4895-8a64-cbdfd52c6aa1")
                         },
                         new
                         {
-                            SourceId = new Guid("487f8d99-99a3-4c58-90e1-e75615cc080c"),
-                            TargetId = new Guid("8db03f1c-ffd5-4895-8a64-cbdfd52c6aa1")
+                            StCityId = new Guid("487f8d99-99a3-4c58-90e1-e75615cc080c"),
+                            NdCityId = new Guid("8db03f1c-ffd5-4895-8a64-cbdfd52c6aa1")
                         },
                         new
                         {
-                            SourceId = new Guid("487f8d99-99a3-4c58-90e1-e75615cc080c"),
-                            TargetId = new Guid("7aa73bb9-a0d3-4ce3-a1b4-21523befd582")
+                            StCityId = new Guid("487f8d99-99a3-4c58-90e1-e75615cc080c"),
+                            NdCityId = new Guid("7aa73bb9-a0d3-4ce3-a1b4-21523befd582")
                         },
                         new
                         {
-                            SourceId = new Guid("23aad6a1-0e21-4d93-a7e0-60d099793736"),
-                            TargetId = new Guid("7aa73bb9-a0d3-4ce3-a1b4-21523befd582")
+                            StCityId = new Guid("23aad6a1-0e21-4d93-a7e0-60d099793736"),
+                            NdCityId = new Guid("7aa73bb9-a0d3-4ce3-a1b4-21523befd582")
                         },
                         new
                         {
-                            SourceId = new Guid("23aad6a1-0e21-4d93-a7e0-60d099793736"),
-                            TargetId = new Guid("c68d7841-84c3-454a-9e2b-4c3d8e85e8da")
+                            StCityId = new Guid("23aad6a1-0e21-4d93-a7e0-60d099793736"),
+                            NdCityId = new Guid("c68d7841-84c3-454a-9e2b-4c3d8e85e8da")
                         },
                         new
                         {
-                            SourceId = new Guid("8db03f1c-ffd5-4895-8a64-cbdfd52c6aa1"),
-                            TargetId = new Guid("c68d7841-84c3-454a-9e2b-4c3d8e85e8da")
+                            StCityId = new Guid("8db03f1c-ffd5-4895-8a64-cbdfd52c6aa1"),
+                            NdCityId = new Guid("c68d7841-84c3-454a-9e2b-4c3d8e85e8da")
                         },
                         new
                         {
-                            SourceId = new Guid("29e29893-dc9a-4958-b82b-f64ef83f9f7e"),
-                            TargetId = new Guid("7aa73bb9-a0d3-4ce3-a1b4-21523befd582")
+                            StCityId = new Guid("29e29893-dc9a-4958-b82b-f64ef83f9f7e"),
+                            NdCityId = new Guid("7aa73bb9-a0d3-4ce3-a1b4-21523befd582")
                         },
                         new
                         {
-                            SourceId = new Guid("29e29893-dc9a-4958-b82b-f64ef83f9f7e"),
-                            TargetId = new Guid("a591ed84-9567-4d05-9a92-95e1b233b36c")
+                            StCityId = new Guid("29e29893-dc9a-4958-b82b-f64ef83f9f7e"),
+                            NdCityId = new Guid("a591ed84-9567-4d05-9a92-95e1b233b36c")
                         },
                         new
                         {
-                            SourceId = new Guid("a591ed84-9567-4d05-9a92-95e1b233b36c"),
-                            TargetId = new Guid("cd3c9dc6-4ecf-4e07-bfbd-607a074edb5d")
+                            StCityId = new Guid("a591ed84-9567-4d05-9a92-95e1b233b36c"),
+                            NdCityId = new Guid("cd3c9dc6-4ecf-4e07-bfbd-607a074edb5d")
                         },
                         new
                         {
-                            SourceId = new Guid("29e29893-dc9a-4958-b82b-f64ef83f9f7e"),
-                            TargetId = new Guid("cd3c9dc6-4ecf-4e07-bfbd-607a074edb5d")
+                            StCityId = new Guid("29e29893-dc9a-4958-b82b-f64ef83f9f7e"),
+                            NdCityId = new Guid("cd3c9dc6-4ecf-4e07-bfbd-607a074edb5d")
                         },
                         new
                         {
-                            SourceId = new Guid("29e29893-dc9a-4958-b82b-f64ef83f9f7e"),
-                            TargetId = new Guid("353b3a8d-4598-45f5-ad5c-3bec55918665")
+                            StCityId = new Guid("29e29893-dc9a-4958-b82b-f64ef83f9f7e"),
+                            NdCityId = new Guid("353b3a8d-4598-45f5-ad5c-3bec55918665")
                         },
                         new
                         {
-                            SourceId = new Guid("23aad6a1-0e21-4d93-a7e0-60d099793736"),
-                            TargetId = new Guid("29e29893-dc9a-4958-b82b-f64ef83f9f7e")
+                            StCityId = new Guid("23aad6a1-0e21-4d93-a7e0-60d099793736"),
+                            NdCityId = new Guid("29e29893-dc9a-4958-b82b-f64ef83f9f7e")
                         },
                         new
                         {
-                            SourceId = new Guid("29e29893-dc9a-4958-b82b-f64ef83f9f7e"),
-                            TargetId = new Guid("c68d7841-84c3-454a-9e2b-4c3d8e85e8da")
+                            StCityId = new Guid("29e29893-dc9a-4958-b82b-f64ef83f9f7e"),
+                            NdCityId = new Guid("c68d7841-84c3-454a-9e2b-4c3d8e85e8da")
                         },
                         new
                         {
-                            SourceId = new Guid("353b3a8d-4598-45f5-ad5c-3bec55918665"),
-                            TargetId = new Guid("cd3c9dc6-4ecf-4e07-bfbd-607a074edb5d")
+                            StCityId = new Guid("353b3a8d-4598-45f5-ad5c-3bec55918665"),
+                            NdCityId = new Guid("cd3c9dc6-4ecf-4e07-bfbd-607a074edb5d")
                         },
                         new
                         {
-                            SourceId = new Guid("b253f54e-5458-45eb-b294-f6e4bde9053a"),
-                            TargetId = new Guid("cd3c9dc6-4ecf-4e07-bfbd-607a074edb5d")
+                            StCityId = new Guid("b253f54e-5458-45eb-b294-f6e4bde9053a"),
+                            NdCityId = new Guid("cd3c9dc6-4ecf-4e07-bfbd-607a074edb5d")
                         },
                         new
                         {
-                            SourceId = new Guid("b253f54e-5458-45eb-b294-f6e4bde9053a"),
-                            TargetId = new Guid("f49609e4-10c0-4aa8-81dd-952d6a4319dd")
+                            StCityId = new Guid("b253f54e-5458-45eb-b294-f6e4bde9053a"),
+                            NdCityId = new Guid("f49609e4-10c0-4aa8-81dd-952d6a4319dd")
                         },
                         new
                         {
-                            SourceId = new Guid("353b3a8d-4598-45f5-ad5c-3bec55918665"),
-                            TargetId = new Guid("f49609e4-10c0-4aa8-81dd-952d6a4319dd")
+                            StCityId = new Guid("353b3a8d-4598-45f5-ad5c-3bec55918665"),
+                            NdCityId = new Guid("f49609e4-10c0-4aa8-81dd-952d6a4319dd")
                         },
                         new
                         {
-                            SourceId = new Guid("43398d9e-69c5-4203-a66b-5e8d67b82c90"),
-                            TargetId = new Guid("c68d7841-84c3-454a-9e2b-4c3d8e85e8da")
+                            StCityId = new Guid("43398d9e-69c5-4203-a66b-5e8d67b82c90"),
+                            NdCityId = new Guid("c68d7841-84c3-454a-9e2b-4c3d8e85e8da")
                         },
                         new
                         {
-                            SourceId = new Guid("353b3a8d-4598-45f5-ad5c-3bec55918665"),
-                            TargetId = new Guid("43398d9e-69c5-4203-a66b-5e8d67b82c90")
+                            StCityId = new Guid("353b3a8d-4598-45f5-ad5c-3bec55918665"),
+                            NdCityId = new Guid("43398d9e-69c5-4203-a66b-5e8d67b82c90")
                         },
                         new
                         {
-                            SourceId = new Guid("43398d9e-69c5-4203-a66b-5e8d67b82c90"),
-                            TargetId = new Guid("675a39ff-499d-4735-b54a-e7f8502edb33")
+                            StCityId = new Guid("43398d9e-69c5-4203-a66b-5e8d67b82c90"),
+                            NdCityId = new Guid("675a39ff-499d-4735-b54a-e7f8502edb33")
                         },
                         new
                         {
-                            SourceId = new Guid("43398d9e-69c5-4203-a66b-5e8d67b82c90"),
-                            TargetId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716")
+                            StCityId = new Guid("43398d9e-69c5-4203-a66b-5e8d67b82c90"),
+                            NdCityId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716")
                         },
                         new
                         {
-                            SourceId = new Guid("43398d9e-69c5-4203-a66b-5e8d67b82c90"),
-                            TargetId = new Guid("ac8bf4f3-8842-4d6a-8b69-524fd944e19a")
+                            StCityId = new Guid("43398d9e-69c5-4203-a66b-5e8d67b82c90"),
+                            NdCityId = new Guid("ac8bf4f3-8842-4d6a-8b69-524fd944e19a")
                         },
                         new
                         {
-                            SourceId = new Guid("ac8bf4f3-8842-4d6a-8b69-524fd944e19a"),
-                            TargetId = new Guid("f49609e4-10c0-4aa8-81dd-952d6a4319dd")
+                            StCityId = new Guid("ac8bf4f3-8842-4d6a-8b69-524fd944e19a"),
+                            NdCityId = new Guid("f49609e4-10c0-4aa8-81dd-952d6a4319dd")
                         },
                         new
                         {
-                            SourceId = new Guid("8cbb321c-901e-4ccf-8981-88967a12481e"),
-                            TargetId = new Guid("b253f54e-5458-45eb-b294-f6e4bde9053a")
+                            StCityId = new Guid("8cbb321c-901e-4ccf-8981-88967a12481e"),
+                            NdCityId = new Guid("b253f54e-5458-45eb-b294-f6e4bde9053a")
                         },
                         new
                         {
-                            SourceId = new Guid("8cbb321c-901e-4ccf-8981-88967a12481e"),
-                            TargetId = new Guid("f49609e4-10c0-4aa8-81dd-952d6a4319dd")
+                            StCityId = new Guid("8cbb321c-901e-4ccf-8981-88967a12481e"),
+                            NdCityId = new Guid("f49609e4-10c0-4aa8-81dd-952d6a4319dd")
                         },
                         new
                         {
-                            SourceId = new Guid("8cbb321c-901e-4ccf-8981-88967a12481e"),
-                            TargetId = new Guid("fd6aec80-dca3-4d64-b53c-18b7a93eb550")
+                            StCityId = new Guid("8cbb321c-901e-4ccf-8981-88967a12481e"),
+                            NdCityId = new Guid("fd6aec80-dca3-4d64-b53c-18b7a93eb550")
                         },
                         new
                         {
-                            SourceId = new Guid("b41531cb-c23e-4a7c-a149-ea86d942bfb2"),
-                            TargetId = new Guid("f49609e4-10c0-4aa8-81dd-952d6a4319dd")
+                            StCityId = new Guid("b41531cb-c23e-4a7c-a149-ea86d942bfb2"),
+                            NdCityId = new Guid("f49609e4-10c0-4aa8-81dd-952d6a4319dd")
                         },
                         new
                         {
-                            SourceId = new Guid("8cbb321c-901e-4ccf-8981-88967a12481e"),
-                            TargetId = new Guid("b41531cb-c23e-4a7c-a149-ea86d942bfb2")
+                            StCityId = new Guid("8cbb321c-901e-4ccf-8981-88967a12481e"),
+                            NdCityId = new Guid("b41531cb-c23e-4a7c-a149-ea86d942bfb2")
                         },
                         new
                         {
-                            SourceId = new Guid("2431da6c-ddf9-4653-8344-d66de031955e"),
-                            TargetId = new Guid("ac8bf4f3-8842-4d6a-8b69-524fd944e19a")
+                            StCityId = new Guid("2431da6c-ddf9-4653-8344-d66de031955e"),
+                            NdCityId = new Guid("ac8bf4f3-8842-4d6a-8b69-524fd944e19a")
                         },
                         new
                         {
-                            SourceId = new Guid("27d4e3fc-e42e-4187-82d7-4f30e6ddb3e8"),
-                            TargetId = new Guid("fd6aec80-dca3-4d64-b53c-18b7a93eb550")
+                            StCityId = new Guid("27d4e3fc-e42e-4187-82d7-4f30e6ddb3e8"),
+                            NdCityId = new Guid("fd6aec80-dca3-4d64-b53c-18b7a93eb550")
                         },
                         new
                         {
-                            SourceId = new Guid("b41531cb-c23e-4a7c-a149-ea86d942bfb2"),
-                            TargetId = new Guid("fd6aec80-dca3-4d64-b53c-18b7a93eb550")
+                            StCityId = new Guid("b41531cb-c23e-4a7c-a149-ea86d942bfb2"),
+                            NdCityId = new Guid("fd6aec80-dca3-4d64-b53c-18b7a93eb550")
                         },
                         new
                         {
-                            SourceId = new Guid("27d4e3fc-e42e-4187-82d7-4f30e6ddb3e8"),
-                            TargetId = new Guid("aafbf738-869b-4f13-81a9-55847b242d7a")
+                            StCityId = new Guid("27d4e3fc-e42e-4187-82d7-4f30e6ddb3e8"),
+                            NdCityId = new Guid("aafbf738-869b-4f13-81a9-55847b242d7a")
                         },
                         new
                         {
-                            SourceId = new Guid("27d4e3fc-e42e-4187-82d7-4f30e6ddb3e8"),
-                            TargetId = new Guid("b41531cb-c23e-4a7c-a149-ea86d942bfb2")
+                            StCityId = new Guid("27d4e3fc-e42e-4187-82d7-4f30e6ddb3e8"),
+                            NdCityId = new Guid("b41531cb-c23e-4a7c-a149-ea86d942bfb2")
                         },
                         new
                         {
-                            SourceId = new Guid("08c12c35-5306-49d3-bcdd-609f9213265a"),
-                            TargetId = new Guid("2431da6c-ddf9-4653-8344-d66de031955e")
+                            StCityId = new Guid("08c12c35-5306-49d3-bcdd-609f9213265a"),
+                            NdCityId = new Guid("2431da6c-ddf9-4653-8344-d66de031955e")
                         },
                         new
                         {
-                            SourceId = new Guid("08c12c35-5306-49d3-bcdd-609f9213265a"),
-                            TargetId = new Guid("318137aa-fcf8-430a-b7b6-c98e2215510c")
+                            StCityId = new Guid("08c12c35-5306-49d3-bcdd-609f9213265a"),
+                            NdCityId = new Guid("318137aa-fcf8-430a-b7b6-c98e2215510c")
                         },
                         new
                         {
-                            SourceId = new Guid("08c12c35-5306-49d3-bcdd-609f9213265a"),
-                            TargetId = new Guid("b5a67442-19d8-471e-9c32-05a558db9fc7")
+                            StCityId = new Guid("08c12c35-5306-49d3-bcdd-609f9213265a"),
+                            NdCityId = new Guid("b5a67442-19d8-471e-9c32-05a558db9fc7")
                         },
                         new
                         {
-                            SourceId = new Guid("2431da6c-ddf9-4653-8344-d66de031955e"),
-                            TargetId = new Guid("b41531cb-c23e-4a7c-a149-ea86d942bfb2")
+                            StCityId = new Guid("2431da6c-ddf9-4653-8344-d66de031955e"),
+                            NdCityId = new Guid("b41531cb-c23e-4a7c-a149-ea86d942bfb2")
                         },
                         new
                         {
-                            SourceId = new Guid("6e660a3f-7c0c-4597-91ae-2c877518da0a"),
-                            TargetId = new Guid("aafbf738-869b-4f13-81a9-55847b242d7a")
+                            StCityId = new Guid("6e660a3f-7c0c-4597-91ae-2c877518da0a"),
+                            NdCityId = new Guid("aafbf738-869b-4f13-81a9-55847b242d7a")
                         },
                         new
                         {
-                            SourceId = new Guid("08c12c35-5306-49d3-bcdd-609f9213265a"),
-                            TargetId = new Guid("aafbf738-869b-4f13-81a9-55847b242d7a")
+                            StCityId = new Guid("08c12c35-5306-49d3-bcdd-609f9213265a"),
+                            NdCityId = new Guid("aafbf738-869b-4f13-81a9-55847b242d7a")
                         },
                         new
                         {
-                            SourceId = new Guid("161e17f0-c63d-4793-b8c1-76d5d863518c"),
-                            TargetId = new Guid("27d4e3fc-e42e-4187-82d7-4f30e6ddb3e8")
+                            StCityId = new Guid("161e17f0-c63d-4793-b8c1-76d5d863518c"),
+                            NdCityId = new Guid("27d4e3fc-e42e-4187-82d7-4f30e6ddb3e8")
                         },
                         new
                         {
-                            SourceId = new Guid("aafbf738-869b-4f13-81a9-55847b242d7a"),
-                            TargetId = new Guid("b5a67442-19d8-471e-9c32-05a558db9fc7")
+                            StCityId = new Guid("aafbf738-869b-4f13-81a9-55847b242d7a"),
+                            NdCityId = new Guid("b5a67442-19d8-471e-9c32-05a558db9fc7")
                         },
                         new
                         {
-                            SourceId = new Guid("6e660a3f-7c0c-4597-91ae-2c877518da0a"),
-                            TargetId = new Guid("b5a67442-19d8-471e-9c32-05a558db9fc7")
+                            StCityId = new Guid("6e660a3f-7c0c-4597-91ae-2c877518da0a"),
+                            NdCityId = new Guid("b5a67442-19d8-471e-9c32-05a558db9fc7")
                         },
                         new
                         {
-                            SourceId = new Guid("1997df31-8e36-4166-91ba-423bcef19794"),
-                            TargetId = new Guid("318137aa-fcf8-430a-b7b6-c98e2215510c")
+                            StCityId = new Guid("1997df31-8e36-4166-91ba-423bcef19794"),
+                            NdCityId = new Guid("318137aa-fcf8-430a-b7b6-c98e2215510c")
                         },
                         new
                         {
-                            SourceId = new Guid("9d4a6fc5-a5ea-4e07-8354-15dff81c356d"),
-                            TargetId = new Guid("b5a67442-19d8-471e-9c32-05a558db9fc7")
+                            StCityId = new Guid("9d4a6fc5-a5ea-4e07-8354-15dff81c356d"),
+                            NdCityId = new Guid("b5a67442-19d8-471e-9c32-05a558db9fc7")
                         },
                         new
                         {
-                            SourceId = new Guid("1997df31-8e36-4166-91ba-423bcef19794"),
-                            TargetId = new Guid("b5a67442-19d8-471e-9c32-05a558db9fc7")
+                            StCityId = new Guid("1997df31-8e36-4166-91ba-423bcef19794"),
+                            NdCityId = new Guid("b5a67442-19d8-471e-9c32-05a558db9fc7")
                         },
                         new
                         {
-                            SourceId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716"),
-                            TargetId = new Guid("ac8bf4f3-8842-4d6a-8b69-524fd944e19a")
+                            StCityId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716"),
+                            NdCityId = new Guid("ac8bf4f3-8842-4d6a-8b69-524fd944e19a")
                         },
                         new
                         {
-                            SourceId = new Guid("178b0049-509f-42da-9008-d49e5ea98142"),
-                            TargetId = new Guid("6e591c23-5b60-4f81-ae3e-1c57e6c63962")
+                            StCityId = new Guid("178b0049-509f-42da-9008-d49e5ea98142"),
+                            NdCityId = new Guid("6e591c23-5b60-4f81-ae3e-1c57e6c63962")
                         },
                         new
                         {
-                            SourceId = new Guid("4d814ee8-8d6a-49e2-93cb-71199f987f74"),
-                            TargetId = new Guid("6e591c23-5b60-4f81-ae3e-1c57e6c63962")
+                            StCityId = new Guid("4d814ee8-8d6a-49e2-93cb-71199f987f74"),
+                            NdCityId = new Guid("6e591c23-5b60-4f81-ae3e-1c57e6c63962")
                         },
                         new
                         {
-                            SourceId = new Guid("6e591c23-5b60-4f81-ae3e-1c57e6c63962"),
-                            TargetId = new Guid("da6b69f7-d94f-42ca-bad1-54f1906102c6")
+                            StCityId = new Guid("6e591c23-5b60-4f81-ae3e-1c57e6c63962"),
+                            NdCityId = new Guid("da6b69f7-d94f-42ca-bad1-54f1906102c6")
                         },
                         new
                         {
-                            SourceId = new Guid("6e591c23-5b60-4f81-ae3e-1c57e6c63962"),
-                            TargetId = new Guid("a75127b3-d2a7-4d8b-9f1d-986297ecece1")
+                            StCityId = new Guid("6e591c23-5b60-4f81-ae3e-1c57e6c63962"),
+                            NdCityId = new Guid("a75127b3-d2a7-4d8b-9f1d-986297ecece1")
                         },
                         new
                         {
-                            SourceId = new Guid("6e591c23-5b60-4f81-ae3e-1c57e6c63962"),
-                            TargetId = new Guid("7a0b25d1-2edd-49cd-a37c-ae5b6550aa89")
+                            StCityId = new Guid("6e591c23-5b60-4f81-ae3e-1c57e6c63962"),
+                            NdCityId = new Guid("7a0b25d1-2edd-49cd-a37c-ae5b6550aa89")
                         },
                         new
                         {
-                            SourceId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716"),
-                            TargetId = new Guid("95f92740-ee83-4054-b957-b01be3879d85")
+                            StCityId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716"),
+                            NdCityId = new Guid("95f92740-ee83-4054-b957-b01be3879d85")
                         },
                         new
                         {
-                            SourceId = new Guid("7aa73bb9-a0d3-4ce3-a1b4-21523befd582"),
-                            TargetId = new Guid("a591ed84-9567-4d05-9a92-95e1b233b36c")
+                            StCityId = new Guid("7aa73bb9-a0d3-4ce3-a1b4-21523befd582"),
+                            NdCityId = new Guid("a591ed84-9567-4d05-9a92-95e1b233b36c")
                         },
                         new
                         {
-                            SourceId = new Guid("e5f97401-4aff-4527-94af-c517f152156c"),
-                            TargetId = new Guid("f39e5b14-6633-4b17-b86d-b06076d0430c")
+                            StCityId = new Guid("e5f97401-4aff-4527-94af-c517f152156c"),
+                            NdCityId = new Guid("f39e5b14-6633-4b17-b86d-b06076d0430c")
                         },
                         new
                         {
-                            SourceId = new Guid("494df006-1afd-4b96-bcf3-9f0c4442965d"),
-                            TargetId = new Guid("e5f97401-4aff-4527-94af-c517f152156c")
+                            StCityId = new Guid("494df006-1afd-4b96-bcf3-9f0c4442965d"),
+                            NdCityId = new Guid("e5f97401-4aff-4527-94af-c517f152156c")
                         },
                         new
                         {
-                            SourceId = new Guid("36a87ae2-ab57-4b9e-965d-42e7dc4cf0f1"),
-                            TargetId = new Guid("f39e5b14-6633-4b17-b86d-b06076d0430c")
+                            StCityId = new Guid("36a87ae2-ab57-4b9e-965d-42e7dc4cf0f1"),
+                            NdCityId = new Guid("f39e5b14-6633-4b17-b86d-b06076d0430c")
                         },
                         new
                         {
-                            SourceId = new Guid("675a39ff-499d-4735-b54a-e7f8502edb33"),
-                            TargetId = new Guid("6e774576-1d08-43b8-beb8-e278f21679a1")
+                            StCityId = new Guid("675a39ff-499d-4735-b54a-e7f8502edb33"),
+                            NdCityId = new Guid("6e774576-1d08-43b8-beb8-e278f21679a1")
                         },
                         new
                         {
-                            SourceId = new Guid("5d6a5e74-61cd-4f45-941d-e5bb8a81d66e"),
-                            TargetId = new Guid("6e774576-1d08-43b8-beb8-e278f21679a1")
+                            StCityId = new Guid("5d6a5e74-61cd-4f45-941d-e5bb8a81d66e"),
+                            NdCityId = new Guid("6e774576-1d08-43b8-beb8-e278f21679a1")
                         },
                         new
                         {
-                            SourceId = new Guid("6e774576-1d08-43b8-beb8-e278f21679a1"),
-                            TargetId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716")
+                            StCityId = new Guid("6e774576-1d08-43b8-beb8-e278f21679a1"),
+                            NdCityId = new Guid("834d65e5-7da3-4a42-871e-80f58d19b716")
                         },
                         new
                         {
-                            SourceId = new Guid("2431da6c-ddf9-4653-8344-d66de031955e"),
-                            TargetId = new Guid("aafbf738-869b-4f13-81a9-55847b242d7a")
+                            StCityId = new Guid("2431da6c-ddf9-4653-8344-d66de031955e"),
+                            NdCityId = new Guid("aafbf738-869b-4f13-81a9-55847b242d7a")
                         },
                         new
                         {
-                            SourceId = new Guid("161e17f0-c63d-4793-b8c1-76d5d863518c"),
-                            TargetId = new Guid("b890df70-d9b3-41f6-a624-be238c563e29")
+                            StCityId = new Guid("161e17f0-c63d-4793-b8c1-76d5d863518c"),
+                            NdCityId = new Guid("b890df70-d9b3-41f6-a624-be238c563e29")
                         },
                         new
                         {
-                            SourceId = new Guid("44e5bdfa-329a-41c4-aee2-a2ffc07211b7"),
-                            TargetId = new Guid("6bdf365d-d8c9-42f3-9fd6-8487d5704759")
+                            StCityId = new Guid("44e5bdfa-329a-41c4-aee2-a2ffc07211b7"),
+                            NdCityId = new Guid("6bdf365d-d8c9-42f3-9fd6-8487d5704759")
                         },
                         new
                         {
-                            SourceId = new Guid("87ae0df7-c6b5-4399-8386-f821b0340727"),
-                            TargetId = new Guid("c517921b-d088-45cd-a456-2c613a4feb9e")
+                            StCityId = new Guid("87ae0df7-c6b5-4399-8386-f821b0340727"),
+                            NdCityId = new Guid("c517921b-d088-45cd-a456-2c613a4feb9e")
                         },
                         new
                         {
-                            SourceId = new Guid("7ef620a5-9462-452a-b779-ca343f470625"),
-                            TargetId = new Guid("87ae0df7-c6b5-4399-8386-f821b0340727")
+                            StCityId = new Guid("7ef620a5-9462-452a-b779-ca343f470625"),
+                            NdCityId = new Guid("87ae0df7-c6b5-4399-8386-f821b0340727")
                         },
                         new
                         {
-                            SourceId = new Guid("87ae0df7-c6b5-4399-8386-f821b0340727"),
-                            TargetId = new Guid("e315725c-fc53-4be6-9da1-1e259ab37748")
+                            StCityId = new Guid("87ae0df7-c6b5-4399-8386-f821b0340727"),
+                            NdCityId = new Guid("e315725c-fc53-4be6-9da1-1e259ab37748")
                         },
                         new
                         {
-                            SourceId = new Guid("56f636ea-4898-4a14-be55-295f21fb663a"),
-                            TargetId = new Guid("87ae0df7-c6b5-4399-8386-f821b0340727")
+                            StCityId = new Guid("56f636ea-4898-4a14-be55-295f21fb663a"),
+                            NdCityId = new Guid("87ae0df7-c6b5-4399-8386-f821b0340727")
                         },
                         new
                         {
-                            SourceId = new Guid("a5c86f14-024e-4e31-8b8a-8218e8d9daa9"),
-                            TargetId = new Guid("cd9afdb5-3c6b-423e-9247-a8d26ba0a0a3")
+                            StCityId = new Guid("a5c86f14-024e-4e31-8b8a-8218e8d9daa9"),
+                            NdCityId = new Guid("cd9afdb5-3c6b-423e-9247-a8d26ba0a0a3")
                         },
                         new
                         {
-                            SourceId = new Guid("5acf8b05-b2ad-4e00-87a8-541d977717da"),
-                            TargetId = new Guid("cd9afdb5-3c6b-423e-9247-a8d26ba0a0a3")
+                            StCityId = new Guid("5acf8b05-b2ad-4e00-87a8-541d977717da"),
+                            NdCityId = new Guid("cd9afdb5-3c6b-423e-9247-a8d26ba0a0a3")
                         },
                         new
                         {
-                            SourceId = new Guid("208c67f5-ad51-490f-9f47-6b555ebbfc3a"),
-                            TargetId = new Guid("6e591c23-5b60-4f81-ae3e-1c57e6c63962")
+                            StCityId = new Guid("208c67f5-ad51-490f-9f47-6b555ebbfc3a"),
+                            NdCityId = new Guid("6e591c23-5b60-4f81-ae3e-1c57e6c63962")
                         },
                         new
                         {
-                            SourceId = new Guid("74d20d91-a837-4f24-a9dd-4763e0caac4b"),
-                            TargetId = new Guid("ac8bf4f3-8842-4d6a-8b69-524fd944e19a")
+                            StCityId = new Guid("74d20d91-a837-4f24-a9dd-4763e0caac4b"),
+                            NdCityId = new Guid("ac8bf4f3-8842-4d6a-8b69-524fd944e19a")
                         },
                         new
                         {
-                            SourceId = new Guid("49ef30e1-000d-4b64-a13d-3d1828be6781"),
-                            TargetId = new Guid("a7861024-9eb4-4536-a0a9-e063022ae673")
+                            StCityId = new Guid("49ef30e1-000d-4b64-a13d-3d1828be6781"),
+                            NdCityId = new Guid("a7861024-9eb4-4536-a0a9-e063022ae673")
                         });
                 });
 
@@ -1538,14 +1538,14 @@ namespace Fort.Migrations
 
             modelBuilder.Entity("Fort.Database.Entities.Order", b =>
                 {
-                    b.HasOne("Fort.Database.Entities.City", "SourceCity")
-                        .WithMany("SourceForOrders")
-                        .HasForeignKey("SourceCityId")
+                    b.HasOne("Fort.Database.Entities.City", "NdCity")
+                        .WithMany("NdForOrders")
+                        .HasForeignKey("NdCityId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Fort.Database.Entities.City", "TargetCity")
-                        .WithMany("TargetForOrders")
-                        .HasForeignKey("TargetCityId")
+                    b.HasOne("Fort.Database.Entities.City", "StCity")
+                        .WithMany("StForOrders")
+                        .HasForeignKey("StCityId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Fort.Database.Entities.Turn", "Turn")
@@ -1558,32 +1558,32 @@ namespace Fort.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade);
 
+                    b.HasOne("Fort.Database.Entities.CityOccupation", "NdCityOccupation")
+                        .WithMany("NdForOrders")
+                        .HasForeignKey("NdCityId", "TurnId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("Fort.Database.Entities.Road", "Road")
                         .WithMany("Orders")
-                        .HasForeignKey("SourceCityId", "TargetCityId")
+                        .HasForeignKey("StCityId", "NdCityId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Fort.Database.Entities.CityOccupation", "SourceCityOccupation")
-                        .WithMany("SourceForOrders")
-                        .HasForeignKey("SourceCityId", "TurnId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Fort.Database.Entities.CityOccupation", "TargetCityOccupation")
-                        .WithMany("TargetForOrders")
-                        .HasForeignKey("TargetCityId", "TurnId")
+                    b.HasOne("Fort.Database.Entities.CityOccupation", "StCityOccupation")
+                        .WithMany("StForOrders")
+                        .HasForeignKey("StCityId", "TurnId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Fort.Database.Entities.Road", b =>
                 {
-                    b.HasOne("Fort.Database.Entities.City", "Source")
-                        .WithMany("SourceForRoads")
-                        .HasForeignKey("SourceId")
+                    b.HasOne("Fort.Database.Entities.City", "NdCity")
+                        .WithMany("NdForRoads")
+                        .HasForeignKey("NdCityId")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Fort.Database.Entities.City", "Target")
-                        .WithMany("TargetForRoads")
-                        .HasForeignKey("TargetId")
+                    b.HasOne("Fort.Database.Entities.City", "StCity")
+                        .WithMany("StForRoads")
+                        .HasForeignKey("StCityId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
