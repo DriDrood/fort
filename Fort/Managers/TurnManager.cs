@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Fort.Database;
+using Fort.Models;
 using Fort.Models.Params;
 using Fort.Models.Store;
 using Fort.Services;
@@ -13,14 +14,14 @@ namespace Fort.Managers
     {
         public const int DEFAULT_CITY_SIZE = 10;
 
-        public TurnManager(Context context, FortDbContext db, LifecycleService lifecycleService)
+        public TurnManager(JwtUser jwtUser, FortDbContext db, LifecycleService lifecycleService)
         {
-            _context = context;
+            _jwtUser = jwtUser;
             _db = db;
             _lifecycleService = lifecycleService;
         }
 
-        private readonly Context _context;
+        private readonly JwtUser _jwtUser;
         private readonly FortDbContext _db;
         private readonly LifecycleService _lifecycleService;
 
@@ -147,11 +148,11 @@ namespace Fort.Managers
         }
         private bool IsMy(Database.Entities.CityOccupation cityOccupation)
         {
-            return (cityOccupation.OwnerId == _context.CurrentUser.Id);
+            return (cityOccupation.OwnerId == _jwtUser.UserId);
         }
         private bool IsMy(Database.Entities.Order order)
         {
-            return (order.UserId == _context.CurrentUser.Id);
+            return (order.UserId == _jwtUser.UserId);
         }
 
         private int GetCitySize(int army)
@@ -194,7 +195,7 @@ namespace Fort.Managers
             var citiesList = _db.CityOccupations
                 .Include(co => co.Owner)
                 .Include(co => co.City)
-                .Where(co => co.TurnId == turnId && co.Owner.TeamId == _context.CurrentUser.TeamId)
+                .Where(co => co.TurnId == turnId && co.Owner.TeamId == _jwtUser.TeamId)
                 .Select(co => co.City.Id);
             cities = new HashSet<Guid>(citiesList);
             _friendlyCities.Add(turnId, cities);

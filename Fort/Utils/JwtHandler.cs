@@ -24,7 +24,9 @@ namespace RingoRegistration.backend.Utils
                 Subject = new ClaimsIdentity(new List<Claim> {
                     new Claim(ClaimTypes.Email, user.Email),
                     new Claim(ClaimTypes.GivenName, user.UserName),
-                    new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
+                    new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User"),
+                    new Claim("UserId", user.Id.ToString()),
+                    new Claim("TeamId", user.TeamId.ToString()),
                 }),
                 SigningCredentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256Signature)
             };

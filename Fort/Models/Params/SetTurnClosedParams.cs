@@ -1,6 +1,6 @@
 namespace Fort.Models.Params
 {
-    public class DoneParams
+    public class SetTurnClosedParams
     {
         public bool Done { get; set; }
     }

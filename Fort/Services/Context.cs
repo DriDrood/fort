@@ -1,9 +1,13 @@
-using Fort.Database.Entities;
+using Newtonsoft.Json.Linq;
 
 namespace Fort.Services
 {
-    public class Context
-    {
-        public User CurrentUser { get; set; }
-    }
+  public class MessageContext
+  {
+    public string Route { get; set; }
+    public JToken Data { get; set; }
+    public object Response { get; set; }
+    
+    public string InputMessage { get; set; }
+  }
 }

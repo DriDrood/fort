@@ -19,6 +19,7 @@ namespace Fort.Middlewares
 
         public async Task Invoke(HttpContext context, Logger logger)
         {
+            #warning TODO: LoggerMiddleware
             // init
             Guid reqId = Guid.NewGuid();
 
