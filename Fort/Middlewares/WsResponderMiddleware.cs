@@ -1,8 +1,7 @@
 using System;
-using System.Security.Authentication;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Fort.Services;
+using Fort.Models;
 using Fort.Utils.WebSocket;
 
 namespace Fort.Middlewares

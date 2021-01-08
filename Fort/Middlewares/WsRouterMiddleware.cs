@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Fort.Extensions;
-using Fort.Services;
+using Fort.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace Fort.Utils.WebSocket
@@ -15,7 +15,7 @@ namespace Fort.Utils.WebSocket
 
     private RequestDelegate _next;
 
-    public async Task Invoke(HttpContext _, MessageContext context, IServiceProvider serviceProvider, WsConnection connection)
+    public Task Invoke(HttpContext _, MessageContext context, IServiceProvider serviceProvider, WsConnection connection)
     {
       // get route
       (var controllerName, var methodName) = ParseRoute(context.Route, '/');
@@ -38,6 +38,8 @@ namespace Fort.Utils.WebSocket
       {
         throw ex.InnerException;
       }
+      
+      return Task.CompletedTask;
     }
 
     public (string, string) ParseRoute(string route, char splitter)

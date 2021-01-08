@@ -1,7 +1,6 @@
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using Fort.Models;
-using Fort.Services;
 using Microsoft.AspNetCore.Http;
 
 namespace Fort.Middlewares

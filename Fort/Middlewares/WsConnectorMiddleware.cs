@@ -1,7 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Fort.Extensions;
-using Fort.Services;
+using Fort.Models;
+using Fort.Utils.Logger;
 using Fort.Utils.WebSocket;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,12 +11,14 @@ namespace Fort.Middlewares
 {
   public class WsConnectorMiddleware
   {
-    public WsConnectorMiddleware(RequestDelegate next)
+    public WsConnectorMiddleware(RequestDelegate next, Logger logger)
     {
       _next = next;
+      _logger = logger;
     }
 
     private RequestDelegate _next;
+    private readonly Logger _logger;
 
     public Task Invoke(HttpContext context, IServiceProvider serviceProvider, WsConnection wsc)
     {
@@ -50,9 +53,9 @@ namespace Fort.Middlewares
               
             }
           }
-          catch (Exception)
+          catch (Exception ex)
           {
-#warning TODO: log error
+            _logger.LogException(ex);
           }
         }
       });

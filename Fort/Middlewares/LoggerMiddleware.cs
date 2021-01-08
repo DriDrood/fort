@@ -2,7 +2,6 @@ using System;
 using System.Security.Authentication;
 using System.Threading.Tasks;
 using Fort.Models;
-using Fort.Services;
 using Fort.Utils.Logger;
 using Microsoft.AspNetCore.Http;
 

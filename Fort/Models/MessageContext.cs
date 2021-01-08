@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json.Linq;
 
-namespace Fort.Services
+namespace Fort.Models
 {
   public class MessageContext
   {
