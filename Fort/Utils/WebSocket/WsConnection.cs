@@ -10,6 +10,13 @@ namespace Fort.Utils.WebSocket
 {
   public class WsConnection
   {
+    public WsConnection(Logger.Logger logger)
+    {
+      _logger = logger;
+    }
+
+    private readonly Logger.Logger _logger;
+
     public Action<string> ReceiveMessage { get; set; }
 
     private CancellationTokenSource _listenCancel = new CancellationTokenSource();
@@ -47,10 +54,13 @@ namespace Fort.Utils.WebSocket
       _listenCancel.Cancel();
     }
 
-    public Task Send(string route, object data)
+    public Task Send(Guid requestId, string route, object data)
     {
       var dataString = JsonConvert.SerializeObject(new { route, data }, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() });
       var dataByte = System.Text.Encoding.UTF8.GetBytes(dataString);
+
+      // log
+      _logger?.LogResponse(requestId, dataString);
 
       _sendCancel = new CancellationTokenSource();
       return _webSocket.SendAsync(dataByte, WS.WebSocketMessageType.Text, true, _sendCancel.Token);

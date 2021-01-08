@@ -1,4 +1,5 @@
-﻿using Fort.Database;
+﻿using Fort.Comm;
+using Fort.Database;
 using Fort.Extensions;
 using Fort.Managers;
 using Fort.Middlewares;
@@ -38,7 +39,8 @@ namespace Fort
       services.AddScoped<MapManager>();
       services.AddScoped<TurnManager>();
       services.AddScoped<UserManager>();
-
+      services.AddScoped<PlayerController>();
+      services.AddScoped<AdminController>();
     }
 
     // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -56,10 +58,12 @@ namespace Fort
       app.UseWebSockets();
       app.UseMiddleware<WsConnectorMiddleware>();
       app.UseMiddleware<LoggerMiddleware>();
+      app.UseMiddleware<WsResponderMiddleware>();
       app.UseMiddleware<WsParserMiddleware>();
       app.UseMiddleware<WsAuthorizationMiddleware>();
       app.UseMiddleware<WsRouterMiddleware>();
 
+      app.ApplicationServices.GetService<Logger>().Setup(ConfigManager.Logger);
       app.ApplicationServices.GetService<LifecycleService>().Setup();
     }
 

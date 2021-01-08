@@ -19,7 +19,7 @@ namespace Fort.Extensions
         var type = typeof(TService);
         var constructor = type.GetConstructors()[0];
         var param = constructor.GetParameters().Select(p => sp.GetService(p.ParameterType));
-        var instance = (TService)Activator.CreateInstance(type, param);
+        var instance = (TService)Activator.CreateInstance(type, param.ToArray());
         return instance;
       });
     }

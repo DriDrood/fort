@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Fort.Extensions;
 using Fort.Services;
 using Microsoft.AspNetCore.Http;
 
@@ -20,21 +21,16 @@ namespace Fort.Utils.WebSocket
       (var controllerName, var methodName) = ParseRoute(context.Route, '/');
 
       // get controller
-      var controllerType = Type.GetType($"Fort.Comm.{controllerName}Controller");
+      var controllerType = Type.GetType($"Fort.Comm.{controllerName.ToCamelCase()}Controller");
       var controller = serviceProvider.GetService(controllerType);
 
       // get param
-      var method = controllerType.GetMethod(methodName);
+      var method = controllerType.GetMethod(methodName.ToCamelCase());
       var paramType = method.GetParameters()[0].ParameterType;
       var param = context.Data.ToObject(paramType);
 
       // RUN
-      var result = method.Invoke(controller, new object[] { param });
-
-      if (result != null)
-      {
-        await connection.Send(context.Route, result);
-      }
+      context.Response = method.Invoke(controller, new object[] { param });
     }
 
     public (string, string) ParseRoute(string route, char splitter)

@@ -1,57 +1,36 @@
 using System;
-using System.IO;
-using System.Linq;
-using System.Security.Claims;
+using System.Security.Authentication;
 using System.Threading.Tasks;
+using Fort.Models;
+using Fort.Services;
 using Fort.Utils.Logger;
 using Microsoft.AspNetCore.Http;
 
 namespace Fort.Middlewares
 {
-    public class LoggerMiddleware
+  public class LoggerMiddleware
+  {
+    public LoggerMiddleware(RequestDelegate next)
     {
-        public LoggerMiddleware(RequestDelegate next)
-        {
-            _next = next;
-        }
-
-        private RequestDelegate _next;
-
-        public async Task Invoke(HttpContext context, Logger logger)
-        {
-            #warning TODO: LoggerMiddleware
-            // init
-            Guid reqId = Guid.NewGuid();
-
-            // request
-            logger.LogRequest(reqId, context.User?.Claims.SingleOrDefault(c => c.Type == ClaimTypes.Email)?.Value, context.Request);
-
-            // response
-            using (var responseBody = new MemoryStream())
-            {
-                var originalResponseBody = context.Response.Body;
-                context.Response.Body = responseBody;
-                
-                // run
-                try
-                {
-                    await _next.Invoke(context);
-                }
-                // catch (RRException ex)
-                // {
-                //     logger.LogResponse(reqId, 500, ex.Message);
-                //     throw;
-                // }
-                catch (Exception ex)
-                {
-                    logger.LogException(ex);
-                    throw;
-                }
-
-                // log response
-                logger.LogResponse(reqId, context.Response.StatusCode, context.Response);
-                await responseBody.CopyToAsync(originalResponseBody);
-            }
-        }
+      _next = next;
     }
+
+    private RequestDelegate _next;
+
+    public async Task Invoke(HttpContext _, JwtUser jwtUser, MessageContext context, Logger logger)
+    {
+      // log request
+      logger.LogRequest(context.RequestId, jwtUser.Email, context.InputMessage);
+
+      // run
+      try
+      {
+        await _next.Invoke(_);
+      }
+      catch (Exception ex)
+      {
+        logger.LogException(ex);
+      }
+    }
+  }
 }

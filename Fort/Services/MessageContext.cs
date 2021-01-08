@@ -1,9 +1,12 @@
+using System;
 using Newtonsoft.Json.Linq;
 
 namespace Fort.Services
 {
   public class MessageContext
   {
+    public Guid RequestId { get; } = new Guid();
+    
     public string Route { get; set; }
     public JToken Data { get; set; }
     public object Response { get; set; }

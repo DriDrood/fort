@@ -18,7 +18,7 @@ namespace Fort.Middlewares
     public Task Invoke(HttpContext _, MessageContext messageContext, JwtUser jwtUser)
     {
       // only login can be annonymous
-      if (messageContext.Route != "login" && jwtUser.IsAnnonymous)
+      if (messageContext.Route != "player/login" && jwtUser.IsAnnonymous)
         throw new AuthenticationException("Invalid token");
         
       // admin endpoints
