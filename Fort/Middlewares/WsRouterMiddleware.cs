@@ -30,7 +30,14 @@ namespace Fort.Utils.WebSocket
       var param = context.Data.ToObject(paramType);
 
       // RUN
-      context.Response = method.Invoke(controller, new object[] { param });
+      try
+      {
+        context.Response = method.Invoke(controller, new object[] { param });
+      }
+      catch (Exception ex)
+      {
+        throw ex.InnerException;
+      }
     }
 
     public (string, string) ParseRoute(string route, char splitter)
