@@ -22,11 +22,11 @@ namespace Fort.Middlewares
         await _next.Invoke(_);
 
         if (context.Response != null)
-          await wsConnection.Send(context.RequestId, context.Route, context.Response);
+          await wsConnection.Send(context.MessageId, context.Route, context.Response);
       }
       catch (Exception ex)
       {
-        await wsConnection.Send(context.RequestId, "error", new { message = ex.Message, stackTrace = ex.StackTrace });
+        await wsConnection.Send(context.MessageId, "error", new { message = ex.Message, stackTrace = ex.StackTrace });
         throw;
       }
     }

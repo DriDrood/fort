@@ -21,6 +21,7 @@ namespace Fort.Middlewares
       var param = JsonConvert.DeserializeObject<WebSocketParam>(context.InputMessage);
 
       // fill context
+      context.MessageId = param.MessageId;
       context.Route = param.Route;
       context.Data = param.Data;
 

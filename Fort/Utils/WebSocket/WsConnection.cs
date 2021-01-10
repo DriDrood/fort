@@ -54,13 +54,13 @@ namespace Fort.Utils.WebSocket
       _listenCancel.Cancel();
     }
 
-    public Task Send(Guid requestId, string route, object data)
+    public Task Send(Guid messageId, string route, object data)
     {
-      var dataString = JsonConvert.SerializeObject(new { route, data }, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() });
+      var dataString = JsonConvert.SerializeObject(new { messageId, route, data }, new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() });
       var dataByte = System.Text.Encoding.UTF8.GetBytes(dataString);
 
       // log
-      _logger?.LogResponse(requestId, dataString);
+      _logger?.LogResponse(messageId, dataString);
 
       _sendCancel = new CancellationTokenSource();
       return _webSocket.SendAsync(dataByte, WS.WebSocketMessageType.Text, true, _sendCancel.Token);

@@ -5,7 +5,7 @@ namespace Fort.Models
 {
   public class MessageContext
   {
-    public Guid RequestId { get; } = new Guid();
+    public Guid MessageId { get; set; }
     
     public string Route { get; set; }
     public JToken Data { get; set; }

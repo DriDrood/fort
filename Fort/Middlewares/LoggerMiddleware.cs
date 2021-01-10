@@ -19,7 +19,7 @@ namespace Fort.Middlewares
     public async Task Invoke(HttpContext _, JwtUser jwtUser, MessageContext context, Logger logger)
     {
       // log request
-      logger.LogRequest(context.RequestId, jwtUser.Email, context.InputMessage);
+      logger.LogRequest(context.MessageId, jwtUser.Email, context.InputMessage);
 
       // run
       try
