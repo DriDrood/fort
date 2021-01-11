@@ -3,7 +3,7 @@
     <input type="text" placeholder="E-mail" class="email" v-model="email">
     <input type="password" placeholder="Heslo" class="password" v-model="password">
     <button @click="login">
-      <i v-if="loading" class="fas fa-spin fa-circle-notch"></i>
+      <i v-if="isLoading" class="fas fa-spin fa-circle-notch"></i>
       <i v-else class="fas fa-sign-in-alt" title="login"></i>
     </button>
   </div>
@@ -19,11 +19,11 @@ export default {
     password: null
   }),
   computed: {
-    ...mapGetters(["loading"])
+    ...mapGetters(["isLoading"])
   },
   methods: {
     login() {
-      this.$store.dispatch('login', {
+      this.$store.dispatch('userLogin', {
         email: this.email,
         password: this.password
       })

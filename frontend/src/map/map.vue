@@ -4,7 +4,7 @@
       <svg viewBox="0 0 1920 1024" preserveAspectRatio="none">
         <defs>
           <linearGradient
-            v-for="(team, teamId) in teams"
+            v-for="(team, teamId) in user.teams"
             :key="`team-${teamId}`"
             :id="`team-${teamId}`"
           >
@@ -15,16 +15,16 @@
             <image v-bind:[`xlink:href`]="`/users/${userSize.playerId}.jpg`" x="0" y="0" :width="userSize.size * 2" :height="userSize.size * 2" />
           </pattern>
         </defs>
-        <road v-for="(road, index) in roads" :key="index" :road="road" />
+        <road v-for="(road, index) in map.roads" :key="index" :road="road" />
         <order v-for="(order, orderId) in orders" :key="orderId" :order="order" :orderId="orderId" />
         <city
-          v-for="city in cities"
+          v-for="city in map.cities"
           :key="`city-${city.id}`"
           :city="city"
           :selected="selected"
           @select="select(city.id)"
         />
-        <armyMove v-for="(armyMove, index) in turnRun.armies" :key="`armyMove-${index}`" :armyMove="armyMove" />
+        <armyMove v-for="(armyMove, index) in turns.turnChangeProgress.armies" :key="`armyMove-${index}`" :armyMove="armyMove" />
         <rect
           v-if="selected"
           class="darkness"
@@ -79,7 +79,7 @@ export default {
     showModal: false
   }),
   computed: {
-    ...mapState(["cities", "roads", "teams", "turnRun"]),
+    ...mapState(["map", "user", "turns"]),
     ...mapGetters(["isTurnCurrent", "activeTurn"]),
     availableRoads() {
       if (!this.selected) return [];

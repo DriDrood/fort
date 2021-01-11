@@ -15,10 +15,10 @@ export default {
   props: ["road"],
   computed: {
     source() {
-      return this.$store.state.cities[this.road.split("__")[0]];
+      return this.$store.state.map.cities[this.road.split("__")[0]];
     },
     target() {
-      return this.$store.state.cities[this.road.split("__")[1]];
+      return this.$store.state.map.cities[this.road.split("__")[1]];
     }
   }
 };

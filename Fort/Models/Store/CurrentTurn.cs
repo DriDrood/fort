@@ -8,6 +8,5 @@ namespace Fort.Models.Store
         public int Id { get; set; }
         public string State { get; set; }
         public DateTime? EndsAt { get; set; }
-        public Turn Turn { get; set; }
     }
 }

@@ -34,13 +34,11 @@ namespace Fort.Managers
             if (currentTurn == null)
                 return null;
 
-            var turn = GetTurn(currentTurn.Id);
             return new CurrentTurn
             {
                 Id = currentTurn.Id,
                 State = _lifecycleService.State.ToString(),
                 EndsAt = _lifecycleService.WaitTill,
-                Turn = turn
             };
         }
 
@@ -77,6 +75,7 @@ namespace Fort.Managers
 
             var turn = new Turn
             {
+                Id = id,
                 CityOccupations = cityOccupations,
                 Orders = orders
             };

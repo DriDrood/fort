@@ -53,14 +53,14 @@ export default {
       if (this.occupation.playerId == null) return false;
 
       // same player
-      if (this.occupation.playerId == this.$store.state.login.id) return true;
+      if (this.occupation.playerId == this.$store.state.user.login.id) return true;
 
       // same team
-      var currentPlayerTeamId = this.$store.state.players[
-        this.$store.state.login.id
+      var currentPlayerTeamId = this.$store.state.user.players[
+        this.$store.state.user.login.id
       ].teamId;
       if (
-        this.$store.state.players[this.occupation.playerId].teamId ==
+        this.$store.state.user.players[this.occupation.playerId].teamId ==
         currentPlayerTeamId
       )
         return true;
@@ -70,7 +70,7 @@ export default {
         this.$store.getters.cityRoads[this.city.id].some(
           neighbourId =>
             this.activeTurn.cityOccupations[neighbourId].playerId &&
-            this.$store.state.players[
+            this.$store.state.user.players[
               this.activeTurn.cityOccupations[neighbourId].playerId
             ].teamId == currentPlayerTeamId
         )
@@ -83,7 +83,7 @@ export default {
     teamId() {
       if (this.occupation.playerId == null) return "neutral";
 
-      return this.$store.state.players[this.occupation.playerId].teamId;
+      return this.$store.state.user.players[this.occupation.playerId].teamId;
     }
   },
   methods: {

@@ -14,7 +14,7 @@ export default {
     armyMove: {}
   },
   computed: {
-    ...mapState(["config", "turnRun"]),
+    ...mapState(["config", "turns"]),
     animation() {
       const middleX = (this.armyMove.endX - this.armyMove.startX) / 2 + this.armyMove.startX;
       const middleY = (this.armyMove.endY - this.armyMove.startY) / 2 + this.armyMove.startY;
@@ -26,13 +26,13 @@ export default {
       };
     },
     x() {
-      return this.animation.x[this.turnRun.armiesPosition];
+      return this.animation.x[this.turns.turnChangeProgress.armiesPosition];
     },
     y() {
-      return this.animation.y[this.turnRun.armiesPosition];
+      return this.animation.y[this.turns.turnChangeProgress.armiesPosition];
     },
     size() {
-      return this.animation.size[this.turnRun.armiesPosition];
+      return this.animation.size[this.turns.turnChangeProgress.armiesPosition];
     },
     teamId() {
       return this.$store.state.players[this.armyMove.playerId].teamId;

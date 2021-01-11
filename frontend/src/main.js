@@ -8,6 +8,6 @@ new Vue({
   store,
   render: h => h(App),
   created() {
-    this.$store.dispatch('init');
+    // this.$store.dispatch('userInit');
   }
 }).$mount('#app')

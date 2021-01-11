@@ -1,0 +1,268 @@
+import Vue from "vue";
+
+export default {
+  state: () => ({
+    activeId: 0,
+    currentId: 0,
+    data: [
+      // {
+      //   cityOccupations: {
+      //     '1': {
+      //       playerId: '5',
+      //       size: 50
+      //     },
+      //     '2': {
+      //       playerId: '4',
+      //       size: 15
+      //     },
+      //   },
+      //   orders: {
+      //     '4>>3': {
+      //       playerId: '4',
+      //       amount: 10,
+      //       size: 8
+      //     },
+      //   }
+      // },
+      // {
+      //   cityOccupations: {
+      //     '1': {
+      //       playerId: '3',
+      //       size: 15
+      //     },
+      //     '2': {
+      //       playerId: '4',
+      //       size: 15
+      //     },
+      //   },
+      //   orders: {}
+      // }
+    ],
+    turnChangeProgress: {
+      armies: [],
+      armiesPosition: 0
+    }
+  }),
+  getters: {
+    isTurnCurrent: (state) => state.activeId == state.currentId,
+    activeTurn: (state) => state.data[state.activeId]
+  },
+  mutations: {
+    turnsUpdate(state, payload) {
+      payload.turns.forEach(t => {
+        // add empty turns
+        for (let i = state.data.length; i < t.id; i++) {
+          state.data.push(null);
+        }
+
+        // add turn
+        Vue.set(state.data, t.id, t);
+      });
+
+      state.currentId = Math.max(...payload.turns.map(t => t.id));
+      state.activeId = state.currentId;
+    },
+    turnsOrder(state, payload) { // sourceId, targetId, amount
+      const currentTurn = state.activeTurn;
+      const source = currentTurn.cityOccupations[payload.sourceId];
+      if (source.playerId != state.login.id) return;
+  
+      const orderKey = `${payload.sourceId}>>${payload.targetId}`;
+      const max = ((currentTurn.orders[orderKey] && currentTurn.orders[orderKey].amount) || 0) + source.availableArmy;
+      if (payload.amount > 0)
+        Vue.set(currentTurn.orders, orderKey, { playerId: state.login.id, amount: payload.amount, size: helpers.getArmySize(payload.amount) });
+      else if (currentTurn.orders[orderKey])
+        Vue.delete(currentTurn.orders, orderKey);
+      // else nothing
+  
+      source.availableArmy = max - payload.amount;
+    },
+    turnsPrev: async (state) => {
+      // invalid command
+      if (state.activeTurnId <= 0 || state.turnChangeProgress.armiesPosition != 0) return;
+  
+      // init
+      const orders = state.data[state.activeTurnId - 1].orders;
+      var met = helpers.meetingResults(state, orders);
+      helpers.createMove(state, orders, met, true);
+  
+      // move
+      await helpers.sleep(10);
+      state.turnChangeProgress.armiesPosition = 1;
+      await helpers.sleep(state.config.armyRunDuration * 1000);
+      state.turnChangeProgress.armiesPosition = 2;
+      await helpers.sleep(state.config.armyRunDuration * 1000);
+  
+      // decrease active
+      state.activeTurnId -= 1;
+  
+      // clean
+      Vue.set(state.turnChangeProgress, 'armies', []);
+      state.turnChangeProgress.armiesPosition = 0;
+    },
+    turnsNext: async (state) => {
+      // invalid command
+      if (state.activeTurnId >= state.data.last || state.turnChangeProgress.armiesPosition != 0) return;
+  
+      // init
+      const orders = state.activeTurn.orders;
+      let met = helpers.meetingResults(state, orders);
+      helpers.createMove(state, orders, met, false);
+  
+      // move
+      await helpers.sleep(10);
+      state.turnChangeProgress.armiesPosition = 1;
+      await helpers.sleep(state.config.armyRunDuration * 1000);
+      state.turnChangeProgress.armiesPosition = 2;
+      await helpers.sleep(state.config.armyRunDuration * 1000);
+  
+      // increase active
+      state.activeTurnId += 1;
+  
+      // clean
+      Vue.set(state.turnChangeProgress, 'armies', []);
+      state.turnChangeProgress.armiesPosition = 0;
+    }
+  },
+  actions: {
+    // sourceId, targetId, amount
+    turnsOrder(context, payload) {
+      const source = context.getters.activeTurn.cityOccupations[payload.sourceId];
+      if (source.playerId != context.state.login.id) return;
+  
+      context.dispatch("commSend", {
+        route: "player/setOrder",
+        data: payload,
+      });
+      // comm.post('play/setorder', payload, context, () => {
+      //   context.commit('updateOrder', payload);
+      // });
+    },
+    turnsPrev(context) {
+      // invalid command - first turn || already running
+      if (context.state.activeTurnId <= 0 || context.state.turnChangeProgress.armiesPosition != 0) return;
+  
+      // null - load
+      const finalTurn = context.state.activeTurnId - 1;
+      if (context.state.data[finalTurn] == null)
+      {
+        context.dispatch("commSend", {
+          route: "player/getTurn",
+          data: { id: finalTurn }
+        });
+        // comm.post('play/getTurn', { id: finalTurn}, context, (data) => {
+        //   Vue.set(context.state.data, finalTurn, data);
+        //   context.commit('updatePrevTurn');
+        // });
+      }
+      // already loaded
+      else
+      {
+        context.commit('turnsPrev');
+      }
+    },
+    turnsNext(context) {
+      // invalid command - last turn || already running
+      if (context.state.activeTurnId >= context.state.data.last || context.state.turnChangeProgress.armiesPosition != 0) return;
+  
+      // null - load
+      const finalTurn = context.state.activeTurnId + 1;
+      if (context.state.data[finalTurn] == null)
+      {
+        context.dispatch("commSend", {
+          route: "player/getTurn",
+          data: { id: finalTurn }
+        });
+        // comm.post('play/getTurn', { id: finalTurn}, context, (data) => {
+        //   Vue.set(context.state.data, finalTurn, data);
+        //   context.commit('updateNextTurn');
+        // });
+      }
+      // already loaded
+      else
+      {
+        context.commit('turnsNext');
+      }
+    }
+  },
+}
+
+
+const helpers = {
+  meetingResults(state, orders) {
+    let met = {};
+    // meeting
+    Object.keys(orders).forEach(orderId => {
+      // already met
+      if (met[orderId] != null) return;
+
+      const [sourceId, targetId] = orderId.split('>>');
+      const reverseOrderId = `${targetId}>>${sourceId}`;
+
+      const order = orders[orderId];
+      const reverseOrder = orders[reverseOrderId];
+      // no enemy reverse turn
+      if (!reverseOrder || state.players[order.playerId].teamId == state.players[reverseOrder.playerId].teamId) return;
+
+      // meeting ;-)
+      // first win
+      if (order.size > reverseOrder.size) {
+        met[orderId] = this.getSizeAfterMeeting(order.size, reverseOrder.size);
+        met[reverseOrderId] = 0;
+      }
+      // second win
+      else if (order.size < reverseOrder.size) {
+        met[orderId] = 0;
+        met[reverseOrderId] = this.getSizeAfterMeeting(reverseOrder.size, order.size);
+      }
+      // same size
+      else {
+        met[orderId] = 5;
+        met[reverseOrderId] = 5;
+      }
+    });
+
+    return met;
+  },
+  createMove(state, orders, met, reverse) {
+    // create
+    Object.keys(orders).forEach(orderId => {
+      // init
+      const order = orders[orderId];
+      const [sourceId, targetId] = orderId.split('>>');
+      // get positions
+      const start = state.cities[reverse ? targetId : sourceId];
+      const end = state.cities[reverse ? sourceId : targetId];
+      // get sizes
+      const size1 = reverse
+        ? met[orderId] || order.size
+        : order.size;
+      const size2 = reverse
+        ? order.size
+        : met[orderId] || order.size;
+
+      // return
+      state.turnChangeProgress.armies.push({
+        startX: start.x,
+        startY: start.y,
+        endX: end.x,
+        endY: end.y,
+        size1: size1,
+        size2: size2,
+        playerId: order.playerId
+      });
+    });
+  },
+  getSizeAfterMeeting(biggerArmySize, smallerArmySize) {
+    return Math.floor(Math.sqrt(Math.pow(biggerArmySize - 5, 2) - Math.pow(smallerArmySize - 5, 2))) + 5;
+  },
+  getArmySize(army) {
+    if (!army)
+      return null;
+
+    return Math.floor(Math.sqrt(army)) + 5;
+  },
+  sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+}

@@ -50,9 +50,11 @@ namespace Fort.Comm
     }
 
     /// User marks himself as finished
-    public void SetTurnClosed(SetTurnClosedParams param)
+    public SetTurnClosedParams SetTurnClosed(SetTurnClosedParams param)
     {
-      _doneService.Done(_jwtUser.UserId, param.Done);
+      _doneService.Done(_jwtUser.UserId, param.Closed);
+
+      return param;
     }
 
     // create / update new order 
@@ -65,6 +67,7 @@ namespace Fort.Comm
     {
       var initData = new Init();
       initData.CurrentTurn = _turnManager.GetCurrentTurn();
+      initData.Turns = new Turn[] { _turnManager.GetTurn(initData.CurrentTurn.Id) };
       initData.Cities = _mapManager.GetAllCities();
       initData.Roads = _mapManager.GetAllRoads();
       initData.Players = _userManager.GetAllPlayers();

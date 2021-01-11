@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <login v-if="!login.id" />
+    <login v-if="!userIsLogged" />
     <template v-else>
       <topPanel />
       <notifications />
@@ -10,11 +10,11 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import login from "./users/login";
 import notifications from "./notify/notification";
 import topPanel from "./master/top-panel";
 import worldMap from "./map/map";
-import { mapState } from 'vuex';
 
 export default {
   name: "app",
@@ -25,12 +25,8 @@ export default {
     worldMap
   },
   computed: {
-    ...mapState(['login'])
+    ...mapGetters(['userIsLogged'])
   },
-  mounted() {
-    this.$store.dispatch('countDownPeriodicaly');
-    this.$store.dispatch('checkStatePeriodicaly');
-  }
 };
 </script>
 
