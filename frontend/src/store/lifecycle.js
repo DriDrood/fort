@@ -27,6 +27,9 @@ export default {
     }
   },
   actions: {
+    lifecycleInit: context => {
+      context.commit("commRegisterReceiver", { route: "player/setTurnClosed", callback: "lifecycleToggleClose" });
+    },
     lifecycleToggleClose: context => {
       context.dispatch("commSend", { route: "player/setTurnClosed", data: { closed: !context.state.currentTurn.closed }});
     },

@@ -5,23 +5,30 @@ export default {
   state: () => ({
     connection: null,
     isOpened: false,
-    loading: {},
+    requests: {},
+    receivers: {
+      // 'user/login': [ data => context.commit("userInit", data), data => context.commit("turnsInit", data), ],
+    },
   }),
   getters: {
-    isLoading: state => Object.keys(state.loading).length != 0,
+    isLoading: state => Object.keys(state.requests).length != 0,
   },
   mutations: {
-    // messageId
+    // messageId, callback
     commSendMessage: (state, payload) => {
-      Vue.set(state.loading, payload.messageId, true);
+      Vue.set(state.requests, payload.messageId, payload.callback || null);
     },
     // messageId
     commReceiveMessage: (state, payload) => {
-      if (!state.loading[payload.messageId])
-        return;
-        
-      Vue.delete(state.loading, payload.messageId);
-    }
+      Vue.delete(state.requests, payload.messageId);
+    },
+    // route, callback
+    commRegisterReceiver: (state, payload) => {
+      if (!state.receivers[payload.route])
+        Vue.set(state.receivers, payload.route, []);
+
+      state.receivers[payload.route].push(payload.callback);
+    },
   },
   actions: {
     // callback
@@ -32,52 +39,69 @@ export default {
       context.state.connection.onclose = event => context.dispatch("commConnectionClosed", { event });
       context.state.connection.onerror = event => context.dispatch("commOnError", { event });
     },
-    // route, data
+    // route, data, callback
     commSend: (context, payload) => {
+      // open connection if not
+      if (!context.state.isOpened) {
+        context.dispatch("commInit", { callback: () => context.dispatch("commSend", payload) });
+        return;
+      }
+
+      // prepare message
       payload.messageId = master.getters.generateGuid();
-      payload.jwtToken = context.rootState.user.jwtToken;
+      payload.jwtToken = context.rootState.user.login.jwtToken;
       const payloadString = JSON.stringify(payload);
 
-      if (!context.state.isOpened)
-        context.dispatch("commInit", { callback: () => { context.commit("commSendMessage", payload); context.state.connection.send(payloadString); } });
-        
-      else {
-        context.commit("commSendMessage", payload);
-        context.state.connection.send(payloadString);
-      }
+      // send
+      context.commit("commSendMessage", payload);
+      context.state.connection.send(payloadString);
     },
     
     // event
     commMessageReceive: (context, payload) => {
+      // get data
       const data = JSON.parse(payload.event.data);
       console.log("received message", data);
+
+      // get callbacks
+      var callbacks = [ context.state.requests[data.messageId] ];
+      if (callbacks)
+        callbacks = context.state.receivers[data.route];
+
+      // remove loading status
       context.commit("commReceiveMessage", data);
-      switch (data.route) {
-        case "error":
-          // context.commit("notificationsCreate", {
-          //   type: "error",
-          //   text: data.data.Message
-          // });
-          break;
-        case "player/login":
-          context.commit("userLogged", data.data);
-          context.commit("masterInit", data.data);
-          context.commit("lifecycleUpdateCurrentTurn", data.data);
-          context.commit("mapInit", data.data);
-          context.commit("turnsUpdate", data.data);
-          context.commit("userUpdate", data.data);
-          break;
-        case "player/init":
-          context.commit("masterInit", data.data);
-          context.commit("lifecycleUpdateCurrentTurn", data.data);
-          context.commit("mapInit", data.data);
-          context.commit("turnsUpdate", data.data);
-          context.commit("userUpdate", data.data);
-          break;
-        case "player/setTurnClosed":
-          context.commit("lifecycleToggleClose", data.data);
-          break;
-      }
+
+      // run all callbacks
+      callbacks.forEach(callback => context.commit(callback, data.data));
+
+      // switch (data.route) {
+      //   case "error":
+      //     // context.commit("notificationsCreate", {
+      //     //   type: "error",
+      //     //   text: data.data.Message
+      //     // });
+      //     break;
+      //   case "player/login":
+      //     context.commit("userLogged", data.data);
+      //     context.commit("masterInit", data.data);
+      //     context.commit("lifecycleUpdateCurrentTurn", data.data);
+      //     context.commit("mapInit", data.data);
+      //     context.commit("turnsUpdate", data.data);
+      //     context.commit("userUpdate", data.data);
+      //     break;
+      //   case "player/init":
+      //     context.commit("masterInit", data.data);
+      //     context.commit("lifecycleUpdateCurrentTurn", data.data);
+      //     context.commit("mapInit", data.data);
+      //     context.commit("turnsUpdate", data.data);
+      //     context.commit("userUpdate", data.data);
+      //     break;
+      //   case "player/setTurnClosed":
+      //     context.commit("lifecycleToggleClose", data.data);
+      //     break;
+      //   case "player/":
+      //     break;
+      // }
     },
     // event, callback
     commConnectionOpened: (context, payload) => {

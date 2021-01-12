@@ -35,11 +35,15 @@ export default {
   },
   mutations: {
     // cities, roads
-    mapInit(state, payload) {
+    mapInitData(state, payload) {
       state.cities = payload.cities;
       state.roads = payload.roads;
     },
   },
   actions: {
+    mapInit: context => {
+      context.commit("commRegisterReceiver", { route: "player/init", callback: "mapInitData" });
+      context.commit("commRegisterReceiver", { route: "player/login", callback: "mapInitData" });
+    },
   },
 }

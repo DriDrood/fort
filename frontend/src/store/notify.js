@@ -1,3 +1,4 @@
+import Vue from "vue";
 import master from "./master";
 
 export default {
@@ -6,21 +7,9 @@ export default {
       // '167b0591-937c-46a2-a967-f90c525c2134': {
       //   id: '167b0591-937c-46a2-a967-f90c525c2134',
       //   text: 'Hello',
-      //   level: 'info',
+      //   level: 'info', // warning, error
       //   permanent: true
       // },
-      // 'bccdc555-1156-4055-8ba7-3fd32cef4a6c': {
-      //   id: 'bccdc555-1156-4055-8ba7-3fd32cef4a6c',
-      //   text: 'tohle ti nemůžu dovolit',
-      //   level: 'warning',
-      //   permanent: true
-      // },
-      // '74b84570-d89f-4ab1-a9cd-faf127b029de': {
-      //   id: '74b84570-d89f-4ab1-a9cd-faf127b029de',
-      //   text: 'Spojení se serverem nenavázáno',
-      //   level: 'error',
-      //   permanent: true
-      // }
     }
   }),
   mutations: {
@@ -33,9 +22,22 @@ export default {
       if (!state.notifications[payload.id]) return;
   
       Vue.delete(state.notifications, payload.id);
-    }
+    },
+    error: (state, payload) => {
+      const guid = master.getters.generateGuid();
+      const newNotification = {
+        id: guid,
+        text: payload.message,
+        level: "warning",
+      };
+
+      Vue.set(state.data, guid, newNotification);
+    },
   },
   actions: {
+    notifyInit: (context) => {
+      context.commit("commRegisterReceiver", { route: "error", callback: "error" });
+    },
     // level, text, permanent
     notifyCreate: (context, payload) => {
       // create

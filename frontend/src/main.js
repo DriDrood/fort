@@ -8,6 +8,12 @@ new Vue({
   store,
   render: h => h(App),
   created() {
-    // this.$store.dispatch('userInit');
+    this.$store.dispatch('lifecycleInit');
+    this.$store.dispatch('mapInit');
+    this.$store.dispatch('notifyInit');
+    this.$store.dispatch('turnsInit');
+    this.$store.dispatch('userInit');
+
+    this.$store.dispatch('masterInit');
   }
 }).$mount('#app')

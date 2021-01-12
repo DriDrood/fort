@@ -9,13 +9,14 @@ export default {
     generateGuid: () => `${helpers.s4()}${helpers.s4()}-${helpers.s4()}-4${helpers.s4().substr(0, 3)}-${helpers.s4()}-${helpers.s4()}${helpers.s4()}${helpers.s4()}`.toLowerCase(),
   },
   mutations: {
-    masterInit(state, payload) {
+    masterInitData(state, payload) {
       state.config = payload.config;
     },
   },
   actions: {
     masterInit(context) {
-      context.commit("userInit");
+      context.commit("commRegisterReceiver", { route: "player/init", callback: "masterInitData" });
+      context.commit("commRegisterReceiver", { route: "player/login", callback: "masterInitData" });
       
       if (context.rootState.user.login.jwtToken)
         context.dispatch("commSend", { route: "player/init" });

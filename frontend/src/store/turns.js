@@ -49,6 +49,10 @@ export default {
   },
   mutations: {
     turnsUpdate(state, payload) {
+      // no data
+      if (!payload.turns)
+        return;
+
       payload.turns.forEach(t => {
         // add empty turns
         for (let i = state.data.length; i < t.id; i++) {
@@ -62,7 +66,8 @@ export default {
       state.currentId = Math.max(...payload.turns.map(t => t.id));
       state.activeId = state.currentId;
     },
-    turnsOrder(state, payload) { // sourceId, targetId, amount
+    // sourceId, targetId, amount
+    turnsOrder(state, payload) {
       const currentTurn = state.activeTurn;
       const source = currentTurn.cityOccupations[payload.sourceId];
       if (source.playerId != state.login.id) return;
@@ -125,18 +130,18 @@ export default {
     }
   },
   actions: {
+    turnsInit: context => {
+      context.commit("commRegisterReceiver", { route: "player/init", callback: "turnsUpdate" });
+      context.commit("commRegisterReceiver", { route: "player/login", callback: "turnsUpdate" });
+
+      context.commit("commRegisterReceiver", { route: "player/setOrder", callback: "turnsOrder" });
+    },
     // sourceId, targetId, amount
     turnsOrder(context, payload) {
       const source = context.getters.activeTurn.cityOccupations[payload.sourceId];
       if (source.playerId != context.state.login.id) return;
   
-      context.dispatch("commSend", {
-        route: "player/setOrder",
-        data: payload,
-      });
-      // comm.post('play/setorder', payload, context, () => {
-      //   context.commit('updateOrder', payload);
-      // });
+      context.dispatch("commSend", { route: "player/setOrder", data: payload });
     },
     turnsPrev(context) {
       // invalid command - first turn || already running
@@ -148,12 +153,9 @@ export default {
       {
         context.dispatch("commSend", {
           route: "player/getTurn",
-          data: { id: finalTurn }
+          data: { id: finalTurn },
+          callback: "turnsPrev",
         });
-        // comm.post('play/getTurn', { id: finalTurn}, context, (data) => {
-        //   Vue.set(context.state.data, finalTurn, data);
-        //   context.commit('updatePrevTurn');
-        // });
       }
       // already loaded
       else
@@ -171,12 +173,9 @@ export default {
       {
         context.dispatch("commSend", {
           route: "player/getTurn",
-          data: { id: finalTurn }
+          data: { id: finalTurn },
+          callback: "turnsNext",
         });
-        // comm.post('play/getTurn', { id: finalTurn}, context, (data) => {
-        //   Vue.set(context.state.data, finalTurn, data);
-        //   context.commit('updateNextTurn');
-        // });
       }
       // already loaded
       else

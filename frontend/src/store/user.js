@@ -24,7 +24,7 @@ export default {
     teams: {
       // '1': { color: '#83824b', colorLight: '#c4c498' },
       // '2': { color: '#52834b', colorLight: '#9dc498' },
-      // '3': { color: '#4b7183', colorLight: '#98b6c4' }
+      // '3': { color: '#4b7183', colorLight: '#98b6c4' },
     }
   }),
   getters: {
@@ -39,16 +39,18 @@ export default {
         state.login.jwtToken = Vue.ls.get("jwtToken");
       }
     },
+    userInitData(state, payload) {
+      state.players = payload.players;
+      state.teams = payload.teams;
+    },
     userLogged(state, payload) {
       state.login = payload.login;
+      state.players = payload.players;
+      state.teams = payload.teams;
 
       Vue.ls.set("id", payload.login.id);
       Vue.ls.set("name", payload.login.name);
       Vue.ls.set("jwtToken", payload.login.jwtToken);
-    },
-    userUpdate(state, payload) {
-      state.players = payload.players;
-      state.teams = payload.teams;
     },
     userLogout(state) {
       state.login = {
@@ -59,6 +61,12 @@ export default {
     }
   },
   actions: {
+    userInit: context => {
+      context.commit("userInit");
+
+      context.commit("commRegisterReceiver", { route: "player/init", callback: "userInitData" });
+      context.commit("commRegisterReceiver", { route: "player/login", callback: "userLogged" });
+    },
     // email, password
     userLogin(context, payload) {
       context.dispatch("commSend", { route: "player/login", data: payload });
