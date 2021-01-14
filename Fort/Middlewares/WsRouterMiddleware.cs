@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Fort.Extensions;
 using Fort.Models;
@@ -26,13 +27,15 @@ namespace Fort.Utils.WebSocket
 
       // get param
       var method = controllerType.GetMethod(methodName.ToCamelCase());
-      var paramType = method.GetParameters()[0].ParameterType;
-      var param = context.Data.ToObject(paramType);
+      var paramType = method.GetParameters().FirstOrDefault()?.ParameterType;
+      var param = paramType != null ? context.Data.ToObject(paramType) : null;
 
       // RUN
       try
       {
-        context.Response = method.Invoke(controller, new object[] { param });
+        context.Response = param != null
+          ? method.Invoke(controller, new object[] { param })
+          : method.Invoke(controller, new object[0]);
       }
       catch (Exception ex)
       {
