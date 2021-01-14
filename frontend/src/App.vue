@@ -11,10 +11,10 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import login from "./users/login";
-import notifications from "./notify/notification";
-import topPanel from "./master/top-panel";
-import worldMap from "./map/map";
+import login from "./components/login";
+import notifications from "./components/notification";
+import topPanel from "./components/top-panel";
+import worldMap from "./components/map";
 
 export default {
   name: "app",

@@ -60,9 +60,9 @@ import Vue from "vue";
 import { mapState, mapGetters } from "vuex";
 import city from "./city";
 import road from "./road";
-import order from "../turns/order";
-import armyMove from "../turns/armyMove";
-import selectArmy from "../turns/select-army";
+import order from "./order";
+import armyMove from "./armyMove";
+import selectArmy from "./select-army";
 
 export default {
   name: "worldMap",
@@ -96,11 +96,12 @@ export default {
       return this.$store.getters.cityRoads[this.selected].concat(this.selected);
     },
     orders() {
-      return this.activeTurn.orders;
+      return (this.activeTurn && this.activeTurn.orders) || {};
     },
     userAvatarSizes() {
       let result = {};
-      Object.values(this.activeTurn.cityOccupations).forEach(c => {
+      const occupations = (this.activeTurn && this.activeTurn.cityOccupations) || {};
+      Object.values(occupations).forEach(c => {
         if (c.playerId == null)
           return;
           
