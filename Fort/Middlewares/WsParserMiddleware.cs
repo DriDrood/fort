@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Fort.Models;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
+using RingoRegistration.backend.Utils;
 
 namespace Fort.Middlewares
 {
@@ -12,9 +13,11 @@ namespace Fort.Middlewares
     public WsParserMiddleware(RequestDelegate next)
     {
       _next = next;
+      _jwtHandler = new JwtHandler();
     }
 
     private RequestDelegate _next;
+    private readonly JwtHandler _jwtHandler;
 
     public Task Invoke(HttpContext _, MessageContext context, JwtUser jwtUser)
     {
@@ -25,21 +28,9 @@ namespace Fort.Middlewares
       context.Route = param.Route;
       context.Data = param.Data;
 
-      // fill jwtUser with newer
+      // authenticate
       if (jwtUser.Token != param.JwtToken)
-      {
-        var tokenData = Convert.FromBase64String(param.JwtToken.Split('.')[1]);
-        var tokenDataString = Encoding.UTF8.GetString(tokenData);
-        var UpdatedUser = JsonConvert.DeserializeObject<JwtUser>(tokenDataString);
-
-        jwtUser.Token = param.JwtToken;
-        jwtUser.Email = UpdatedUser.Email;
-        jwtUser.Given_Name = UpdatedUser.Given_Name;
-        jwtUser.Role = UpdatedUser.Role;
-        jwtUser.NotValidBefore = UpdatedUser.NotValidBefore;
-        jwtUser.ExpirationTime = UpdatedUser.ExpirationTime;
-        jwtUser.IssuedAt = UpdatedUser.IssuedAt;
-      }
+        _jwtHandler.ValidateUpdateJwt(param.JwtToken, jwtUser);
 
       return _next.Invoke(_);
     }
