@@ -66,6 +66,7 @@ export default {
 
       context.commit("commRegisterReceiver", { route: "player/init", callback: "userInitData" });
       context.commit("commRegisterReceiver", { route: "player/login", callback: "userLogged" });
+      context.commit("commRegisterReceiver", { route: "player/logout", callback: "userLogout" });
     },
     // email, password
     userLogin(context, payload) {

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Fort.Models;
 using Fort.Utils.WebSocket;
+using System.Security.Authentication;
 
 namespace Fort.Middlewares
 {
@@ -23,6 +24,11 @@ namespace Fort.Middlewares
 
         if (context.Response != null)
           await wsConnection.Send(context.MessageId, context.Route, context.Response);
+      }
+      catch (AuthenticationException ex)
+      {
+        await wsConnection.Send(context.MessageId, "player/logout", new { message = ex.Message });
+        throw;
       }
       catch (Exception ex)
       {
