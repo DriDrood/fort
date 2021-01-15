@@ -7,14 +7,14 @@ export default {
     isOpened: false,
     requests: {},
     receivers: {
-      // 'user/login': [ data => context.commit("userInit", data), data => context.commit("turnsInit", data), ],
+      // 'user/login': { userInit: "mutation", turnsInit: "action" },
     },
   }),
   getters: {
     isLoading: state => Object.keys(state.requests).length != 0,
   },
   mutations: {
-    // messageId, callback
+    // messageId, callback = { "route": "mutation/action" }
     commSendMessage: (state, payload) => {
       Vue.set(state.requests, payload.messageId, payload.callback || null);
     },
@@ -22,12 +22,14 @@ export default {
     commReceiveMessage: (state, payload) => {
       Vue.delete(state.requests, payload.messageId);
     },
-    // route, callback
+    // route, callback, callbackType
     commRegisterReceiver: (state, payload) => {
-      if (!state.receivers[payload.route])
-        Vue.set(state.receivers, payload.route, []);
+      const type = payload.callbackType || "mutation";
 
-      state.receivers[payload.route].push(payload.callback);
+      if (!state.receivers[payload.route])
+        Vue.set(state.receivers, payload.route, {});
+
+      state.receivers[payload.route][payload.callback] = type;
     },
   },
   actions: {
@@ -65,15 +67,24 @@ export default {
       console.log("Received message", data);
 
       // get callbacks
-      var callbacks = context.state.requests[data.messageId]
-        ? [ context.state.requests[data.messageId] ]
-        : context.state.receivers[data.route];
+      var callbacks = context.state.requests[data.messageId] || context.state.receivers[data.route];
 
       // remove loading status
       context.commit("commReceiveMessage", data);
 
       // run all callbacks
-      callbacks.forEach(callback => context.commit(callback, data.data));
+      Object.keys(callbacks).forEach(route => {
+        switch (callbacks[route]) {
+          case "mutation":
+            context.commit(route, data.data);
+            break;
+          case "action":
+            context.dispatch(route, data.data);
+            break;
+          default:
+            console.log("error - unknown callback type", route, callbacks[route]);
+        }
+      });
 
       // switch (data.route) {
       //   case "error":

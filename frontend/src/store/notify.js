@@ -23,20 +23,10 @@ export default {
   
       Vue.delete(state.notifications, payload.id);
     },
-    error: (state, payload) => {
-      const guid = master.getters.generateGuid();
-      const newNotification = {
-        id: guid,
-        text: payload.message,
-        level: "warning",
-      };
-
-      Vue.set(state.data, guid, newNotification);
-    },
   },
   actions: {
     notifyInit: (context) => {
-      context.commit("commRegisterReceiver", { route: "error", callback: "error" });
+      context.commit("commRegisterReceiver", { route: "error", callback: "notifyError", callbackType: "action" });
     },
     // level, text, permanent
     notifyCreate: (context, payload) => {
@@ -60,6 +50,14 @@ export default {
     // id
     notifyClose: (context, payload) => { 
       context.commit("notifyClose", payload);
-    }
+    },
+    // message
+    notifyError: (context, payload) => {
+      context.dispatch("notifyCreate", {
+        text: payload.message,
+        level: "warning",
+        permanent: false,
+      });
+    },
   }
 };

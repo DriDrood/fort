@@ -154,7 +154,7 @@ export default {
         context.dispatch("commSend", {
           route: "player/getTurn",
           data: { id: finalTurn },
-          callback: "turnsPrev",
+          callback: { "turnsReceivePrev": "action" },
         });
       }
       // already loaded
@@ -174,14 +174,22 @@ export default {
         context.dispatch("commSend", {
           route: "player/getTurn",
           data: { id: finalTurn },
-          callback: "turnsNext",
+          callback: { "turnsReceiveNext": "action" },
         });
       }
       // already loaded
       else
       {
-        context.commit('turnsNext');
+        context.commit("turnsNext");
       }
+    },
+    turnsReceivePrev: (context, payload) => {
+      context.commit("turnsUpdate", payload);
+      context.commit("turnsPrev");
+    },
+    turnsReceiveNext: (context, payload) => {
+      context.commit("turnsUpdate", payload);
+      context.commit("turnsNext");
     }
   },
 }
