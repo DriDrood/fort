@@ -58,9 +58,9 @@ namespace Fort.Comm
     }
 
     // create / update new order 
-    public void SetOrder(OrderParams param)
+    public Order SetOrder(OrderParams param)
     {
-      _turnManager.SetOrder(param, _jwtUser.UserId, _lifecycleService.CurrentTurnId);
+      return _turnManager.SetOrder(param, _jwtUser.UserId, _lifecycleService.CurrentTurnId);
     }
 
     private Init GetInitData()

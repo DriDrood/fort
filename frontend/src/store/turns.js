@@ -9,7 +9,7 @@ export default {
       //   cityOccupations: {
       //     '1': {
       //       playerId: '5',
-      //       size: 50
+      //       size: 50,
       //     },
       //     '2': {
       //       playerId: '4',
@@ -38,28 +38,19 @@ export default {
       //   orders: {}
       // }
     ],
-    turnChangeProgress: {
-      armies: [],
-      armiesPosition: 0
-    }
+    moveProgress: 0, // 0, 1, 2
   }),
   getters: {
     isTurnCurrent: (state) => state.activeId == state.currentId,
     activeTurn: (state) => state.data[state.activeId]
   },
   mutations: {
-    turnsUpdate(state, payload) {
+    turnsInitData(state, payload) {
       // no data
       if (!payload.turns)
         return;
 
       payload.turns.forEach(t => {
-        // add empty turns
-        for (let i = state.data.length; i < t.id; i++) {
-          state.data.push(null);
-        }
-
-        // add turn
         Vue.set(state.data, t.id, t);
       });
 
@@ -69,22 +60,21 @@ export default {
     // sourceId, targetId, amount
     turnsOrder(state, payload) {
       const currentTurn = state.data[state.currentId];
-      const source = currentTurn.cityOccupations[payload.sourceId];
-      if (source.playerId != state.login.id) return;
+      const sourceCity = currentTurn.cityOccupations[payload.id.split(">>")[0]];
   
-      const orderKey = `${payload.sourceId}>>${payload.targetId}`;
-      const max = ((currentTurn.orders[orderKey] && currentTurn.orders[orderKey].amount) || 0) + source.availableArmy;
+      const max = ((currentTurn.orders[payload.id] && currentTurn.orders[payload.id].amount) || 0) + sourceCity.availableArmy;
       if (payload.amount > 0)
-        Vue.set(currentTurn.orders, orderKey, { playerId: state.login.id, amount: payload.amount, size: helpers.getArmySize(payload.amount) });
-      else if (currentTurn.orders[orderKey])
-        Vue.delete(currentTurn.orders, orderKey);
-      // else nothing
+        Vue.set(currentTurn.orders, payload.id, payload);
+      else if (currentTurn.orders[payload.id])
+        Vue.delete(currentTurn.orders, payload.id);
   
-      source.availableArmy = max - payload.amount;
+      sourceCity.availableArmy = max - payload.amount;
     },
     turnsPrev: async (state) => {
       // invalid command
       if (state.activeId <= 0 || state.turnChangeProgress.armiesPosition != 0) return;
+
+      console.log("turnsPrev", state.data, state.activeId);
   
       // init
       const orders = state.data[state.activeId - 1].orders;
@@ -131,8 +121,8 @@ export default {
   },
   actions: {
     turnsInit: context => {
-      context.commit("commRegisterReceiver", { route: "player/init", callback: "turnsUpdate" });
-      context.commit("commRegisterReceiver", { route: "player/login", callback: "turnsUpdate" });
+      context.commit("commRegisterReceiver", { route: "player/init", callback: "turnsInitData" });
+      context.commit("commRegisterReceiver", { route: "player/login", callback: "turnsInitData" });
 
       context.commit("commRegisterReceiver", { route: "player/setOrder", callback: "turnsOrder" });
     },
@@ -154,7 +144,7 @@ export default {
         context.dispatch("commSend", {
           route: "player/getTurn",
           data: { id: finalTurn },
-          callback: { "turnsReceivePrev": "action" },
+          callback: { "turnsReceive": "action" },
         });
       }
       // already loaded
@@ -174,7 +164,7 @@ export default {
         context.dispatch("commSend", {
           route: "player/getTurn",
           data: { id: finalTurn },
-          callback: { "turnsReceiveNext": "action" },
+          callback: { "turnsReceive": "action" },
         });
       }
       // already loaded
@@ -183,14 +173,14 @@ export default {
         context.commit("turnsNext");
       }
     },
-    turnsReceivePrev: (context, payload) => {
-      context.commit("turnsUpdate", payload);
-      context.commit("turnsPrev");
+    turnsReceive: (context, payload) => {
+      Vue.set(context.state.data, payload.id, payload);
+
+      if (payload.id < context.state.activeId)
+        context.commit("turnsPrev");
+      else if (payload.id > context.state.activeId)
+        context.commit("turnsNext")
     },
-    turnsReceiveNext: (context, payload) => {
-      context.commit("turnsUpdate", payload);
-      context.commit("turnsNext");
-    }
   },
 }
 

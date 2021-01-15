@@ -4,9 +4,11 @@ namespace Fort.Models.Store
 {
   public class Order
   {
+    public string Id { get; set; }
     public Guid PlayerId { get; set; }
-    public int Size { get; set; }
-    public int SizeAfterFight { get; set; }
-    public int? Amount { get; set; }
+    public int StartSize { get; set; }
+    public int EndSize { get; set; }
+    public int? StartAmount { get; set; }
+    public int? EndAmount { get; set; }
   }
 }

@@ -5,7 +5,8 @@ export default {
       key: 'Init',
       remains: '-:--',
       closed: false
-    }
+    },
+    countDown: null,
   }),
   mutations: {
     lifecycleUpdateState(state, payload) {
@@ -33,5 +34,28 @@ export default {
     lifecycleToggleClose: context => {
       context.dispatch("commSend", { route: "player/setTurnClosed", data: { closed: !context.state.state.closed }});
     },
+    lifecycleCountDown: (context) => {
+      setTimeout(() =>
+        context.state.countDown = setInterval(() => {
+          if (context.state.endsAt) {
+            let remains = context.state.endsAt - new Date();
+  
+            // turn end
+            if (remains <= 0) {
+              remains = 0;
+              context.dispatch("masterStopCountDown");
+            }
+            
+            const remainsDate = new Date(remains);
+            context.state.remains = `${remainsDate.getMinutes()}:${remainsDate.getSeconds().toString().padStart(2, '0')}`;
+          }
+          else {
+            context.rootState.lifecycle.state.remains = '-:--';
+          }
+        }, 1000), new Date(context.state.endsAt - new Date()).getMilliseconds());
+    },
+    lifecycleStopCountDown: context => {
+      clearInterval(context.state.countDown);
+    }
   },
 }

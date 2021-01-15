@@ -20,28 +20,7 @@ export default {
       
       if (context.rootState.user.login.jwtToken)
         context.dispatch("commSend", { route: "player/init" });
-    },
-    masterCountDown: (context) => {
-      setTimeout(() =>
-        setInterval(() => {
-          if (context.rootState.lifecycle.state.endsAt) {
-            const remains = context.rootState.lifecycle.state.endsAt - new Date();
-  
-            // turn end
-            if (remains <= 0) {
-              context.dispatch('checkState');
-            }
-            // turn is running
-            else {
-              const remainsDate = new Date(remains);
-              context.rootState.lifecycle.state.remains = `${remainsDate.getMinutes()}:${remainsDate.getSeconds().toString().padStart(2, '0')}`;
-            }
-          }
-          else {
-            context.rootState.lifecycle.state.remains = '-:--';
-          }
-        }, 1000), new Date(context.rootState.lifecycle.state.endsAt - new Date()).getMilliseconds());
-    },
+    }
   }
 };
 

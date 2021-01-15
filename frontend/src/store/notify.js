@@ -19,9 +19,9 @@ export default {
     },
     // id
     notifyClose: (state, payload) => {
-      if (!state.notifications[payload.id]) return;
+      if (!state.data[payload.id]) return;
   
-      Vue.delete(state.notifications, payload.id);
+      Vue.delete(state.data, payload.id);
     },
   },
   actions: {

@@ -24,7 +24,6 @@
           :selected="selected"
           @select="select(city.id)"
         />
-        <armyMove v-for="(armyMove, index) in turns.turnChangeProgress.armies" :key="`armyMove-${index}`" :armyMove="armyMove" />
         <rect
           v-if="selected"
           class="darkness"
@@ -61,7 +60,6 @@ import { mapState, mapGetters } from "vuex";
 import city from "./city";
 import road from "./road";
 import order from "./order";
-import armyMove from "./armyMove";
 import selectArmy from "./select-army";
 
 export default {
@@ -70,7 +68,6 @@ export default {
     city,
     road,
     order,
-    armyMove,
     selectArmy
   },
   data: () => ({
@@ -124,9 +121,9 @@ export default {
         return;
       }
 
-      if (this.$store.state.lifecycle.state.key != 'Running')
+      if (this.$store.state.lifecycle.state.key != 'Running' && this.$store.state.lifecycle.state.key != "Paused")
       {
-        this.$store.commit("notify", {
+        this.$store.dispatch("notifyCreate", {
           text: "Kolo neběží",
           level: "warning"
         });
@@ -136,7 +133,7 @@ export default {
 
       // I'm in history
       if (!this.isTurnCurrent) {
-        this.$store.commit("notify", {
+        this.$store.dispatch("notifyCreate", {
           text: "Jste v minulosti",
           level: "warning"
         });
@@ -153,7 +150,7 @@ export default {
         }
 
         // foreign city
-        this.$store.commit("notify", {
+        this.$store.dispatch("notifyCreate", {
           text: "Toto není vaše město",
           level: "warning"
         });

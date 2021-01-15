@@ -63,14 +63,14 @@ export default {
     accept() {
       if (this.value > this.max)
       {
-        this.commit('notify', {
+        this.dispatch('notifyCreate', {
           text: "Posíláte větší armádu než jakou máte.",
           level: 'warning'
         });
         return;
       }
 
-      this.$store.dispatch('order', {
+      this.$store.dispatch('turnsOrder', {
         sourceId: this.sourceId,
         targetId: this.targetId,
         amount: this.value

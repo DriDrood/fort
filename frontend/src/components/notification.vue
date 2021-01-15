@@ -1,7 +1,7 @@
 <template>
   <div class="notifications">
     <div
-      v-for="notification in notifications"
+      v-for="notification in notify.data"
       :key="notification.id"
       class="notification"
       :class="notification.level"
@@ -18,13 +18,11 @@ import { mapState } from "vuex";
 export default {
   name: "notification",
   computed: {
-    ...mapState(["notifications"])
+    ...mapState(["notify"])
   },
   methods: {
     destroy(id) {
-      this.$store.commit('unNotify', {
-        id
-      });
+      this.$store.dispatch("notifyClose", { id });
     }
   }
 };

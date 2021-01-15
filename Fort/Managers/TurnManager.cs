@@ -67,10 +67,12 @@ namespace Fort.Managers
                     o => o.StIsSource ? $"{o.StCityId}>>{o.NdCityId}" : $"{o.NdCityId}>>{o.StCityId}",
                     o => new Order
                     {
+                        Id = o.StIsSource ? $"{o.StCityId}>>{o.NdCityId}" : $"{o.NdCityId}>>{o.StCityId}",
                         PlayerId = o.UserId,
-                        Size = GetOrderSize(o.Amount),
-                        SizeAfterFight = GetOrderSize(o.Amount - o.Road.Orders.Where(ro => ro.StIsSource != o.StIsSource).Sum(ro => ro.Amount)),
-                        Amount = IsMy(o) ? (int?)o.Amount : null
+                        StartSize = GetOrderSize(o.Amount),
+                        EndSize = GetOrderSize(o.Amount - o.Road.Orders.Where(ro => ro.StIsSource != o.StIsSource).Sum(ro => ro.Amount)),
+                        StartAmount = IsMy(o) ? (int?)o.Amount : null,
+                        EndAmount = IsMy(o) ? (int?)o.Amount - o.Road.Orders.Where(ro => ro.StIsSource != o.StIsSource).Sum(ro => ro.Amount) : null,
                     });
 
             var turn = new Turn
@@ -82,9 +84,9 @@ namespace Fort.Managers
             return turn;
         }
 
-        public void SetOrder(OrderParams order, Guid playerId, int turnId)
+        public Order SetOrder(OrderParams order, Guid playerId, int turnId)
         {
-            if (_lifecycleService.State != ELifecycleState.Running)
+            if (_lifecycleService.State != ELifecycleState.Running && _lifecycleService.State != ELifecycleState.Paused)
                 throw new Exception("Turn is not running");
 
             var stIsSource = string.Compare(order.SourceId.ToString(), order.TargetId.ToString()) < 0;
@@ -102,9 +104,11 @@ namespace Fort.Managers
                 ?? throw new Exception("City not found");
             if (sourceCity.Army < ((stIsSource ? sourceCity.StForOrders : sourceCity.NdForOrders).Sum(o => o.Amount) - (dbOrder?.Amount ?? 0)))
                 throw new Exception("City has not enought army");
+            if (sourceCity.OwnerId != playerId)
+                throw new Exception("City is not yours!");
 
             // add
-            if (dbOrder == null)
+            if (dbOrder == null && order.Amount > 0)
             {
                 dbOrder = new Database.Entities.Order
                 {
@@ -131,6 +135,17 @@ namespace Fort.Managers
             }
 
             _db.SaveChanges();
+
+            var result = new Order
+            {
+                Id = dbOrder.StIsSource ? $"{dbOrder.StCityId}>>{dbOrder.NdCityId}" : $"{dbOrder.NdCityId}>>{dbOrder.StCityId}",
+                PlayerId = dbOrder.UserId,
+                StartSize = GetOrderSize(dbOrder.Amount),
+                EndSize = GetOrderSize(dbOrder.Amount),
+                StartAmount = IsMy(dbOrder) ? (int?)dbOrder.Amount : null,
+                EndAmount = IsMy(dbOrder) ? (int?)dbOrder.Amount : null,
+            };
+            return result;
         }
 
         private bool IsVisible(Database.Entities.CityOccupation cityOccupation)
