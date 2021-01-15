@@ -28,16 +28,16 @@ namespace Fort.Managers
         private readonly Dictionary<int, HashSet<Guid>> _visibleCities = new Dictionary<int, HashSet<Guid>>();
         private readonly Dictionary<int, HashSet<Guid>> _friendlyCities = new Dictionary<int, HashSet<Guid>>();
 
-        public CurrentTurn GetCurrentTurn()
+        public TurnState GetTurnState()
         {
             var currentTurn = _db.Turns.Find(_lifecycleService.CurrentTurnId);
             if (currentTurn == null)
                 return null;
 
-            return new CurrentTurn
+            return new TurnState
             {
                 Id = currentTurn.Id,
-                State = _lifecycleService.State.ToString(),
+                Key = _lifecycleService.State.ToString(),
                 EndsAt = _lifecycleService.WaitTill,
             };
         }

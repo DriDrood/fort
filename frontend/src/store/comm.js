@@ -51,6 +51,7 @@ export default {
       payload.messageId = master.getters.generateGuid();
       payload.jwtToken = context.rootState.user.login.jwtToken;
       const payloadString = JSON.stringify(payload);
+      console.log("Sending message", payload);
 
       // send
       context.commit("commSendMessage", payload);
@@ -61,12 +62,12 @@ export default {
     commMessageReceive: (context, payload) => {
       // get data
       const data = JSON.parse(payload.event.data);
-      console.log("received message", data);
+      console.log("Received message", data);
 
       // get callbacks
-      var callbacks = [ context.state.requests[data.messageId] ];
-      if (callbacks)
-        callbacks = context.state.receivers[data.route];
+      var callbacks = context.state.requests[data.messageId]
+        ? [ context.state.requests[data.messageId] ]
+        : context.state.receivers[data.route];
 
       // remove loading status
       context.commit("commReceiveMessage", data);

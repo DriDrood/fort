@@ -124,7 +124,7 @@ export default {
         return;
       }
 
-      if (this.$store.state.currentTurn.state != 'Running')
+      if (this.$store.state.lifecycle.state.key != 'Running')
       {
         this.$store.commit("notify", {
           text: "Kolo neběží",

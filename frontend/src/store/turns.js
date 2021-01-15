@@ -68,7 +68,7 @@ export default {
     },
     // sourceId, targetId, amount
     turnsOrder(state, payload) {
-      const currentTurn = state.activeTurn;
+      const currentTurn = state.data[state.currentId];
       const source = currentTurn.cityOccupations[payload.sourceId];
       if (source.playerId != state.login.id) return;
   
@@ -84,10 +84,10 @@ export default {
     },
     turnsPrev: async (state) => {
       // invalid command
-      if (state.activeTurnId <= 0 || state.turnChangeProgress.armiesPosition != 0) return;
+      if (state.activeId <= 0 || state.turnChangeProgress.armiesPosition != 0) return;
   
       // init
-      const orders = state.data[state.activeTurnId - 1].orders;
+      const orders = state.data[state.activeId - 1].orders;
       var met = helpers.meetingResults(state, orders);
       helpers.createMove(state, orders, met, true);
   
@@ -99,7 +99,7 @@ export default {
       await helpers.sleep(state.config.armyRunDuration * 1000);
   
       // decrease active
-      state.activeTurnId -= 1;
+      state.activeId -= 1;
   
       // clean
       Vue.set(state.turnChangeProgress, 'armies', []);
@@ -107,7 +107,7 @@ export default {
     },
     turnsNext: async (state) => {
       // invalid command
-      if (state.activeTurnId >= state.data.last || state.turnChangeProgress.armiesPosition != 0) return;
+      if (state.activeId >= state.data.last || state.turnChangeProgress.armiesPosition != 0) return;
   
       // init
       const orders = state.activeTurn.orders;
@@ -122,7 +122,7 @@ export default {
       await helpers.sleep(state.config.armyRunDuration * 1000);
   
       // increase active
-      state.activeTurnId += 1;
+      state.activeId += 1;
   
       // clean
       Vue.set(state.turnChangeProgress, 'armies', []);
@@ -145,10 +145,10 @@ export default {
     },
     turnsPrev(context) {
       // invalid command - first turn || already running
-      if (context.state.activeTurnId <= 0 || context.state.turnChangeProgress.armiesPosition != 0) return;
+      if (context.state.activeId <= 0 || context.state.turnChangeProgress.armiesPosition != 0) return;
   
       // null - load
-      const finalTurn = context.state.activeTurnId - 1;
+      const finalTurn = context.state.activeId - 1;
       if (context.state.data[finalTurn] == null)
       {
         context.dispatch("commSend", {
@@ -165,10 +165,10 @@ export default {
     },
     turnsNext(context) {
       // invalid command - last turn || already running
-      if (context.state.activeTurnId >= context.state.data.last || context.state.turnChangeProgress.armiesPosition != 0) return;
+      if (context.state.activeId >= context.state.data.last || context.state.turnChangeProgress.armiesPosition != 0) return;
   
       // null - load
-      const finalTurn = context.state.activeTurnId + 1;
+      const finalTurn = context.state.activeId + 1;
       if (context.state.data[finalTurn] == null)
       {
         context.dispatch("commSend", {

@@ -4,17 +4,17 @@
     <div v-if="isLoading" class="loading">
       <i class="fas fa-spin fa-circle-notch"></i>
     </div>
-    <button v-if="activeTurnId > 0" class="prev" title="Vrátit o kolo" @click="prevTurn">
+    <button v-if="turns.activeId > 0" class="prev" title="Vrátit o kolo" @click="prevTurn">
       <i class="fa fa-step-backward"></i>
     </button>
-    <div class="turn">{{ activeTurnId + 1 }}</div>
+    <div class="turn">{{ turns.activeId + 1 }}</div>
     <button v-if="!isTurnCurrent" class="next" title="Vpřed o kolo" @click="nextTurn">
       <i class="fa fa-step-forward"></i>
     </button>
-    <button class="close" :class="{active: lifecycle.currentTurn.closed}" title="Hotovo" @click="toggleClose">
+    <button class="close" :class="{active: lifecycle.state.closed}" title="Hotovo" @click="toggleClose">
       <i class="fa" :class="icon"></i>
     </button>
-    <div class="time">{{ lifecycle.currentTurn.remains }}</div>
+    <div class="time">{{ lifecycle.state.remains }}</div>
   </nav>
 </template>
 
@@ -24,10 +24,10 @@ import { mapState, mapGetters } from "vuex";
 export default {
   name: "topPanel",
   computed: {
-    ...mapState(["activeTurnId", "lifecycle", "user"]),
+    ...mapState(["turns", "lifecycle", "user"]),
     ...mapGetters(["isTurnCurrent", "isLoading"]),
     icon() {
-      switch (this.lifecycle.currentTurn.state) {
+      switch (this.lifecycle.state.key) {
         case "Running":
           return "fa-check";
         case "Finalizing":

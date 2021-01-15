@@ -3,10 +3,10 @@ using Fort.Services;
 
 namespace Fort.Models.Store
 {
-    public class CurrentTurn
+    public class TurnState
     {
         public int Id { get; set; }
-        public string State { get; set; }
+        public string Key { get; set; }
         public DateTime? EndsAt { get; set; }
     }
 }

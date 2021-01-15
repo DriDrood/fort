@@ -24,8 +24,8 @@ export default {
     masterCountDown: (context) => {
       setTimeout(() =>
         setInterval(() => {
-          if (context.state.currentTurn.endsAt) {
-            const remains = context.state.currentTurn.endsAt - new Date();
+          if (context.rootState.lifecycle.state.endsAt) {
+            const remains = context.rootState.lifecycle.state.endsAt - new Date();
   
             // turn end
             if (remains <= 0) {
@@ -34,13 +34,13 @@ export default {
             // turn is running
             else {
               const remainsDate = new Date(remains);
-              context.state.currentTurn.remains = `${remainsDate.getMinutes()}:${remainsDate.getSeconds().toString().padStart(2, '0')}`;
+              context.rootState.lifecycle.state.remains = `${remainsDate.getMinutes()}:${remainsDate.getSeconds().toString().padStart(2, '0')}`;
             }
           }
           else {
-            context.state.currentTurn.remains = '-:--';
+            context.rootState.lifecycle.state.remains = '-:--';
           }
-        }, 1000), new Date(context.state.currentTurn.endsAt - new Date()).getMilliseconds());
+        }, 1000), new Date(context.rootState.lifecycle.state.endsAt - new Date()).getMilliseconds());
     },
   }
 };

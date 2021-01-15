@@ -66,8 +66,8 @@ namespace Fort.Comm
     private Init GetInitData()
     {
       var initData = new Init();
-      initData.CurrentTurn = _turnManager.GetCurrentTurn();
-      initData.Turns = new Turn[] { _turnManager.GetTurn(initData.CurrentTurn.Id) };
+      initData.State = _turnManager.GetTurnState();
+      initData.Turns = new Turn[] { _turnManager.GetTurn(initData.State.Id) };
       initData.Cities = _mapManager.GetAllCities();
       initData.Roads = _mapManager.GetAllRoads();
       initData.Players = _userManager.GetAllPlayers();
