@@ -5,6 +5,7 @@ export default {
     login: {
       id: null,
       name: null,
+      role: null,
       jwtToken: null
     },
     players: {
@@ -27,15 +28,13 @@ export default {
       // '3': { color: '#4b7183', colorLight: '#98b6c4' },
     }
   }),
-  getters: {
-    userIsLogged: state => state.login.jwtToken != null
-  },
   mutations: {
     userInit(state) {
       if (Vue.ls.get("jwtToken") != null)
       {
         state.login.id = Vue.ls.get("id");
         state.login.name = Vue.ls.get("name");
+        state.login.role = Vue.ls.get("role");
         state.login.jwtToken = Vue.ls.get("jwtToken");
       }
     },
@@ -50,12 +49,14 @@ export default {
 
       Vue.ls.set("id", payload.login.id);
       Vue.ls.set("name", payload.login.name);
+      Vue.ls.set("role", payload.login.role);
       Vue.ls.set("jwtToken", payload.login.jwtToken);
     },
     userLogout(state) {
       state.login = {
         id: null,
         name: null,
+        role: null,
         jwtToken: null
       };
     }

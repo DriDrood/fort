@@ -144,7 +144,7 @@ export default {
       // select 1st
       if (!this.selected) {
         // my city
-        if (this.activeTurn.cityOccupations[cityId].playerId == this.$store.state.login.id) {
+        if (this.activeTurn.cityOccupations[cityId].playerId == this.$store.state.user.login.id) {
           this.selected = cityId;
           return;
         }

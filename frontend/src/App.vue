@@ -1,8 +1,9 @@
 <template>
   <div id="app">
-    <login v-if="!userIsLogged" />
+    <login v-if="!isLogged" />
     <template v-else>
       <topPanel />
+      <controls v-if="isAdmin" />
       <notifications />
       <worldMap />
     </template>
@@ -10,8 +11,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import login from "./components/login";
+import controls from "./components/controls";
 import notifications from "./components/notification";
 import topPanel from "./components/top-panel";
 import worldMap from "./components/map";
@@ -20,12 +21,18 @@ export default {
   name: "app",
   components: {
     login,
+    controls,
     notifications,
     topPanel,
     worldMap
   },
   computed: {
-    ...mapGetters(['userIsLogged'])
+    isLogged() {
+      return this.$store.state.user.login.jwtToken != null;
+    },
+    isAdmin() {
+      return this.$store.state.user.login.role == "Admin";
+    },
   },
 };
 </script>

@@ -129,7 +129,7 @@ export default {
     // sourceId, targetId, amount
     turnsOrder(context, payload) {
       const source = context.getters.activeTurn.cityOccupations[payload.sourceId];
-      if (source.playerId != context.state.login.id) return;
+      if (source.playerId != context.rootState.user.login.id) return;
   
       context.dispatch("commSend", { route: "player/setOrder", data: payload });
     },

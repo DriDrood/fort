@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Fort.Database;
 using Fort.Models.Store;
-using Fort.Services;
 using Microsoft.AspNetCore.Identity;
 using RingoRegistration.backend.Utils;
 using User = Fort.Database.Entities.User;
@@ -53,6 +52,7 @@ namespace Fort.Managers
       {
         Id = user.Id,
         Name = user.UserName,
+        Role = user.IsAdmin ? "Admin" : "User",
         JwtToken = token,
       };
       return login;

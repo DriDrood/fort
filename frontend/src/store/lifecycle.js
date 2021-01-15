@@ -29,6 +29,8 @@ export default {
   },
   actions: {
     lifecycleInit: context => {
+      context.commit("commRegisterReceiver", { route: "player/init", callback: "lifecycleUpdateState" });
+      context.commit("commRegisterReceiver", { route: "player/login", callback: "lifecycleUpdateState" });
       context.commit("commRegisterReceiver", { route: "player/setTurnClosed", callback: "lifecycleToggleClose" });
     },
     lifecycleToggleClose: context => {
