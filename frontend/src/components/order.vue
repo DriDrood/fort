@@ -1,7 +1,7 @@
 <template>
   <g :id="`order-${orderId}`" class="order">
     <circle :cx="coords.x" :cy="coords.y" :r="size" />
-    <text :x="coords.x" :y="coords.y + 5" text-anchor="middle">{{ order.amount }}</text>
+    <text :x="coords.x" :y="coords.y + 5" text-anchor="middle">{{ order.startAmount }}</text>
   </g>
 </template>
 

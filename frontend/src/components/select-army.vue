@@ -43,7 +43,7 @@ export default {
     },
     prevOrderArmy() {
       const prevOrder = this.activeTurn.orders[`${this.sourceId}>>${this.targetId}`]
-      return (prevOrder && prevOrder.amount) || 0;
+      return (prevOrder && prevOrder.startAmount) || 0;
     }
   },
   methods: {

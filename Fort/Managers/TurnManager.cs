@@ -106,15 +106,25 @@ namespace Fort.Managers
                 throw new Exception("City has not enought army");
             if (sourceCity.OwnerId != playerId)
                 throw new Exception("City is not yours!");
+            // deleted twice
+            if (dbOrder == null && order.Amount == 0)
+                return new Order
+                {
+                    Id = $"{order.SourceId}>>{order.TargetId}",
+                    PlayerId = playerId,
+                    StartSize = 0,
+                    EndSize = 0,
+                    StartAmount = 0,
+                    EndAmount = 0,
+                };
 
             // add
-            if (dbOrder == null && order.Amount > 0)
+            if (dbOrder == null)
             {
                 dbOrder = new Database.Entities.Order
                 {
                     TurnId = turnId,
                     StIsSource = stIsSource,
-                    Amount = order.Amount,
                     StCityId = stIsSource ? order.SourceId : order.TargetId,
                     NdCityId = stIsSource ? order.TargetId : order.SourceId,
                     UserId = playerId
@@ -129,11 +139,7 @@ namespace Fort.Managers
             }
 
             // update
-            else
-            {
-                dbOrder.Amount = order.Amount;
-            }
-
+            dbOrder.Amount = order.Amount;
             _db.SaveChanges();
 
             var result = new Order

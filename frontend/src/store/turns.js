@@ -57,18 +57,18 @@ export default {
       state.currentId = Math.max(...payload.turns.map(t => t.id));
       state.activeId = state.currentId;
     },
-    // sourceId, targetId, amount
+    // id, playerId, startSize, endSize, startAmount, endAmount
     turnsOrder(state, payload) {
       const currentTurn = state.data[state.currentId];
       const sourceCity = currentTurn.cityOccupations[payload.id.split(">>")[0]];
   
-      const max = ((currentTurn.orders[payload.id] && currentTurn.orders[payload.id].amount) || 0) + sourceCity.availableArmy;
-      if (payload.amount > 0)
+      const max = ((currentTurn.orders[payload.id] && currentTurn.orders[payload.id].startAmount) || 0) + sourceCity.availableArmy;
+      if (payload.startAmount > 0)
         Vue.set(currentTurn.orders, payload.id, payload);
       else if (currentTurn.orders[payload.id])
         Vue.delete(currentTurn.orders, payload.id);
   
-      sourceCity.availableArmy = max - payload.amount;
+      sourceCity.availableArmy = max - payload.startAmount;
     },
     turnsPrev: async (state) => {
       // invalid command

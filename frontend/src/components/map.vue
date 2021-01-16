@@ -16,7 +16,6 @@
           </pattern>
         </defs>
         <road v-for="(road, index) in map.roads" :key="index" :road="road" />
-        <order v-for="(order, orderId) in orders" :key="orderId" :order="order" :orderId="orderId" />
         <city
           v-for="city in map.cities"
           :key="`city-${city.id}`"
@@ -24,6 +23,7 @@
           :selected="selected"
           @select="select(city.id)"
         />
+        <order v-for="(order, orderId) in orders" :key="orderId" :order="order" :orderId="orderId" />
         <rect
           v-if="selected"
           class="darkness"
@@ -143,15 +143,24 @@ export default {
 
       // select 1st
       if (!this.selected) {
-        // my city
-        if (this.activeTurn.cityOccupations[cityId].playerId == this.$store.state.user.login.id) {
-          this.selected = cityId;
+        // foreign city
+        if (this.activeTurn.cityOccupations[cityId].playerId != this.$store.state.user.login.id) {
+          this.$store.dispatch("notifyCreate", {
+            text: "Toto není vaše město",
+            level: "warning"
+          });
           return;
         }
 
-        // foreign city
+        // my city
+        this.selected = cityId;
+        return;
+      }
+      
+      // no army
+      if (this.activeTurn.cityOccupations[this.selected].availableArmy === 0 && !this.activeTurn.orders[`${this.selected}>>${cityId}`]) {
         this.$store.dispatch("notifyCreate", {
-          text: "Toto není vaše město",
+          text: "Město nemá žádnou volnou armádu",
           level: "warning"
         });
         return;
