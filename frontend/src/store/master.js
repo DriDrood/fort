@@ -1,7 +1,7 @@
 export default {
   state: () => ({
     config: {
-      armyRunDuration: 0.4,
+      armyMoveDuration: 0.4,
       notificationDuration: 10
     },
   }),

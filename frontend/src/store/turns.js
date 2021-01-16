@@ -70,53 +70,36 @@ export default {
   
       sourceCity.availableArmy = max - payload.startAmount;
     },
-    turnsPrev: async (state) => {
+    // armyMoveDuration
+    turnsPrev: async (state, payload) => {
       // invalid command
-      if (state.activeId <= 0 || state.turnChangeProgress.armiesPosition != 0) return;
+      if (state.activeId <= 0 || state.moveProgress != 0) return;
 
-      console.log("turnsPrev", state.data, state.activeId);
-  
       // init
-      const orders = state.data[state.activeId - 1].orders;
-      var met = helpers.meetingResults(state, orders);
-      helpers.createMove(state, orders, met, true);
-  
-      // move
-      await helpers.sleep(10);
-      state.turnChangeProgress.armiesPosition = 1;
-      await helpers.sleep(state.config.armyRunDuration * 1000);
-      state.turnChangeProgress.armiesPosition = 2;
-      await helpers.sleep(state.config.armyRunDuration * 1000);
-  
-      // decrease active
       state.activeId -= 1;
-  
-      // clean
-      Vue.set(state.turnChangeProgress, 'armies', []);
-      state.turnChangeProgress.armiesPosition = 0;
+      state.moveProgress = 2;
+      await helpers.sleep(10);
+
+      // move
+      state.moveProgress = 1;
+      await helpers.sleep(payload.armyMoveDuration * 1000);
+      state.moveProgress = 0;
+      await helpers.sleep(payload.armyMoveDuration * 1000);
     },
-    turnsNext: async (state) => {
+    // armyMoveDuration
+    turnsNext: async (state, payload) => {
       // invalid command
-      if (state.activeId >= state.data.last || state.turnChangeProgress.armiesPosition != 0) return;
-  
-      // init
-      const orders = state.activeTurn.orders;
-      let met = helpers.meetingResults(state, orders);
-      helpers.createMove(state, orders, met, false);
+      if (state.activeId >= state.data.last || state.moveProgress != 0) return;
   
       // move
-      await helpers.sleep(10);
-      state.turnChangeProgress.armiesPosition = 1;
-      await helpers.sleep(state.config.armyRunDuration * 1000);
-      state.turnChangeProgress.armiesPosition = 2;
-      await helpers.sleep(state.config.armyRunDuration * 1000);
+      state.moveProgress = 1;
+      await helpers.sleep(payload.armyMoveDuration * 1000);
+      state.moveProgress = 2;
+      await helpers.sleep(payload.armyMoveDuration * 1000);
   
       // increase active
       state.activeId += 1;
-  
-      // clean
-      Vue.set(state.turnChangeProgress, 'armies', []);
-      state.turnChangeProgress.armiesPosition = 0;
+      state.moveProgress = 0;
     }
   },
   actions: {
@@ -135,7 +118,7 @@ export default {
     },
     turnsPrev(context) {
       // invalid command - first turn || already running
-      if (context.state.activeId <= 0 || context.state.turnChangeProgress.armiesPosition != 0) return;
+      if (context.state.activeId <= 0 || context.state.moveProgress != 0) return;
   
       // null - load
       const finalTurn = context.state.activeId - 1;
@@ -150,12 +133,12 @@ export default {
       // already loaded
       else
       {
-        context.commit('turnsPrev');
+        context.commit('turnsPrev', { armyMoveDuration: context.rootState.master.config.armyMoveDuration });
       }
     },
     turnsNext(context) {
       // invalid command - last turn || already running
-      if (context.state.activeId >= context.state.data.last || context.state.turnChangeProgress.armiesPosition != 0) return;
+      if (context.state.activeId >= context.state.data.last || context.state.moveProgress != 0) return;
   
       // null - load
       const finalTurn = context.state.activeId + 1;
@@ -170,95 +153,22 @@ export default {
       // already loaded
       else
       {
-        context.commit("turnsNext");
+        context.commit("turnsNext", { armyMoveDuration: context.rootState.master.config.armyMoveDuration });
       }
     },
     turnsReceive: (context, payload) => {
       Vue.set(context.state.data, payload.id, payload);
 
       if (payload.id < context.state.activeId)
-        context.commit("turnsPrev");
+        context.commit("turnsPrev", { armyMoveDuration: context.rootState.master.config.armyMoveDuration });
       else if (payload.id > context.state.activeId)
-        context.commit("turnsNext")
+        context.commit("turnsNext", { armyMoveDuration: context.rootState.master.config.armyMoveDuration });
     },
   },
 }
 
 
 const helpers = {
-  meetingResults(state, orders) {
-    let met = {};
-    // meeting
-    Object.keys(orders).forEach(orderId => {
-      // already met
-      if (met[orderId] != null) return;
-
-      const [sourceId, targetId] = orderId.split('>>');
-      const reverseOrderId = `${targetId}>>${sourceId}`;
-
-      const order = orders[orderId];
-      const reverseOrder = orders[reverseOrderId];
-      // no enemy reverse turn
-      if (!reverseOrder || state.players[order.playerId].teamId == state.players[reverseOrder.playerId].teamId) return;
-
-      // meeting ;-)
-      // first win
-      if (order.size > reverseOrder.size) {
-        met[orderId] = this.getSizeAfterMeeting(order.size, reverseOrder.size);
-        met[reverseOrderId] = 0;
-      }
-      // second win
-      else if (order.size < reverseOrder.size) {
-        met[orderId] = 0;
-        met[reverseOrderId] = this.getSizeAfterMeeting(reverseOrder.size, order.size);
-      }
-      // same size
-      else {
-        met[orderId] = 5;
-        met[reverseOrderId] = 5;
-      }
-    });
-
-    return met;
-  },
-  createMove(state, orders, met, reverse) {
-    // create
-    Object.keys(orders).forEach(orderId => {
-      // init
-      const order = orders[orderId];
-      const [sourceId, targetId] = orderId.split('>>');
-      // get positions
-      const start = state.cities[reverse ? targetId : sourceId];
-      const end = state.cities[reverse ? sourceId : targetId];
-      // get sizes
-      const size1 = reverse
-        ? met[orderId] || order.size
-        : order.size;
-      const size2 = reverse
-        ? order.size
-        : met[orderId] || order.size;
-
-      // return
-      state.turnChangeProgress.armies.push({
-        startX: start.x,
-        startY: start.y,
-        endX: end.x,
-        endY: end.y,
-        size1: size1,
-        size2: size2,
-        playerId: order.playerId
-      });
-    });
-  },
-  getSizeAfterMeeting(biggerArmySize, smallerArmySize) {
-    return Math.floor(Math.sqrt(Math.pow(biggerArmySize - 5, 2) - Math.pow(smallerArmySize - 5, 2))) + 5;
-  },
-  getArmySize(army) {
-    if (!army)
-      return null;
-
-    return Math.floor(Math.sqrt(army)) + 5;
-  },
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

@@ -1,7 +1,7 @@
 <template>
   <g :id="`order-${orderId}`" class="order">
-    <circle :cx="coords.x" :cy="coords.y" :r="size" />
-    <text :x="coords.x" :y="coords.y + 5" text-anchor="middle">{{ order.startAmount }}</text>
+    <circle :cx="coords.x" :cy="coords.y" :r="size" :style="{ fill: team.color, transition: `cx ${animationDuration}s linear, cy ${animationDuration}s linear` }" />
+    <text v-if="showText" :x="coords.x" :y="coords.y + 5" text-anchor="middle" :style="`fill: ${team.colorLight}`">{{ order.startAmount }}</text>
   </g>
 </template>
 
@@ -38,12 +38,21 @@ export default {
 
       return this.order.endSize;
     },
+    showText() {
+      // unknown amount
+      if (!this.order.startAmount)
+        return false;
+
+      return this.$store.state.turns.moveProgress == 0;
+    },
+    team() {
+      const player = this.$store.state.user.players[this.order.playerId];
+      const team = this.$store.state.user.teams[player.teamId];
+      return team;
+    },
+    animationDuration() {
+      return this.$store.state.master.config.armyMoveDuration;
+    }
   }
 };
 </script>
-
-<style lang="sass">
-.order
-  circle
-    fill: #ccc
-</style>

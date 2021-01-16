@@ -17,7 +17,7 @@ namespace Fort.Managers
             configuration.GetSection("Logger").Bind(Logger);
             Config = new Config
             {
-                ArmyRunDuration = Game.Animations.ArmyRunSec,
+                ArmyMoveDuration = Game.Animations.ArmyMoveSec,
                 NotificationDuration = Game.Animations.NotificationSec
             };
         }
