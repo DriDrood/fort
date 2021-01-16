@@ -1,9 +1,9 @@
 <template>
   <div class="controls">
-    <button @click="start" title="Game start"><i class="fas fa-play"></i></button>
-    <button @click="pause" title="Pause"><i class="fas fa-pause"></i></button>
-    <button @click="resume" title="Resume"><i class="fas fa-play"></i></button>
-    <button @click="end" title="End turn"><i class="fas fa-stop"></i></button>
+    <button v-if="stateKey == 'Ready'" @click="start" title="Game start"><i class="fas fa-play"></i></button>
+    <button v-if="stateKey == 'Running'" @click="pause" title="Pause"><i class="fas fa-pause"></i></button>
+    <button v-if="stateKey == 'Paused'" @click="resume" title="Resume"><i class="fas fa-play"></i></button>
+    <button v-if="stateKey != 'Ready'" @click="end" title="End turn"><i class="fas fa-stop"></i></button>
     <button @click="resetGame" title="Reset game"><i class="fas fa-redo"></i></button>
   </div>
 </template>

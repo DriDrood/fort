@@ -32,6 +32,8 @@ export default {
           return "fa-check";
         case "Finalizing":
           return "fa-flag-checkered";
+        case "Paused":
+          return "fa-pause";
         default:
           return "fa-stop";
       }
