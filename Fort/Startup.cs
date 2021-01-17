@@ -29,6 +29,7 @@ namespace Fort
 
       services.AddSingleton<Logger>();
       services.AddSingleton<LifecycleService>();
+      services.AddSingleton<ConnectionsService>();
       services.AddSingleton<DoneService>();
 
       services.AddScoped<ConnectionServiceProviderHolder>();

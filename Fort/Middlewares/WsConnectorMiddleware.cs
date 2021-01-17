@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Fort.Extensions;
 using Fort.Models;
+using Fort.Services;
 using Fort.Utils.Logger;
 using Fort.Utils.WebSocket;
 using Microsoft.AspNetCore.Http;
@@ -11,25 +12,34 @@ namespace Fort.Middlewares
 {
   public class WsConnectorMiddleware
   {
-    public WsConnectorMiddleware(RequestDelegate next, Logger logger)
+    public WsConnectorMiddleware(RequestDelegate next, ConnectionsService connectionsService, Logger logger)
     {
       _next = next;
+      _connectionsService = connectionsService;
       _logger = logger;
     }
 
     private RequestDelegate _next;
+    private readonly ConnectionsService _connectionsService;
     private readonly Logger _logger;
 
-    public Task Invoke(HttpContext context, IServiceProvider serviceProvider, WsConnection wsc)
+    public async Task Invoke(HttpContext context, IServiceProvider serviceProvider, WsConnection wsc)
     {
-      wsc.ReceiveMessage = msg => CreateNewScope(serviceProvider, msg);
-      // is WebSocket
-      if (context.Request.Path == "/ws" && context.WebSockets.IsWebSocketRequest)
-        return wsc.Connect(context);
+      // not WebSocket
+      if (context.Request.Path != "/ws" || !context.WebSockets.IsWebSocketRequest) {
+        context.Response.StatusCode = 400;
+        return;
+      }
         
-      // fail
-      context.Response.StatusCode = 400;
-      return Task.CompletedTask;
+      // connect
+      _connectionsService.NewConnection(serviceProvider);
+
+      // listen
+      wsc.ReceiveMessage = msg => CreateNewScope(serviceProvider, msg);
+      await wsc.Connect(context);
+
+      // disconnect
+      _connectionsService.Disconnected(serviceProvider);
     }
 
     private void CreateNewScope(IServiceProvider serviceProvider, string message)
