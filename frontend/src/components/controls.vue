@@ -18,7 +18,7 @@ export default {
   },
   methods: {
     start() {
-      this.$store.dispatch("commSend", { route: "admin/startTurn" });
+      this.$store.dispatch("commSend", { route: "admin/startGame" });
     },
     pause() {
       this.$store.dispatch("commSend", { route: "admin/pauseTurn" });

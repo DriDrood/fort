@@ -12,13 +12,14 @@ namespace Fort.Services
 {
   public class LifecycleService
   {
-    public LifecycleService(IServiceScopeFactory serviceScopeFactory)
+    public LifecycleService(IServiceScopeFactory serviceScopeFactory, ConnectionsService connectionsService)
     {
       _serviceScopeFactory = serviceScopeFactory;
-      _remainingTurnDuration = ConfigManager.GetDuration();
+      _connectionsService = connectionsService;
     }
 
     private readonly IServiceScopeFactory _serviceScopeFactory;
+    private readonly ConnectionsService _connectionsService;
 
     private Turn _currentTurn;
     private TimeSpan? _remainingTurnDuration;
@@ -111,6 +112,9 @@ namespace Fort.Services
             await Wait(TimeSpan.FromSeconds(ConfigManager.Game.Animations.PauseBeforeArmyRunSec));
             break;
         }
+
+        // send to all connected users
+        var _ = SendToAllStateChanged();
       }
     }
 
@@ -128,6 +132,8 @@ namespace Fort.Services
         db.SaveChanges();
 
         RunLifecycle();
+        
+        SendToAllStateChanged();
       }
     }
     public void PauseTurn(FortDbContext db)
@@ -137,12 +143,16 @@ namespace Fort.Services
         if (State != ELifecycleState.Running)
           throw new Exception($"Cannot pause turn while in '{State}' state");
 
+        // set paused
         _currentTurn = _getDbTurn(db);
         _remainingTurnDuration = _currentTurn.EndsAt.Value - _now;
         _currentTurn.EndsAt = null;
         db.SaveChanges();
 
+        // end running
         _cancel.Cancel();
+
+        SendToAllStateChanged();
       }
     }
     public void ResumeTurn(FortDbContext db)
@@ -157,6 +167,8 @@ namespace Fort.Services
         db.SaveChanges();
 
         RunLifecycle();
+
+        SendToAllStateChanged();
       }
     }
     public void EndTurn(FortDbContext db)
@@ -171,6 +183,8 @@ namespace Fort.Services
         db.SaveChanges();
 
         _cancel.Cancel();
+
+        SendToAllStateChanged();
       }
     }
     public void ResetGame(FortDbContext db)
@@ -181,6 +195,9 @@ namespace Fort.Services
         _currentTurn = null;
 
         Init(db);
+
+        // foreach (var userConnection in _connectionsService.GetAllConnections())
+        //   userConnection.Send(Guid.NewGuid(), "player/resetGame", )
       }
     }
     private void FinalizeTurn()
@@ -217,7 +234,13 @@ namespace Fort.Services
             }
             db.SaveChanges();
 
+            // current turn
             _currentTurn = nextTurn;
+
+            // send result
+            var sendingTasks = _connectionsService.GetAllUserConnections()
+              .Select(i => i.connection.Send(Guid.NewGuid(), "player/turnFinalized", new { turn = new TurnManager(i.user, db, this).GetTurn(_currentTurn.Id) }))
+              .ToArray();
           }
         }
         finally
@@ -250,6 +273,15 @@ namespace Fort.Services
         return Task.CompletedTask;
 
       return Wait(waitDuration);
+    }
+    private Task SendToAllStateChanged()
+    {
+      // send to all connected users
+      var tasks = _connectionsService.GetAllConnections()
+        .Select(c => c?.Send(Guid.NewGuid(), "player/stateChanged", new { state = new Models.Store.TurnState { EndsAt = _currentTurn.EndsAt, Key = State.ToString() }}))
+        .ToArray();
+
+      return Task.WhenAll(tasks);
     }
     private void _initGame(FortDbContext db)
     {

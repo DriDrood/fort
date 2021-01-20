@@ -57,6 +57,10 @@ export default {
       state.currentId = Math.max(...payload.turns.map(t => t.id));
       state.activeId = state.currentId;
     },
+    turnsFinalized(state, payload) {
+      Vue.set(state.data, payload.turn.id, payload.turn);
+      state.currentId = payload.turn.id;
+    },
     // id, playerId, startSize, endSize, startAmount, endAmount
     turnsOrder(state, payload) {
       const currentTurn = state.data[state.currentId];
@@ -108,6 +112,7 @@ export default {
       context.commit("commRegisterReceiver", { route: "player/login", callback: "turnsInitData" });
 
       context.commit("commRegisterReceiver", { route: "player/setOrder", callback: "turnsOrder" });
+      context.commit("commRegisterReceiver", { route: "player/turnFinalized", callback: "turnsFinalized" });
     },
     // sourceId, targetId, amount
     turnsOrder(context, payload) {

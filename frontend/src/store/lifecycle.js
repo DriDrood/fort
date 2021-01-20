@@ -9,6 +9,7 @@ export default {
     countDown: null,
   }),
   mutations: {
+    // id, key, endsAt
     lifecycleUpdateState(state, payload) {
       state.state.id = payload.state.id;
       state.state.key = payload.state.key;
@@ -25,36 +26,46 @@ export default {
     // closed
     lifecycleToggleClose: (state, payload) => {
       state.state.closed = payload.closed;
-    }
+    },
   },
   actions: {
     lifecycleInit: context => {
-      context.commit("commRegisterReceiver", { route: "player/init", callback: "lifecycleUpdateState" });
-      context.commit("commRegisterReceiver", { route: "player/login", callback: "lifecycleUpdateState" });
+      context.commit("commRegisterReceiver", { route: "player/init", callback: "lifecycleUpdateState", callbackType: "action" });
+      context.commit("commRegisterReceiver", { route: "player/login", callback: "lifecycleUpdateState", callbackType: "action" });
+
       context.commit("commRegisterReceiver", { route: "player/setTurnClosed", callback: "lifecycleToggleClose" });
+      context.commit("commRegisterReceiver", { route: "player/stateChanged", callback: "lifecycleUpdateState", callbackType: "action" });
     },
     lifecycleToggleClose: context => {
       context.dispatch("commSend", { route: "player/setTurnClosed", data: { closed: !context.state.state.closed }});
     },
+    // id, key, endsAt
+    lifecycleUpdateState: (context, payload) => {
+      context.commit("lifecycleUpdateState", payload);
+      context.dispatch("lifecycleCountDown");
+    },
     lifecycleCountDown: (context) => {
       setTimeout(() =>
+      {
         context.state.countDown = setInterval(() => {
-          if (context.state.endsAt) {
-            let remains = context.state.endsAt - new Date();
+          if (context.state.state.endsAt) {
+            let remains = context.state.state.endsAt - new Date();
   
             // turn end
             if (remains <= 0) {
               remains = 0;
-              context.dispatch("masterStopCountDown");
+              context.dispatch("lifecycleStopCountDown");
             }
-            
+
             const remainsDate = new Date(remains);
-            context.state.remains = `${remainsDate.getMinutes()}:${remainsDate.getSeconds().toString().padStart(2, '0')}`;
+            context.state.state.remains = `${remainsDate.getMinutes()}:${remainsDate.getSeconds().toString().padStart(2, '0')}`;
           }
           else {
-            context.rootState.lifecycle.state.remains = '-:--';
+            context.state.state.remains = '-:--';
+            context.dispatch("lifecycleStopCountDown");
           }
-        }, 1000), new Date(context.state.endsAt - new Date()).getMilliseconds());
+        }, 1000);
+      }, new Date(context.state.state.endsAt - new Date()).getMilliseconds());
     },
     lifecycleStopCountDown: context => {
       clearInterval(context.state.countDown);

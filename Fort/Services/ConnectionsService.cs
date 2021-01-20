@@ -40,6 +40,13 @@ namespace Fort.Services
         .ToArray();
     }
 
+    public (JwtUser user, WsConnection connection)[] GetAllUserConnections()
+    {
+      return _serviceProviders
+        .Select(sp => (sp.GetService<JwtUser>(), sp.GetService<WsConnection>()))
+        .ToArray();
+    }
+
     public WsConnection[] GetAllConnections()
     {
       return _serviceProviders

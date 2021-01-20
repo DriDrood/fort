@@ -7,7 +7,7 @@
     <button v-if="turns.activeId > 0" class="prev" title="Vrátit o kolo" @click="prevTurn">
       <i class="fa fa-step-backward"></i>
     </button>
-    <div class="turn">{{ turns.activeId ? turns.activeId + 1 : "?" }}</div>
+    <div class="turn">{{ turns.activeId != null ? turns.activeId + 1 : "?" }}</div>
     <button v-if="!isTurnCurrent" class="next" title="Vpřed o kolo" @click="nextTurn">
       <i class="fa fa-step-forward"></i>
     </button>

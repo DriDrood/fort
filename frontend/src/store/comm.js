@@ -72,6 +72,10 @@ export default {
       // remove loading status
       context.commit("commReceiveMessage", data);
 
+      // no receiver
+      if (!callbacks)
+        return;
+
       // run all callbacks
       Object.keys(callbacks).forEach(route => {
         switch (callbacks[route]) {
@@ -85,35 +89,6 @@ export default {
             console.log("error - unknown callback type", route, callbacks[route]);
         }
       });
-
-      // switch (data.route) {
-      //   case "error":
-      //     // context.commit("notificationsCreate", {
-      //     //   type: "error",
-      //     //   text: data.data.Message
-      //     // });
-      //     break;
-      //   case "player/login":
-      //     context.commit("userLogged", data.data);
-      //     context.commit("masterInit", data.data);
-      //     context.commit("lifecycleUpdateCurrentTurn", data.data);
-      //     context.commit("mapInit", data.data);
-      //     context.commit("turnsUpdate", data.data);
-      //     context.commit("userUpdate", data.data);
-      //     break;
-      //   case "player/init":
-      //     context.commit("masterInit", data.data);
-      //     context.commit("lifecycleUpdateCurrentTurn", data.data);
-      //     context.commit("mapInit", data.data);
-      //     context.commit("turnsUpdate", data.data);
-      //     context.commit("userUpdate", data.data);
-      //     break;
-      //   case "player/setTurnClosed":
-      //     context.commit("lifecycleToggleClose", data.data);
-      //     break;
-      //   case "player/":
-      //     break;
-      // }
     },
     // event, callback
     commConnectionOpened: (context, payload) => {
