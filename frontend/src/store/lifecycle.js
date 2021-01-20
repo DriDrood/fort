@@ -2,7 +2,7 @@ export default {
   state: () => ({
     state: {
       endsAt: null, // new Date(2021, 1, 1),
-      key: 'Init',
+      key: 'Ready',
       remains: '-:--',
       closed: false
     },

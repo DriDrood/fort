@@ -28,6 +28,8 @@ export default {
     ...mapGetters(["isTurnCurrent", "isLoading"]),
     icon() {
       switch (this.lifecycle.state.key) {
+        case "Ready":
+          return "fa-stop";
         case "Running":
           return "fa-check";
         case "Finalizing":
@@ -35,7 +37,7 @@ export default {
         case "Paused":
           return "fa-pause";
         default:
-          return "fa-stop";
+          return "fa-exclamation-triangle";
       }
     }
   },
