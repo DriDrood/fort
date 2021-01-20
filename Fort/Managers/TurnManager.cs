@@ -38,7 +38,7 @@ namespace Fort.Managers
             {
                 Id = currentTurn.Id,
                 Key = _lifecycleService.State.ToString(),
-                EndsAt = _lifecycleService.WaitTill,
+                EndsAt = _lifecycleService.TurnEndsAt,
             };
         }
 

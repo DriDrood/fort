@@ -2,25 +2,29 @@ namespace Fort.Services
 {
     public enum ELifecycleState
     {
-        // Empty DB
-        Init,
-
-        // In DB are starting positions, not started yet
+        /// <summary>
+        ///   The game didn't start yet
+        /// </summary>
         Ready,
 
-        // next turn ready, after pause
-        Starting,
+        /// <summary>
+        ///   Play fast!
+        /// </summary>
+        Running,
         
-        // turn started but never ends
+        /// <summary>
+        ///   turn started but never ends
+        /// </summary>
         Paused,
 
-        // running turn - started, turn end is in the future
-        Running,
-
-        // turn end is in the past
+        /// <summary>
+        ///   gap between turns
+        /// </summary>
         Finalizing,
 
-        // next turn ready, waiting pause
-        Finalized,
+        /// <summary>
+        ///   Game has a winner
+        /// </summary>
+        End,
     }
 }

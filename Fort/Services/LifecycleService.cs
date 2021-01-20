@@ -10,320 +10,347 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Fort.Services
 {
-    public class LifecycleService
+  public class LifecycleService
+  {
+    public LifecycleService(IServiceScopeFactory serviceScopeFactory)
     {
-        public LifecycleService(IServiceScopeFactory serviceScopeFactory)
-        {
-            _serviceScopeFactory = serviceScopeFactory;
-            _remainingTurnDuration = ConfigManager.GetDuration();
-        }
-
-        private readonly IServiceScopeFactory _serviceScopeFactory;
-
-        private Turn _currentTurn;
-        private Turn _nextTurn;
-        private TimeSpan? _remainingTurnDuration;
-        private Task _lifecycleTask;
-        private CancellationTokenSource _cancel;
-
-        public ELifecycleState State
-        {
-            get
-            {
-                if (_currentTurn == null)
-                    return ELifecycleState.Init;
-
-                if (_currentTurn.StartsAt == null)
-                    return ELifecycleState.Ready;
-
-                if (_nextTurn != null && _currentTurn.EndsAt.Value.AddSeconds(ConfigManager.Game.Animations.PauseBeforeArmyRunSec) <= DateTime.UtcNow)
-                    return ELifecycleState.Starting;
-
-                if (_currentTurn.EndsAt == null)
-                    return ELifecycleState.Paused;
-
-                if (_currentTurn.EndsAt > DateTime.UtcNow)
-                    return ELifecycleState.Running;
-
-                if (_nextTurn == null)
-                    return ELifecycleState.Finalizing;
-
-                return ELifecycleState.Finalized;
-            }
-        }
-        public DateTime? WaitTill
-        {
-            get
-            {
-                switch (State) {
-                    // running
-                    case ELifecycleState.Running:
-                        return _currentTurn.EndsAt;
-                    // waiting pause
-                    case ELifecycleState.Finalized:
-                        return _currentTurn.EndsAt.Value.AddSeconds(ConfigManager.Game.Animations.PauseBeforeArmyRunSec);
-                    // don't wait
-                    default:
-                        return null;
-                }
-            }
-        }
-        public int CurrentTurnId => _currentTurn?.Id ?? -1;
-
-        public void Setup()
-        {
-            // get current turn & state
-            using (var scope = _serviceScopeFactory.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetService<FortDbContext>();
-                _currentTurn = db.Turns
-                    .OrderByDescending(t => t.Id)
-                    .FirstOrDefault();
-            }
-
-            // continue
-            RunLifecycle();
-        }
-
-        public void RunLifecycle()
-        {
-            _cancel = new CancellationTokenSource();
-            _lifecycleTask = Lifecycle();
-        }
-
-        private async Task Lifecycle()
-        {
-            while (!(IsGameEnd() || _cancel.IsCancellationRequested))
-            {
-                // wait
-                if (WaitTill != null && WaitTill > DateTime.UtcNow)
-                {
-                    try
-                    {
-                        await Task.Delay(WaitTill.Value - DateTime.UtcNow, _cancel.Token);
-                    }
-                    catch (TaskCanceledException)
-                    { }
-                }
-
-                // do
-                using (var scope = _serviceScopeFactory.CreateScope())
-                {
-                    var db = scope.ServiceProvider.GetService<FortDbContext>();
-
-                    switch (State)
-                    {
-                        case ELifecycleState.Init:
-                            _startGame(db);
-                            break;
-                        case ELifecycleState.Ready:
-                            _cancel.Cancel();
-                            break;
-                        case ELifecycleState.Starting:
-                            _startTurn(db);
-                            break;
-                        case ELifecycleState.Paused:
-                            _cancel.Cancel();
-                            break;
-                        case ELifecycleState.Running:
-                            break;
-                        case ELifecycleState.Finalizing:
-                            _endTurn(db);
-                            break;
-                        case ELifecycleState.Finalized:
-                            break;
-                    }
-
-                    db.SaveChanges();
-                }
-            }
-        }
-
-        private bool IsGameEnd()
-        {
-            if (_nextTurn == null)
-                return false;
-
-            return _nextTurn.CityOccupations
-                .Where(co => co.Owner != null)
-                .GroupBy(co => co.Owner.TeamId)
-                .Count() == 1;
-        }
-
-        #region public status change
-        public void ResetGame(FortDbContext db)
-        {
-            _cancel.Cancel();
-            db.Database.ExecuteSqlCommand("DELETE FROM Turns;");
-            _currentTurn = null;
-
-            RunLifecycle();
-        }
-        public void StartTurn(FortDbContext db)
-        {
-            if (State != ELifecycleState.Ready && State != ELifecycleState.Finalizing)
-                throw new Exception($"Cannot start turn while in '{State}' state");
-
-            _cancel.Cancel();
-            _startTurn(db);
-            RunLifecycle();
-        }
-        public void PauseTurn(FortDbContext db)
-        {
-            if (State != ELifecycleState.Running)
-                throw new Exception($"Cannot pause turn while in '{State}' state");
-
-            _cancel.Cancel();
-            _pauseTurn(db);
-        }
-        public void ResumeTurn(FortDbContext db)
-        {
-            if (State != ELifecycleState.Paused)
-                throw new Exception($"Cannot resume turn while in '{State}' state");
-
-            _cancel.Cancel();
-            _resumeTurn(db);
-            RunLifecycle();
-        }
-        public void EndTurn(FortDbContext db)
-        {
-            if (State != ELifecycleState.Running)
-                throw new Exception($"Cannot end turn while in '{State}' state");
-
-            _cancel.Cancel();
-            _endTurn(db);
-            RunLifecycle();
-        }
-        #endregion
-
-        #region private status change
-        private void _startGame(FortDbContext db)
-        {
-            // create turn
-            _currentTurn = new Turn
-            {
-                Id = 0
-            };
-            db.Add(_currentTurn);
-
-            // set occupations
-            var random = new Random();
-            var startingPositions = db.StartingPositions.ToDictionary(p => p.CityId, p => p);
-
-            foreach (var city in db.Cities)
-            {
-                int army;
-                Guid? ownerId = null;
-                // city owned by player
-                if (startingPositions.TryGetValue(city.Id, out var position))
-                {
-                    army = position.Army ?? ConfigManager.Game.Population.DefaultPlayerStartPopulation;
-                    ownerId = position.UserId;
-                }
-                // generate neutral
-                else
-                {
-                    army = random.Next(ConfigManager.Game.Population.NeutralCitiesPopulationMin, ConfigManager.Game.Population.NeutralCitiesPopulationMax);
-                }
-
-                var occupation = new CityOccupation
-                {
-                    Turn = _currentTurn,
-                    CityId = city.Id,
-                    OwnerId = ownerId,
-                    Army = army
-                };
-                db.CityOccupations.Add(occupation);
-            }
-        }
-        private void _startTurn(FortDbContext db)
-        {
-            var turn = db.Turns
-                .OrderByDescending(t => t.Id)
-                .First();
-
-            var now = DateTime.UtcNow;
-            turn.StartsAt = now;
-            turn.EndsAt = ConfigManager.GetTurnEnd(now);
-            
-            _currentTurn = turn;
-            _nextTurn = null;
-        }
-        private void _pauseTurn(FortDbContext db)
-        {
-            _currentTurn = db.Turns.Find(CurrentTurnId);
-
-            var now = DateTime.UtcNow;
-            _remainingTurnDuration = _currentTurn.EndsAt - now;
-            _currentTurn.EndsAt = null;
-        }
-        private void _resumeTurn(FortDbContext db)
-        {
-            _currentTurn = db.Turns.Find(CurrentTurnId);
-
-            var now = DateTime.UtcNow;
-            _currentTurn.EndsAt = (now + _remainingTurnDuration) ?? ConfigManager.GetTurnEnd(now);
-        }
-        private void _endTurn(FortDbContext db)
-        {
-            // create new turn
-            _nextTurn = new Turn
-            {
-                Id = CurrentTurnId + 1
-            };
-            db.Add(_nextTurn);
-
-            // get results
-            foreach (var cityOccupation in db.CityOccupations
-                .Include(c => c.Owner)
-                .Where(c => c.TurnId == CurrentTurnId))
-            {
-                // get armies
-                var armyOut = db.Orders
-                    .Where(o => o.TurnId == CurrentTurnId && (o.StIsSource ? o.StCityId : o.NdCityId) == cityOccupation.CityId)
-                    .Sum(o => o.Amount);
-                var armyIn = db.Orders
-                    .Where(o => o.TurnId == CurrentTurnId && (o.StIsSource ? o.NdCityId : o.StCityId) == cityOccupation.CityId && cityOccupation.Owner != null && o.User.TeamId == cityOccupation.Owner.TeamId)
-                    .Sum(o => o.Amount);
-                var armyCounter = db.Orders
-                    .Where(o => o.TurnId == CurrentTurnId && (o.StIsSource ? o.NdCityId : o.StCityId) == cityOccupation.CityId && (cityOccupation.Owner == null || o.User.TeamId != cityOccupation.Owner.TeamId))
-                    .Sum(o => o.Amount);
-
-                // new occupation
-                var result = cityOccupation.Army - armyOut + armyIn - armyCounter;
-                User owner;
-                // conquered
-                if (result < 0)
-                {
-                    // biggest enemy army
-                    owner = db.Orders
-                        .Include(o => o.User)
-                        .Where(o => o.TurnId == CurrentTurnId && (o.StIsSource ? o.NdCityId : o.StCityId) == cityOccupation.CityId && (cityOccupation.Owner == null || o.User.TeamId != cityOccupation.Owner.TeamId))
-                        .OrderByDescending(o => o.Amount)
-                        .First().User;
-                    result = -result;
-                }
-                // defended
-                else
-                {
-                    owner = cityOccupation.Owner;
-                }
-
-                // population grow only for users
-                var populationGrow = owner != null
-                    ? ConfigManager.Game.Population.DefaultTurnGrow
-                    : 0;
-
-                // create
-                var newOccupation = new CityOccupation
-                {
-                    CityId = cityOccupation.CityId,
-                    Owner = owner,
-                    Army = result + populationGrow
-                };
-                _nextTurn.CityOccupations.Add(newOccupation);
-            }
-        }
-        #endregion
+      _serviceScopeFactory = serviceScopeFactory;
+      _remainingTurnDuration = ConfigManager.GetDuration();
     }
+
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    private Turn _currentTurn;
+    private TimeSpan? _remainingTurnDuration;
+    private Task _lifecycleTask;
+    private CancellationTokenSource _cancel;
+    private DateTime _now => DateTime.UtcNow;
+    private object _actionLock = new object();
+    private object _finalizeLock = new object();
+    private bool _finalizeLockTaken = false;
+
+    public ELifecycleState State
+    {
+      get
+      {
+        if (_currentTurn.StartsAt == null && _currentTurn.EndsAt == null)
+          return ELifecycleState.Ready;
+
+        if (_currentTurn.StartsAt == null)
+          return ELifecycleState.End;
+
+        if (_currentTurn.EndsAt == null)
+          return ELifecycleState.Paused;
+
+        if (_currentTurn.EndsAt > DateTime.UtcNow)
+          return ELifecycleState.Running;
+
+        return ELifecycleState.Finalizing;
+      }
+    }
+    public DateTime? TurnEndsAt
+    {
+      get
+      {
+        switch (State)
+        {
+          case ELifecycleState.Running:
+          case ELifecycleState.Finalizing:
+            return _currentTurn.EndsAt;
+
+          // don't wait
+          default:
+            return null;
+        }
+      }
+    }
+    public int CurrentTurnId => _currentTurn?.Id ?? -1;
+
+    public void Init(FortDbContext db)
+    {
+      _currentTurn = _getDbTurn(db);
+
+      // init
+      if (_currentTurn == null)
+      {
+        _initGame(db);
+      }
+
+      // ready || end
+      else if (_currentTurn.StartsAt == null)
+      {
+        // do nothing, wait
+      }
+
+      // running || finalising || paused
+      else
+      {
+        _remainingTurnDuration = ConfigManager.GetDuration();
+        _currentTurn.EndsAt = null;
+      }
+
+      db.SaveChanges();
+    }
+
+    private void RunLifecycle()
+    {
+      _lifecycleTask = Lifecycle();
+    }
+    private async Task Lifecycle()
+    {
+      while (State == ELifecycleState.Running || State == ELifecycleState.Finalizing)
+      {
+        // run
+        switch (State)
+        {
+          case ELifecycleState.Running:
+            await Wait(TurnEndsAt);
+            break;
+          case ELifecycleState.Finalizing:
+            FinalizeTurn();
+            await Wait(TimeSpan.FromSeconds(ConfigManager.Game.Animations.PauseBeforeArmyRunSec));
+            break;
+        }
+      }
+    }
+
+    #region Actions
+    public void StartGame(FortDbContext db)
+    {
+      lock (_actionLock)
+      {
+        if (State != ELifecycleState.Ready)
+          throw new Exception($"Cannot start turn while in '{State}' state");
+
+        _currentTurn = _getDbTurn(db);
+        _currentTurn.StartsAt = _now;
+        _currentTurn.EndsAt = ConfigManager.GetTurnEnd(_now);
+        db.SaveChanges();
+
+        RunLifecycle();
+      }
+    }
+    public void PauseTurn(FortDbContext db)
+    {
+      lock (_actionLock)
+      {
+        if (State != ELifecycleState.Running)
+          throw new Exception($"Cannot pause turn while in '{State}' state");
+
+        _currentTurn = _getDbTurn(db);
+        _remainingTurnDuration = _currentTurn.EndsAt.Value - _now;
+        _currentTurn.EndsAt = null;
+        db.SaveChanges();
+
+        _cancel.Cancel();
+      }
+    }
+    public void ResumeTurn(FortDbContext db)
+    {
+      lock (_actionLock)
+      {
+        if (State != ELifecycleState.Paused)
+          throw new Exception($"Cannot resume turn while in '{State}' state");
+
+        _currentTurn = _getDbTurn(db);
+        _currentTurn.EndsAt = (_now + _remainingTurnDuration) ?? ConfigManager.GetTurnEnd(_now);
+        db.SaveChanges();
+
+        RunLifecycle();
+      }
+    }
+    public void EndTurn(FortDbContext db)
+    {
+      lock (_actionLock)
+      {
+        if (State != ELifecycleState.Running)
+          throw new Exception($"Cannot end turn while in '{State}' state");
+
+        _currentTurn = _getDbTurn(db);
+        _currentTurn.EndsAt = _now;
+        db.SaveChanges();
+
+        _cancel.Cancel();
+      }
+    }
+    public void ResetGame(FortDbContext db)
+    {
+      lock (_actionLock)
+      {
+        db.Database.ExecuteSqlCommand("DELETE FROM Turns;");
+        _currentTurn = null;
+
+        Init(db);
+      }
+    }
+    private void FinalizeTurn()
+    {
+      // finalize is running
+      if (_finalizeLockTaken)
+        return;
+
+      Task.Run(() =>
+      {
+        try
+        {
+          Monitor.Enter(_finalizeLock, ref _finalizeLockTaken);
+
+          using (var scope = _serviceScopeFactory.CreateScope())
+          {
+            var db = scope.ServiceProvider.GetService<FortDbContext>();
+            var nextTurn = _createNextTurn(db);
+            db.Add(nextTurn);
+
+            // game ends?
+            if (nextTurn.CityOccupations
+              .Where(co => co.Owner != null)
+              .GroupBy(co => co.Owner?.TeamId)
+              .Count() < 2)
+            {
+              nextTurn.StartsAt = null;
+              nextTurn.EndsAt = _currentTurn.EndsAt;
+            }
+            else
+            {
+              nextTurn.StartsAt = _currentTurn.EndsAt;
+              nextTurn.EndsAt = ConfigManager.GetEndsAt(_currentTurn.EndsAt.Value);
+            }
+            db.SaveChanges();
+
+            _currentTurn = nextTurn;
+          }
+        }
+        finally
+        {
+          if (_finalizeLockTaken) Monitor.Exit(_finalizeLock);
+        }
+      });
+    }
+    #endregion
+
+    #region Helpers
+    private Turn _getDbTurn(FortDbContext db)
+    {
+      return db.Turns
+          .OrderByDescending(t => t.Id)
+          .FirstOrDefault();
+    }
+    private Task Wait(TimeSpan waitDuration)
+    {
+      _cancel = new CancellationTokenSource();
+      return Task.Delay(waitDuration, _cancel.Token);
+    }
+    private Task Wait(DateTime? waitTill)
+    {
+      if (waitTill == null)
+        return Task.CompletedTask;
+
+      var waitDuration = waitTill.Value - _now;
+      if (waitDuration < TimeSpan.Zero)
+        return Task.CompletedTask;
+
+      return Wait(waitDuration);
+    }
+    private void _initGame(FortDbContext db)
+    {
+      // create turn
+      _currentTurn = new Turn
+      {
+        Id = 0
+      };
+      db.Add(_currentTurn);
+
+      // set occupations
+      var random = new Random();
+      var startingPositions = db.StartingPositions.ToDictionary(p => p.CityId, p => p);
+
+      foreach (var city in db.Cities)
+      {
+        int army;
+        Guid? ownerId = null;
+        // city owned by player
+        if (startingPositions.TryGetValue(city.Id, out var position))
+        {
+          army = position.Army ?? ConfigManager.Game.Population.DefaultPlayerStartPopulation;
+          ownerId = position.UserId;
+        }
+        // generate neutral
+        else
+        {
+          army = random.Next(ConfigManager.Game.Population.NeutralCitiesPopulationMin, ConfigManager.Game.Population.NeutralCitiesPopulationMax);
+        }
+
+        var occupation = new CityOccupation
+        {
+          Turn = _currentTurn,
+          CityId = city.Id,
+          OwnerId = ownerId,
+          Army = army
+        };
+        db.CityOccupations.Add(occupation);
+      }
+    }
+    private Turn _createNextTurn(FortDbContext db)
+    {
+      // create new turn
+      var nextTurn = new Turn
+      {
+        Id = CurrentTurnId + 1
+      };
+
+      // get results
+      foreach (var cityOccupation in db.CityOccupations
+        .Include(c => c.Owner)
+        .Where(c => c.TurnId == CurrentTurnId))
+      {
+        // get armies
+        var armyOut = db.Orders
+          .Where(o => o.TurnId == CurrentTurnId && (o.StIsSource ? o.StCityId : o.NdCityId) == cityOccupation.CityId)
+          .Sum(o => o.Amount);
+        var armyIn = db.Orders
+          .Where(o => o.TurnId == CurrentTurnId && (o.StIsSource ? o.NdCityId : o.StCityId) == cityOccupation.CityId && cityOccupation.Owner != null && o.User.TeamId == cityOccupation.Owner.TeamId)
+          .Sum(o => o.Amount);
+        var armyCounter = db.Orders
+          .Where(o => o.TurnId == CurrentTurnId && (o.StIsSource ? o.NdCityId : o.StCityId) == cityOccupation.CityId && (cityOccupation.Owner == null || o.User.TeamId != cityOccupation.Owner.TeamId))
+          .Sum(o => o.Amount);
+
+        // new occupation
+        var result = cityOccupation.Army - armyOut + armyIn - armyCounter;
+        User owner;
+        // conquered
+        if (result < 0)
+        {
+          // biggest enemy army
+          owner = db.Orders
+            .Include(o => o.User)
+            .Where(o => o.TurnId == CurrentTurnId && (o.StIsSource ? o.NdCityId : o.StCityId) == cityOccupation.CityId && (cityOccupation.Owner == null || o.User.TeamId != cityOccupation.Owner.TeamId))
+            .OrderByDescending(o => o.Amount)
+            .First().User;
+          result = -result;
+        }
+        // defended
+        else
+        {
+          owner = cityOccupation.Owner;
+        }
+
+        // population grow only for users
+        var populationGrow = owner != null
+          ? ConfigManager.Game.Population.DefaultTurnGrow
+          : 0;
+
+        // create
+        var newOccupation = new CityOccupation
+        {
+          CityId = cityOccupation.CityId,
+          Owner = owner,
+          Army = result + populationGrow
+        };
+        nextTurn.CityOccupations.Add(newOccupation);
+      }
+
+      return nextTurn;
+    }
+    #endregion
+  }
 }

@@ -22,11 +22,13 @@ namespace Fort.Utils.WebSocket
       (var controllerName, var methodName) = ParseRoute(context.Route, '/');
 
       // get controller
-      var controllerType = Type.GetType($"Fort.Comm.{controllerName.ToCamelCase()}Controller");
+      var controllerType = Type.GetType($"Fort.Comm.{controllerName.ToCamelCase()}Controller")
+        ?? throw new Exception($"Unknown method namespace - {controllerName}");
       var controller = serviceProvider.GetService(controllerType);
 
       // get param
-      var method = controllerType.GetMethod(methodName.ToCamelCase());
+      var method = controllerType.GetMethod(methodName.ToCamelCase())
+        ?? throw new Exception($"Unknown method - {methodName}");
       var paramType = method.GetParameters().FirstOrDefault()?.ParameterType;
       var param = paramType != null ? context.Data.ToObject(paramType) : null;
 

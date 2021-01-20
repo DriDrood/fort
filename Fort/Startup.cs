@@ -51,10 +51,6 @@ namespace Fort
       {
         app.UseDeveloperExceptionPage();
       }
-      else
-      {
-        MigrateDatabase(app);
-      }
 
       app.UseWebSockets();
       app.UseMiddleware<WsConnectorMiddleware>();
@@ -64,20 +60,24 @@ namespace Fort
       app.UseMiddleware<WsAuthorizationMiddleware>();
       app.UseMiddleware<WsRouterMiddleware>();
 
-      app.ApplicationServices.GetService<Logger>().Setup(ConfigManager.Logger);
-      app.ApplicationServices.GetService<LifecycleService>().Setup();
+      SetupServices(app, env);
     }
 
-    private static void MigrateDatabase(IApplicationBuilder app)
+    private static void SetupServices(IApplicationBuilder app, IHostingEnvironment env)
     {
       using (var serviceScope = app.ApplicationServices
         .GetRequiredService<IServiceScopeFactory>()
         .CreateScope())
       {
-        using (var context = serviceScope.ServiceProvider.GetService<FortDbContext>())
+        var db = serviceScope.ServiceProvider.GetService<FortDbContext>();
+
+        if (!env.IsDevelopment())
         {
-          context.Database.Migrate();
+          db.Database.Migrate();
         }
+
+        app.ApplicationServices.GetService<Logger>().Setup(ConfigManager.Logger);
+        app.ApplicationServices.GetService<LifecycleService>().Init(db);
       }
     }
   }
