@@ -86,7 +86,7 @@ namespace Fort.Services
       // running || finalising || paused
       else
       {
-        _remainingTurnDuration = ConfigManager.GetDuration();
+        _remainingTurnDuration = ConfigManager.GetDuration(_now);
         _currentTurn.EndsAt = null;
       }
 
@@ -230,7 +230,7 @@ namespace Fort.Services
             else
             {
               nextTurn.StartsAt = _currentTurn.EndsAt;
-              nextTurn.EndsAt = ConfigManager.GetEndsAt(_currentTurn.EndsAt.Value);
+              nextTurn.EndsAt = ConfigManager.GetTurnEnd(_currentTurn.EndsAt.Value);
             }
             db.SaveChanges();
 
@@ -245,7 +245,11 @@ namespace Fort.Services
         }
         finally
         {
-          if (_finalizeLockTaken) Monitor.Exit(_finalizeLock);
+          if (_finalizeLockTaken)
+          {
+            Monitor.Exit(_finalizeLock);
+            _finalizeLockTaken = false;
+          }
         }
       });
     }

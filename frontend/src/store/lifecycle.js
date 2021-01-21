@@ -1,3 +1,5 @@
+import Vue from "vue";
+
 export default {
   state: () => ({
     state: {
@@ -41,8 +43,19 @@ export default {
     },
     // id, key, endsAt
     lifecycleUpdateState: (context, payload) => {
+      const currentState = context.state.state.key;
+
       context.commit("lifecycleUpdateState", payload);
       context.dispatch("lifecycleCountDown");
+      
+      // next turn
+      if (currentState == "Finalizing" && payload.state.key == "Running")
+      {
+        var isLastTurn = context.getters.isTurnCurrent;
+        Vue.set(context.rootState.turns.data, context.rootState.turns.tempTurn.id, context.rootState.turns.tempTurn);
+        if (isLastTurn)
+          context.dispatch("turnsNext");
+      }
     },
     lifecycleCountDown: (context) => {
       setTimeout(() =>

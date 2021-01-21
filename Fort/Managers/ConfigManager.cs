@@ -32,21 +32,34 @@ namespace Fort.Managers
 
         public static DateTime GetTurnEnd(DateTime now)
         {
-            var duration = GetDuration();
+            var duration = _configDuration();
             return duration != null
-                ? (DateTime.UtcNow + duration.Value)
-                : (GetEndsAt(now)
+                ? (now + duration.Value)
+                : (_configEndsAt(now)
                     ?? throw new Exception("Turn end not configured!"));
         }
 
-        public static TimeSpan? GetDuration()
+        public static TimeSpan GetDuration(DateTime now)
+        {
+            var duration = _configDuration();
+            if (duration != null)
+                return duration.Value;
+            
+            var endsAt = _configEndsAt(now);
+            if (endsAt != null)
+                return endsAt.Value - now;
+
+            throw new Exception("Turn end not configured!");
+        }
+
+        private static TimeSpan? _configDuration()
         {
             return TimeSpan.TryParse(Game.Lifecycle.TurnDuration, out var duration)
                 ? (TimeSpan?)duration
                 : null;
         }
 
-        public static DateTime? GetEndsAt(DateTime now)
+        private static DateTime? _configEndsAt(DateTime now)
         {
             if (!TimeSpan.TryParse(Game.Lifecycle.TurnEndsAt, out var endsAt))
                 return null;

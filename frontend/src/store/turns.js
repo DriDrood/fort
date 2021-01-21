@@ -3,7 +3,6 @@ import Vue from "vue";
 export default {
   state: () => ({
     activeId: 0,
-    currentId: 0,
     data: [
       // {
       //   cityOccupations: {
@@ -39,9 +38,10 @@ export default {
       // }
     ],
     moveProgress: 0, // 0, 1, 2
+    tempTurn: null,
   }),
   getters: {
-    isTurnCurrent: (state) => state.activeId == state.currentId,
+    isTurnCurrent: (state) => state.activeId == state.data.length - 1,
     activeTurn: (state) => state.data[state.activeId]
   },
   mutations: {
@@ -54,16 +54,14 @@ export default {
         Vue.set(state.data, t.id, t);
       });
 
-      state.currentId = Math.max(...payload.turns.map(t => t.id));
-      state.activeId = state.currentId;
+      state.activeId = Math.max(...payload.turns.map(t => t.id));
     },
     turnsFinalized(state, payload) {
-      Vue.set(state.data, payload.turn.id, payload.turn);
-      state.currentId = payload.turn.id;
+      state.tempTurn = payload.turn;
     },
     // id, playerId, startSize, endSize, startAmount, endAmount
     turnsOrder(state, payload) {
-      const currentTurn = state.data[state.currentId];
+      const currentTurn = state.data[state.data.length - 1];
       const sourceCity = currentTurn.cityOccupations[payload.id.split(">>")[0]];
   
       const max = ((currentTurn.orders[payload.id] && currentTurn.orders[payload.id].startAmount) || 0) + sourceCity.availableArmy;
