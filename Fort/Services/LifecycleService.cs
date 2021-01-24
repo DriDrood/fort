@@ -12,14 +12,16 @@ namespace Fort.Services
 {
   public class LifecycleService
   {
-    public LifecycleService(IServiceScopeFactory serviceScopeFactory, ConnectionsService connectionsService)
+    public LifecycleService(IServiceScopeFactory serviceScopeFactory, ConnectionsService connectionsService, CloseService closeService)
     {
       _serviceScopeFactory = serviceScopeFactory;
       _connectionsService = connectionsService;
+      _closeService = closeService;
     }
 
     private readonly IServiceScopeFactory _serviceScopeFactory;
     private readonly ConnectionsService _connectionsService;
+    private readonly CloseService _closeService;
 
     private Turn _currentTurn;
     private TimeSpan? _remainingTurnDuration;
@@ -237,9 +239,12 @@ namespace Fort.Services
             // current turn
             _currentTurn = nextTurn;
 
+            // turn closed
+            _closeService.RestoreAll();
+
             // send result
             var sendingTasks = _connectionsService.GetAllUserConnections()
-              .Select(i => i.connection.Send(Guid.NewGuid(), "player/turnFinalized", new { turn = new TurnManager(i.user, db, this).GetTurn(_currentTurn.Id) }))
+              .Select(i => i.connection.Send(Guid.NewGuid(), "player/turnFinalized", new { turn = new TurnManager(i.user, db, this, _closeService).GetTurn(_currentTurn.Id) }))
               .ToArray();
           }
         }
@@ -281,8 +286,8 @@ namespace Fort.Services
     private Task SendToAllStateChanged()
     {
       // send to all connected users
-      var tasks = _connectionsService.GetAllConnections()
-        .Select(c => c?.Send(Guid.NewGuid(), "player/stateChanged", new { state = new Models.Store.TurnState { EndsAt = _currentTurn.EndsAt, Key = State.ToString() }}))
+      var tasks = _connectionsService.GetAllUserConnections()
+        .Select(p => p.connection?.Send(Guid.NewGuid(), "player/stateChanged", new { state = new Models.Store.TurnState { EndsAt = _currentTurn.EndsAt, Key = State.ToString(), Closed = _closeService.IsClosed(p.user.UserId) }}))
         .ToArray();
 
       return Task.WhenAll(tasks);

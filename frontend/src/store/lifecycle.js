@@ -15,6 +15,7 @@ export default {
     lifecycleUpdateState(state, payload) {
       state.state.id = payload.state.id;
       state.state.key = payload.state.key;
+      state.state.closed = payload.state.closed;
   
       if (payload.state.endsAt != null) {
         var regex = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(\.\d*)?/;

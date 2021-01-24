@@ -7,5 +7,6 @@ namespace Fort.Models.Store
         public int Id { get; set; }
         public string Key { get; set; }
         public DateTime? EndsAt { get; set; }
+        public bool Closed { get; set; }
     }
 }

@@ -30,7 +30,7 @@ namespace Fort
       services.AddSingleton<Logger>();
       services.AddSingleton<LifecycleService>();
       services.AddSingleton<ConnectionsService>();
-      services.AddSingleton<DoneService>();
+      services.AddSingleton<CloseService>();
 
       services.AddScoped<ConnectionServiceProviderHolder>();
       services.AddConnectionScoped<WsConnection>();

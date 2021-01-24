@@ -8,10 +8,10 @@ namespace Fort.Comm
 {
   public class PlayerController
   {
-    public PlayerController(JwtUser jwtUser, DoneService doneService, LifecycleService lifecycleService, MapManager mapManager, TurnManager turnManager, UserManager userManager)
+    public PlayerController(JwtUser jwtUser, CloseService doneService, LifecycleService lifecycleService, MapManager mapManager, TurnManager turnManager, UserManager userManager)
     {
       _jwtUser = jwtUser;
-      _doneService = doneService;
+      _closeService = doneService;
       _lifecycleService = lifecycleService;
       _mapManager = mapManager;
       _turnManager = turnManager;
@@ -19,7 +19,7 @@ namespace Fort.Comm
     }
 
     private readonly JwtUser _jwtUser;
-    private readonly DoneService _doneService;
+    private readonly CloseService _closeService;
     private readonly LifecycleService _lifecycleService;
     private readonly MapManager _mapManager;
     private readonly TurnManager _turnManager;
@@ -52,7 +52,7 @@ namespace Fort.Comm
     /// User marks himself as finished
     public SetTurnClosedParams SetTurnClosed(SetTurnClosedParams param)
     {
-      _doneService.Done(_jwtUser.UserId, param.Closed);
+      _closeService.Close(_jwtUser.UserId, param.Closed);
 
       return param;
     }

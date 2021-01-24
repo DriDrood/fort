@@ -14,16 +14,18 @@ namespace Fort.Managers
     {
         public const int DEFAULT_CITY_SIZE = 10;
 
-        public TurnManager(JwtUser jwtUser, FortDbContext db, LifecycleService lifecycleService)
+        public TurnManager(JwtUser jwtUser, FortDbContext db, LifecycleService lifecycleService, CloseService closeService)
         {
             _jwtUser = jwtUser;
             _db = db;
             _lifecycleService = lifecycleService;
+            _closeService = closeService;
         }
 
         private readonly JwtUser _jwtUser;
         private readonly FortDbContext _db;
         private readonly LifecycleService _lifecycleService;
+        private readonly CloseService _closeService;
 
         private readonly Dictionary<int, HashSet<Guid>> _visibleCities = new Dictionary<int, HashSet<Guid>>();
         private readonly Dictionary<int, HashSet<Guid>> _friendlyCities = new Dictionary<int, HashSet<Guid>>();
@@ -39,6 +41,7 @@ namespace Fort.Managers
                 Id = currentTurn.Id,
                 Key = _lifecycleService.State.ToString(),
                 EndsAt = _lifecycleService.TurnEndsAt,
+                Closed = _closeService.IsClosed(_jwtUser.UserId),
             };
         }
 
