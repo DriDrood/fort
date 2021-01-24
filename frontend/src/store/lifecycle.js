@@ -29,6 +29,9 @@ export default {
     lifecycleToggleClose: (state, payload) => {
       state.state.closed = payload.closed;
     },
+    lifecycleResetGame: () => {
+      location.reload();
+    }
   },
   actions: {
     lifecycleInit: context => {
@@ -37,6 +40,7 @@ export default {
 
       context.commit("commRegisterReceiver", { route: "player/setTurnClosed", callback: "lifecycleToggleClose" });
       context.commit("commRegisterReceiver", { route: "player/stateChanged", callback: "lifecycleUpdateState", callbackType: "action" });
+      context.commit("commRegisterReceiver", { route: "player/resetGame", callback: "lifecycleResetGame" });
     },
     lifecycleToggleClose: context => {
       context.dispatch("commSend", { route: "player/setTurnClosed", data: { closed: !context.state.state.closed }});

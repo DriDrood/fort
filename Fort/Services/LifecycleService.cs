@@ -196,8 +196,8 @@ namespace Fort.Services
 
         Init(db);
 
-        // foreach (var userConnection in _connectionsService.GetAllConnections())
-        //   userConnection.Send(Guid.NewGuid(), "player/resetGame", )
+        foreach (var userConnection in _connectionsService.GetAllConnections())
+          userConnection.Send(Guid.NewGuid(), "player/resetGame", null);
       }
     }
     private void FinalizeTurn()
